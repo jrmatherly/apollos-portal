@@ -8,12 +8,12 @@ from rich.console import Console
 from rich.table import Table
 
 from apollos_cli.auth import (
+    _load_config,
     get_cached_token,
     get_current_account,
     login,
     logout,
     save_config,
-    _load_config,
 )
 
 console = Console()
