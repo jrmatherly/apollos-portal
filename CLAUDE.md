@@ -4,7 +4,8 @@
 - `backend/` — FastAPI + SQLAlchemy + Alembic (Python 3.12, managed by uv)
 - `frontend/` — Vite + React 19 + TypeScript (Node 24)
 - `cli/` — Click CLI with MSAL device-code auth (Python 3.12, managed by uv)
-- `docker/` — Dockerfiles (backend.Dockerfile, frontend.Dockerfile)
+- `docs/` — Mintlify documentation site (MDX + docs.json)
+- `docker/` — Dockerfiles (backend.Dockerfile, frontend.Dockerfile, docs.Dockerfile)
 - `.scratchpad/` — Planning docs, NOT tracked in git
 
 ## Commands
@@ -18,6 +19,8 @@
 - Frontend type check: `cd frontend && npx tsc --noEmit`
 - Frontend dev: `cd frontend && npm run dev`
 - CLI help: `cd cli && uv run apollos --help`
+- Docs dev: `cd docs && mint dev` (or `mise run dev:docs`)
+- Docs validate: `cd docs && mint validate && mint broken-links` (or `mise run check:docs`)
 - All services: `docker compose up`
 - DB migrations: `cd backend && uv run alembic upgrade head`
 - Upgrade Python deps: `uv lock --upgrade`

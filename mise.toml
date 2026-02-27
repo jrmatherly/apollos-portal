@@ -12,6 +12,11 @@ description = "Start frontend only"
 dir = "frontend"
 run = "npm run dev"
 
+[tasks."dev:docs"]
+description = "Start docs preview server"
+dir = "docs"
+run = "mint dev"
+
 [tasks.migrate]
 description = "Run database migrations"
 dir = "backend"
@@ -69,9 +74,14 @@ description = "Check frontend (Biome CI + typecheck)"
 dir = "frontend"
 run = "npx biome ci . && npx tsc --noEmit"
 
+[tasks."check:docs"]
+description = "Check docs (validate + broken links)"
+dir = "docs"
+run = "mint validate && mint broken-links"
+
 [tasks.check]
 description = "Run all checks (read-only)"
-depends = ["check:backend", "check:cli", "check:frontend"]
+depends = ["check:backend", "check:cli", "check:frontend", "check:docs"]
 
 [tasks.test]
 description = "Run backend tests"
@@ -93,6 +103,10 @@ run = "docker compose down"
 [tasks."docker:reset"]
 description = "Reset Docker services and volumes"
 run = "docker compose down -v && docker compose up -d"
+
+[tasks."docker:docs"]
+description = "Start docs container"
+run = "docker compose up -d docs"
 
 [tasks."db:shell"]
 description = "Open psql shell"

@@ -58,5 +58,17 @@ services:
       - backend
     command: npm run dev
 
+  docs:
+    build:
+      context: ./docs
+      dockerfile: ../docker/docs.Dockerfile
+    container_name: apollos-portal-docs
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    volumes:
+      - ./docs:/app
+      - /app/node_modules
+
 volumes:
   portal_db_data:
