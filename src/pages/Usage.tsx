@@ -1,7 +1,7 @@
-import { Calendar, Download, Search, TrendingUp, Minus, Loader2 } from 'lucide-react';
+import { Calendar, Download, Search, TrendingUp, Minus, Loader2, ChevronDown, Check, Info } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { useState, useEffect } from 'react';
-import { motion } from 'motion/react';
+import { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 
 const data = [
   { name: 'Sep 01', gpt4: 4000, claude: 2400 },
@@ -20,6 +20,30 @@ export function Usage() {
   const [isLogLoading, setIsLogLoading] = useState(true);
   const [dateRange, setDateRange] = useState('30d');
   const [activeMetric, setActiveMetric] = useState<'Tokens' | 'Requests' | 'Costs'>('Tokens');
+
+  const [selectedModels, setSelectedModels] = useState<string[]>([]);
+  const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
+  const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
+  const [isKeyDropdownOpen, setIsKeyDropdownOpen] = useState(false);
+
+  const modelDropdownRef = useRef<HTMLDivElement>(null);
+  const keyDropdownRef = useRef<HTMLDivElement>(null);
+
+  const availableModels = ['GPT-4o', 'Claude 3.5 Sonnet', 'Gemini 1.5 Pro'];
+  const availableKeys = ['Production-Main', 'Staging-Test', 'Dev-Personal'];
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (modelDropdownRef.current && !modelDropdownRef.current.contains(event.target as Node)) {
+        setIsModelDropdownOpen(false);
+      }
+      if (keyDropdownRef.current && !keyDropdownRef.current.contains(event.target as Node)) {
+        setIsKeyDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   useEffect(() => {
     setIsChartLoading(true);
@@ -66,23 +90,110 @@ export function Usage() {
       </header>
 
       <div className="flex flex-wrap items-center gap-4">
-        <div className="relative min-w-[180px]">
-          <label className="absolute -top-2 left-2 px-1 bg-bg-primary text-[10px] text-text-secondary font-bold uppercase tracking-wider">Model</label>
-          <select className="w-full bg-surface border border-surface-border text-text-primary text-sm rounded-md py-2 px-3 focus:ring-primary focus:border-primary outline-none">
-            <option>All Models</option>
-            <option>GPT-4o</option>
-            <option>Claude 3.5 Sonnet</option>
-            <option>Gemini 1.5 Pro</option>
-          </select>
+        <div className="relative min-w-[220px]" ref={modelDropdownRef}>
+          <label className="absolute -top-2 left-2 px-1 bg-bg-primary text-[10px] text-text-secondary font-bold uppercase tracking-wider z-10">Model</label>
+          <div 
+            className="w-full bg-surface border border-surface-border text-text-primary text-sm rounded-md py-2 px-3 cursor-pointer flex justify-between items-center hover:border-surface-border/80 transition-colors"
+            onClick={() => setIsModelDropdownOpen(!isModelDropdownOpen)}
+          >
+            <span className="truncate pr-4">
+              {selectedModels.length === 0 ? 'All Models' : `${selectedModels.length} Selected`}
+            </span>
+            <ChevronDown className="w-4 h-4 text-text-secondary flex-shrink-0" />
+          </div>
+          <AnimatePresence>
+            {isModelDropdownOpen && (
+              <motion.div 
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.15 }}
+                className="absolute top-full left-0 mt-1 w-full bg-surface border border-surface-border rounded-md shadow-xl z-20 py-1 max-h-60 overflow-y-auto"
+              >
+                {selectedModels.length > 0 && (
+                  <div className="px-3 py-2 border-b border-surface-border flex justify-between items-center">
+                    <span className="text-xs text-text-secondary font-medium">{selectedModels.length} selected</span>
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); setSelectedModels([]); }} 
+                      className="text-xs text-primary hover:underline font-medium"
+                    >
+                      Clear all
+                    </button>
+                  </div>
+                )}
+                {availableModels.map(model => (
+                  <label key={model} className="flex items-center px-3 py-2 hover:bg-surface-border/10 cursor-pointer gap-3 group">
+                    <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${selectedModels.includes(model) ? 'bg-primary border-primary text-white' : 'border-surface-border group-hover:border-primary/50'}`}>
+                      {selectedModels.includes(model) && <Check className="w-3 h-3" />}
+                    </div>
+                    <input 
+                      type="checkbox" 
+                      className="hidden"
+                      checked={selectedModels.includes(model)}
+                      onChange={() => {
+                        if (selectedModels.includes(model)) setSelectedModels(selectedModels.filter(m => m !== model));
+                        else setSelectedModels([...selectedModels, model]);
+                      }}
+                    />
+                    <span className="text-sm text-text-primary">{model}</span>
+                  </label>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
-        <div className="relative min-w-[180px]">
-          <label className="absolute -top-2 left-2 px-1 bg-bg-primary text-[10px] text-text-secondary font-bold uppercase tracking-wider">API Key</label>
-          <select className="w-full bg-surface border border-surface-border text-text-primary text-sm rounded-md py-2 px-3 focus:ring-primary focus:border-primary outline-none">
-            <option>All Keys</option>
-            <option>Production-Main</option>
-            <option>Staging-Test</option>
-            <option>Dev-Personal</option>
-          </select>
+
+        <div className="relative min-w-[220px]" ref={keyDropdownRef}>
+          <label className="absolute -top-2 left-2 px-1 bg-bg-primary text-[10px] text-text-secondary font-bold uppercase tracking-wider z-10">API Key</label>
+          <div 
+            className="w-full bg-surface border border-surface-border text-text-primary text-sm rounded-md py-2 px-3 cursor-pointer flex justify-between items-center hover:border-surface-border/80 transition-colors"
+            onClick={() => setIsKeyDropdownOpen(!isKeyDropdownOpen)}
+          >
+            <span className="truncate pr-4">
+              {selectedKeys.length === 0 ? 'All Keys' : `${selectedKeys.length} Selected`}
+            </span>
+            <ChevronDown className="w-4 h-4 text-text-secondary flex-shrink-0" />
+          </div>
+          <AnimatePresence>
+            {isKeyDropdownOpen && (
+              <motion.div 
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.15 }}
+                className="absolute top-full left-0 mt-1 w-full bg-surface border border-surface-border rounded-md shadow-xl z-20 py-1 max-h-60 overflow-y-auto"
+              >
+                {selectedKeys.length > 0 && (
+                  <div className="px-3 py-2 border-b border-surface-border flex justify-between items-center">
+                    <span className="text-xs text-text-secondary font-medium">{selectedKeys.length} selected</span>
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); setSelectedKeys([]); }} 
+                      className="text-xs text-primary hover:underline font-medium"
+                    >
+                      Clear all
+                    </button>
+                  </div>
+                )}
+                {availableKeys.map(key => (
+                  <label key={key} className="flex items-center px-3 py-2 hover:bg-surface-border/10 cursor-pointer gap-3 group">
+                    <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${selectedKeys.includes(key) ? 'bg-primary border-primary text-white' : 'border-surface-border group-hover:border-primary/50'}`}>
+                      {selectedKeys.includes(key) && <Check className="w-3 h-3" />}
+                    </div>
+                    <input 
+                      type="checkbox" 
+                      className="hidden"
+                      checked={selectedKeys.includes(key)}
+                      onChange={() => {
+                        if (selectedKeys.includes(key)) setSelectedKeys(selectedKeys.filter(k => k !== key));
+                        else setSelectedKeys([...selectedKeys, key]);
+                      }}
+                    />
+                    <span className="text-sm text-text-primary">{key}</span>
+                  </label>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
         <div className="ml-auto flex items-center gap-1 bg-surface border border-surface-border p-1 rounded-lg shadow-sm">
           {['Tokens', 'Requests', 'Costs'].map((metric) => (
@@ -145,8 +256,10 @@ export function Usage() {
                 <XAxis dataKey="name" stroke="var(--text-secondary)" fontSize={12} tickLine={false} axisLine={false} />
                 <YAxis hide />
                 <Tooltip 
-                  contentStyle={{ backgroundColor: 'var(--surface)', borderColor: 'var(--surface-border)', borderRadius: '8px' }}
-                  itemStyle={{ color: 'var(--text-primary)' }}
+                  contentStyle={{ backgroundColor: 'var(--surface)', borderColor: 'var(--surface-border)', borderRadius: '8px', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                  itemStyle={{ color: 'var(--text-primary)', fontSize: '12px', fontWeight: 500 }}
+                  labelStyle={{ color: 'var(--text-secondary)', fontSize: '12px', marginBottom: '4px' }}
+                  cursor={{ stroke: 'var(--surface-border)', strokeWidth: 1, strokeDasharray: '4 4' }}
                 />
                 <Area type="monotone" dataKey="claude" stroke="var(--secondary)" fillOpacity={1} fill="url(#colorClaudeUsage)" strokeWidth={2} />
                 <Area type="monotone" dataKey="gpt4" stroke="var(--primary)" fillOpacity={1} fill="url(#colorGpt4Usage)" strokeWidth={2} />
@@ -166,12 +279,27 @@ export function Usage() {
             <thead className="bg-surface-border/10 border-b border-surface-border">
               <tr>
                 <th className="px-6 py-4 text-[10px] font-bold text-text-secondary uppercase tracking-widest">Model</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-text-secondary uppercase tracking-widest text-right">Input Tokens</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-text-secondary uppercase tracking-widest text-right">Output Tokens</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-text-secondary uppercase tracking-widest text-right">Total Cost</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-text-secondary uppercase tracking-widest text-right group/th cursor-help" title="Total number of tokens sent in requests">
+                  <div className="flex items-center justify-end gap-1">
+                    Input Tokens
+                    <Info className="w-3 h-3 opacity-50 group-hover/th:opacity-100 transition-opacity" />
+                  </div>
+                </th>
+                <th className="px-6 py-4 text-[10px] font-bold text-text-secondary uppercase tracking-widest text-right group/th cursor-help" title="Total number of tokens generated in responses">
+                  <div className="flex items-center justify-end gap-1">
+                    Output Tokens
+                    <Info className="w-3 h-3 opacity-50 group-hover/th:opacity-100 transition-opacity" />
+                  </div>
+                </th>
+                <th className="px-6 py-4 text-[10px] font-bold text-text-secondary uppercase tracking-widest text-right group/th cursor-help" title="Total cost incurred for this model">
+                  <div className="flex items-center justify-end gap-1">
+                    Total Cost
+                    <Info className="w-3 h-3 opacity-50 group-hover/th:opacity-100 transition-opacity" />
+                  </div>
+                </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-surface-border">
+            <tbody className="divide-y-2 divide-surface-border/30">
               {isModelBreakdownLoading ? (
                 [...Array(3)].map((_, i) => (
                   <tr key={i}>
@@ -183,7 +311,7 @@ export function Usage() {
                 ))
               ) : (
                 <>
-                  <tr className="hover:bg-surface-border/20 transition-colors even:bg-surface-border/5">
+                  <tr className="hover:bg-surface-border/10 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
                         <span className="w-2 h-2 rounded-full bg-primary"></span>
@@ -194,7 +322,7 @@ export function Usage() {
                     <td className="px-6 py-4 text-right font-mono text-sm text-text-secondary">800,488</td>
                     <td className="px-6 py-4 text-right font-mono text-sm font-bold text-text-primary">$2,840.50</td>
                   </tr>
-                  <tr className="hover:bg-surface-border/20 transition-colors even:bg-surface-border/5">
+                  <tr className="hover:bg-surface-border/10 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
                         <span className="w-2 h-2 rounded-full bg-secondary"></span>
@@ -205,7 +333,7 @@ export function Usage() {
                     <td className="px-6 py-4 text-right font-mono text-sm text-text-secondary">350,000</td>
                     <td className="px-6 py-4 text-right font-mono text-sm font-bold text-text-primary">$1,120.00</td>
                   </tr>
-                  <tr className="hover:bg-surface-border/20 transition-colors even:bg-surface-border/5">
+                  <tr className="hover:bg-surface-border/10 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
                         <span className="w-2 h-2 rounded-full bg-warning"></span>
