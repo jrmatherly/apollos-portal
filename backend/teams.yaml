@@ -1,0 +1,25 @@
+# Entra ID Security Group -> LiteLLM Team Mapping
+# Each entry maps an Entra group to a LiteLLM team with its configuration.
+# Users in multiple groups are provisioned into multiple teams (one key per team).
+
+teams:
+  - entra_group_id: "REPLACE-WITH-ENTRA-GROUP-OBJECT-ID"
+    team_alias: "Engineering AI Team"
+    models:
+      - "gpt-4o"
+      - "gpt-4o-mini"
+      - "text-embedding-3-large"
+    max_budget: 500
+    budget_duration: "30d"
+    team_member_budget: 25
+    litellm_role: "internal_user"
+
+  # Add more team mappings as needed:
+  # - entra_group_id: "..."
+  #   team_alias: "Data Science Team"
+  #   models: [...]
+
+# Gate: user must be in at least one of these groups to access the portal.
+# If omitted, membership in any team group above qualifies.
+required_groups: []
+  # - "REPLACE-WITH-GATE-GROUP-OBJECT-ID"

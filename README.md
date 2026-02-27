@@ -1,20 +1,18 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# LiteLLM Self-Service Portal
 
-# Run and deploy your AI Studio app
+A self-service portal for managing LiteLLM proxy access, API keys, usage, and team settings.
 
-This contains everything you need to run your app locally.
+## Project Structure
 
-View your app in AI Studio: https://ai.studio/apps/2e351a44-ec92-420c-8ce9-9f22c0599e54
+```
+litellm-portal/
+├── frontend/    # React 19 + Vite SPA (Tailwind CSS)
+├── backend/     # FastAPI backend service
+├── cli/         # CLI tooling
+├── docker/      # Docker Compose and container configs
+└── .scratchpad/ # Planning docs and notes
+```
 
-## Run Locally
+## Getting Started
 
-**Prerequisites:**  Node.js
-
-
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+See individual `frontend/` and `backend/` directories for setup instructions.

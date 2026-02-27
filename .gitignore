@@ -1,8 +1,28 @@
+# Dependencies
 node_modules/
-build/
+__pycache__/
+*.pyc
+.venv/
+
+# Build output
 dist/
+build/
 coverage/
+*.egg-info/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# OS
 .DS_Store
+
+# Logs
 *.log
-.env*
-!.env.example
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
