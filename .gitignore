@@ -26,3 +26,6 @@ coverage/
 .vscode/
 *.swp
 *.swo
+
+# Scratchpad
+.scratchpad/
