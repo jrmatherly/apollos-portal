@@ -1,0 +1,40 @@
+# Virtual environment
+.venv/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Tests
+tests/
+.pytest_cache/
+
+# Linting/tooling
+.ruff_cache/
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+
+# Sensitive config (mounted at runtime)
+teams.yaml
+
+# Docker
+Dockerfile
+.dockerignore

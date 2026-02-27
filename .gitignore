@@ -29,3 +29,5 @@ coverage/
 
 # Scratchpad
 .scratchpad/
+
+backend/teams.yaml
