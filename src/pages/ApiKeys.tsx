@@ -1,6 +1,57 @@
-import { Copy, Plus, ChevronDown } from 'lucide-react';
+import { Copy, Plus, ChevronDown, ArrowDown } from 'lucide-react';
+import { useState } from 'react';
+
+const mockApiKeys = [
+  {
+    id: '1',
+    key: 'sk-•••••••••8k2',
+    alias: 'Production-Main',
+    team: 'Core Engine',
+    status: 'Active',
+    created: 'Oct 12, 2023',
+    expires: 'Never',
+    spend: '$1,240.50',
+    lastUsed: '2026-02-27T01:10:00-08:00',
+  },
+  {
+    id: '2',
+    key: 'sk-•••••••••f9w',
+    alias: 'Dev-Test-Staging',
+    team: 'Platform Eng',
+    status: 'Expiring Soon',
+    created: 'Jan 05, 2024',
+    expires: '7 Days',
+    spend: '$84.22',
+    lastUsed: '2026-02-26T14:30:00-08:00',
+  },
+  {
+    id: '3',
+    key: 'sk-•••••••••3a1',
+    alias: 'Analytics-Worker',
+    team: 'Data Science',
+    status: 'Active',
+    created: 'Feb 18, 2024',
+    expires: 'Mar 2025',
+    spend: '$312.00',
+    lastUsed: '2026-02-27T00:45:00-08:00',
+  },
+];
+
+function formatDate(dateString: string) {
+  const date = new Date(dateString);
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(date);
+}
 
 export function ApiKeys() {
+  const [keys] = useState(() => 
+    [...mockApiKeys].sort((a, b) => new Date(b.lastUsed).getTime() - new Date(a.lastUsed).getTime())
+  );
+
   return (
     <div className="p-8 max-w-7xl mx-auto w-full">
       <header className="flex justify-between items-center mb-10">
@@ -26,77 +77,50 @@ export function ApiKeys() {
                   <th className="px-6 py-4 text-xs font-semibold text-text-secondary uppercase tracking-wider">Status</th>
                   <th className="px-6 py-4 text-xs font-semibold text-text-secondary uppercase tracking-wider">Created</th>
                   <th className="px-6 py-4 text-xs font-semibold text-text-secondary uppercase tracking-wider">Expires</th>
+                  <th className="px-6 py-4 text-xs font-semibold text-text-primary uppercase tracking-wider flex items-center gap-1">
+                    Last Used
+                    <ArrowDown className="w-3 h-3" />
+                  </th>
                   <th className="px-6 py-4 text-xs font-semibold text-text-secondary uppercase tracking-wider">Spend</th>
                   <th className="px-6 py-4 text-xs font-semibold text-text-secondary uppercase tracking-wider text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-surface-border">
-                <tr className="hover:bg-surface-border/10 transition-colors">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono text-text-secondary tracking-widest">sk-•••••••••8k2</span>
-                      <button className="text-text-secondary hover:text-text-primary transition-colors" title="Copy Key">
-                        <Copy className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-sm font-medium text-text-primary">Production-Main</td>
-                  <td className="px-6 py-4 text-sm text-text-secondary">Core Engine</td>
-                  <td className="px-6 py-4">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary/10 text-secondary border border-secondary/20">Active</span>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-text-secondary">Oct 12, 2023</td>
-                  <td className="px-6 py-4 text-sm text-text-secondary">Never</td>
-                  <td className="px-6 py-4 text-sm text-text-secondary">$1,240.50</td>
-                  <td className="px-6 py-4 text-right space-x-3">
-                    <button className="text-xs text-primary hover:underline font-medium">Rotate</button>
-                    <button className="text-xs text-destructive/70 hover:text-destructive font-medium transition-colors">Revoke</button>
-                  </td>
-                </tr>
-                <tr className="hover:bg-surface-border/10 transition-colors">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono text-text-secondary tracking-widest">sk-•••••••••f9w</span>
-                      <button className="text-text-secondary hover:text-text-primary transition-colors" title="Copy Key">
-                        <Copy className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-sm font-medium text-text-primary">Dev-Test-Staging</td>
-                  <td className="px-6 py-4 text-sm text-text-secondary">Platform Eng</td>
-                  <td className="px-6 py-4">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-warning/10 text-warning border border-warning/20">Expiring Soon</span>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-text-secondary">Jan 05, 2024</td>
-                  <td className="px-6 py-4 text-sm text-warning/80">7 Days</td>
-                  <td className="px-6 py-4 text-sm text-text-secondary">$84.22</td>
-                  <td className="px-6 py-4 text-right space-x-3">
-                    <button className="text-xs text-primary hover:underline font-medium">Rotate</button>
-                    <button className="text-xs text-destructive/70 hover:text-destructive font-medium transition-colors">Revoke</button>
-                  </td>
-                </tr>
-                <tr className="hover:bg-surface-border/10 transition-colors">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono text-text-secondary tracking-widest">sk-•••••••••3a1</span>
-                      <button className="text-text-secondary hover:text-text-primary transition-colors" title="Copy Key">
-                        <Copy className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-sm font-medium text-text-primary">Analytics-Worker</td>
-                  <td className="px-6 py-4 text-sm text-text-secondary">Data Science</td>
-                  <td className="px-6 py-4">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary/10 text-secondary border border-secondary/20">Active</span>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-text-secondary">Feb 18, 2024</td>
-                  <td className="px-6 py-4 text-sm text-text-secondary">Mar 2025</td>
-                  <td className="px-6 py-4 text-sm text-text-secondary">$312.00</td>
-                  <td className="px-6 py-4 text-right space-x-3">
-                    <button className="text-xs text-primary hover:underline font-medium">Rotate</button>
-                    <button className="text-xs text-destructive/70 hover:text-destructive font-medium transition-colors">Revoke</button>
-                  </td>
-                </tr>
+                {keys.map((key) => (
+                  <tr key={key.id} className="hover:bg-surface-border/10 transition-colors">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-text-secondary tracking-widest">{key.key}</span>
+                        <button className="text-text-secondary hover:text-text-primary transition-colors" title="Copy Key">
+                          <Copy className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-sm font-medium text-text-primary">{key.alias}</td>
+                    <td className="px-6 py-4 text-sm text-text-secondary">{key.team}</td>
+                    <td className="px-6 py-4">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
+                        key.status === 'Active' 
+                          ? 'bg-secondary/10 text-secondary border-secondary/20' 
+                          : 'bg-warning/10 text-warning border-warning/20'
+                      }`}>
+                        {key.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-text-secondary">{key.created}</td>
+                    <td className="px-6 py-4 text-sm text-text-secondary">
+                      <span className={key.status === 'Expiring Soon' ? 'text-warning/80' : ''}>
+                        {key.expires}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-text-secondary">{formatDate(key.lastUsed)}</td>
+                    <td className="px-6 py-4 text-sm text-text-secondary">{key.spend}</td>
+                    <td className="px-6 py-4 text-right space-x-3">
+                      <button className="text-xs text-primary hover:underline font-medium">Rotate</button>
+                      <button className="text-xs text-destructive/70 hover:text-destructive font-medium transition-colors">Revoke</button>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>

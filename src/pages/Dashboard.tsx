@@ -61,10 +61,10 @@ export function Dashboard() {
         <div className="bg-surface border border-surface-border rounded-lg p-5">
           <div className="flex justify-between items-start mb-4">
             <span className="text-sm font-medium text-text-secondary">Total Tokens</span>
-            <select className="bg-surface border border-surface-border rounded text-[10px] font-bold text-text-secondary uppercase tracking-widest py-1 px-2 focus:ring-0 cursor-pointer">
-              <option>7D</option>
-              <option selected>30D</option>
-              <option>90D</option>
+            <select defaultValue="30D" className="bg-surface border border-surface-border rounded text-[10px] font-bold text-text-secondary uppercase tracking-widest py-1 px-2 focus:ring-0 cursor-pointer">
+              <option value="7D">7D</option>
+              <option value="30D">30D</option>
+              <option value="90D">90D</option>
             </select>
           </div>
           <div>
