@@ -1,6 +1,52 @@
-import { User, KeyRound, Bell, Palette, Lock } from "lucide-react";
+import { KeyRound, Bell, Palette, Loader2 } from "lucide-react";
+import { useSettings, useUpdateSettings } from "../hooks/useSettings";
 
 export function Settings() {
+  const { data: settings, isLoading, error } = useSettings();
+  const updateSettings = useUpdateSettings();
+
+  if (isLoading) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-400">Failed to load settings</p>
+          <p className="mt-1 text-sm text-zinc-500">{String(error)}</p>
+        </div>
+      </div>
+    );
+  }
+
+  const durations = [
+    { value: 30, label: "30 Days", desc: "Strict enterprise compliance", badge: "Most Secure" },
+    { value: 60, label: "60 Days", desc: "Standard rotation period" },
+    { value: 90, label: "90 Days", desc: "Quarterly rotation" },
+    { value: 180, label: "180 Days", desc: "Maximum allowed duration" },
+  ];
+
+  const notifications = [
+    { key: "notify_14d" as const, label: "14-day warning", desc: "Early notice for key replacement" },
+    { key: "notify_7d" as const, label: "7-day warning", desc: "Standard rotation reminder" },
+    { key: "notify_3d" as const, label: "3-day warning", desc: "Urgent notice for expiring keys" },
+    { key: "notify_1d" as const, label: "1-day final warning", desc: "Critical alert for immediate action" },
+  ];
+
+  const handleDurationChange = (days: number) => {
+    updateSettings.mutate({ default_key_duration_days: days });
+  };
+
+  const handleToggle = (key: "notify_14d" | "notify_7d" | "notify_3d" | "notify_1d") => {
+    if (!settings) return;
+    updateSettings.mutate({ [key]: !settings[key] });
+  };
+
   return (
     <div className="p-8 max-w-4xl mx-auto w-full">
       <header className="mb-10">
@@ -8,46 +54,11 @@ export function Settings() {
           Settings
         </h2>
         <p className="text-text-secondary mt-2">
-          Manage your organization's security preferences and global
-          configurations.
+          Manage your security preferences and notification configurations.
         </p>
       </header>
 
       <div className="space-y-8">
-        {/* Account Info Section */}
-        <section className="bg-surface border border-surface-border rounded-lg p-6 shadow-sm">
-          <h3 className="text-lg font-semibold mb-6 flex items-center gap-2 text-text-primary">
-            <User className="w-5 h-5 text-primary" />
-            Account Information
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-text-secondary uppercase mb-1">
-                  Full Name
-                </label>
-                <div className="text-sm font-medium py-2 border-b border-surface-border text-text-primary">
-                  John Doe
-                </div>
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-text-secondary uppercase mb-1">
-                  Email Address
-                </label>
-                <div className="text-sm font-medium py-2 border-b border-surface-border text-text-primary">
-                  john.doe@nexus.ai
-                </div>
-              </div>
-            </div>
-            <div className="flex flex-col justify-end">
-              <button className="flex items-center gap-2 text-primary hover:text-primary/80 text-sm font-medium transition-colors">
-                <Lock className="w-4 h-4" />
-                Change password
-              </button>
-            </div>
-          </div>
-        </section>
-
         {/* Default Key Expiration */}
         <section className="bg-surface border border-surface-border rounded-lg p-6 shadow-sm">
           <div className="mb-6">
@@ -60,72 +71,40 @@ export function Settings() {
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <label className="relative flex items-center p-4 cursor-pointer rounded-md border border-primary bg-primary/5 hover:bg-primary/10 transition-all group">
-              <input
-                type="radio"
-                name="expiry"
-                className="w-4 h-4 text-primary border-surface-border focus:ring-primary bg-transparent"
-                defaultChecked
-              />
-              <div className="ml-4 flex-1">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold text-text-primary">
-                    30 Days
-                  </span>
-                  <span className="px-2 py-0.5 rounded-full bg-secondary/10 text-secondary text-[10px] font-bold uppercase tracking-wider">
-                    Most Secure
-                  </span>
-                </div>
-                <p className="text-xs text-text-secondary">
-                  Strict enterprise compliance
-                </p>
-              </div>
-            </label>
-            <label className="relative flex items-center p-4 cursor-pointer rounded-md border border-surface-border hover:bg-surface-border/50 transition-all">
-              <input
-                type="radio"
-                name="expiry"
-                className="w-4 h-4 text-primary border-surface-border focus:ring-primary bg-transparent"
-              />
-              <div className="ml-4 flex-1">
-                <span className="text-sm font-semibold text-text-primary">
-                  60 Days
-                </span>
-                <p className="text-xs text-text-secondary">
-                  Standard rotation period
-                </p>
-              </div>
-            </label>
-            <label className="relative flex items-center p-4 cursor-pointer rounded-md border border-surface-border hover:bg-surface-border/50 transition-all">
-              <input
-                type="radio"
-                name="expiry"
-                className="w-4 h-4 text-primary border-surface-border focus:ring-primary bg-transparent"
-              />
-              <div className="ml-4 flex-1">
-                <span className="text-sm font-semibold text-text-primary">
-                  90 Days
-                </span>
-                <p className="text-xs text-text-secondary">
-                  Quarterly rotation
-                </p>
-              </div>
-            </label>
-            <label className="relative flex items-center p-4 cursor-pointer rounded-md border border-surface-border hover:bg-surface-border/50 transition-all">
-              <input
-                type="radio"
-                name="expiry"
-                className="w-4 h-4 text-primary border-surface-border focus:ring-primary bg-transparent"
-              />
-              <div className="ml-4 flex-1">
-                <span className="text-sm font-semibold text-text-primary">
-                  180 Days
-                </span>
-                <p className="text-xs text-text-secondary">
-                  Maximum allowed duration
-                </p>
-              </div>
-            </label>
+            {durations.map((d) => {
+              const isSelected = settings?.default_key_duration_days === d.value;
+              return (
+                <label
+                  key={d.value}
+                  className={`relative flex items-center p-4 cursor-pointer rounded-md border transition-all group ${
+                    isSelected
+                      ? "border-primary bg-primary/5 hover:bg-primary/10"
+                      : "border-surface-border hover:bg-surface-border/50"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="expiry"
+                    className="w-4 h-4 text-primary border-surface-border focus:ring-primary bg-transparent"
+                    checked={isSelected}
+                    onChange={() => handleDurationChange(d.value)}
+                  />
+                  <div className="ml-4 flex-1">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-semibold text-text-primary">
+                        {d.label}
+                      </span>
+                      {d.badge && (
+                        <span className="px-2 py-0.5 rounded-full bg-secondary/10 text-secondary text-[10px] font-bold uppercase tracking-wider">
+                          {d.badge}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-text-secondary">{d.desc}</p>
+                  </div>
+                </label>
+              );
+            })}
           </div>
         </section>
 
@@ -141,58 +120,31 @@ export function Settings() {
             </p>
           </div>
           <div className="divide-y divide-surface-border">
-            <div className="flex items-center justify-between py-4">
-              <div>
-                <p className="text-sm font-medium text-text-primary">
-                  14-day warning
-                </p>
-                <p className="text-xs text-text-secondary">
-                  Early notice for key replacement
-                </p>
-              </div>
-              <button className="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out bg-primary focus:outline-none">
-                <span className="translate-x-5 pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
-              </button>
-            </div>
-            <div className="flex items-center justify-between py-4">
-              <div>
-                <p className="text-sm font-medium text-text-primary">
-                  7-day warning
-                </p>
-                <p className="text-xs text-text-secondary">
-                  Standard rotation reminder
-                </p>
-              </div>
-              <button className="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out bg-primary focus:outline-none">
-                <span className="translate-x-5 pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
-              </button>
-            </div>
-            <div className="flex items-center justify-between py-4">
-              <div>
-                <p className="text-sm font-medium text-text-primary">
-                  3-day warning
-                </p>
-                <p className="text-xs text-text-secondary">
-                  Urgent notice for expiring keys
-                </p>
-              </div>
-              <button className="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out bg-surface-border focus:outline-none">
-                <span className="translate-x-0 pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
-              </button>
-            </div>
-            <div className="flex items-center justify-between py-4">
-              <div>
-                <p className="text-sm font-medium text-text-primary">
-                  1-day final warning
-                </p>
-                <p className="text-xs text-text-secondary">
-                  Critical alert for immediate action
-                </p>
-              </div>
-              <button className="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out bg-primary focus:outline-none">
-                <span className="translate-x-5 pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
-              </button>
-            </div>
+            {notifications.map((n) => {
+              const enabled = settings?.[n.key] ?? false;
+              return (
+                <div key={n.key} className="flex items-center justify-between py-4">
+                  <div>
+                    <p className="text-sm font-medium text-text-primary">
+                      {n.label}
+                    </p>
+                    <p className="text-xs text-text-secondary">{n.desc}</p>
+                  </div>
+                  <button
+                    onClick={() => handleToggle(n.key)}
+                    className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                      enabled ? "bg-primary" : "bg-surface-border"
+                    }`}
+                  >
+                    <span
+                      className={`${
+                        enabled ? "translate-x-5" : "translate-x-0"
+                      } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
+                    />
+                  </button>
+                </div>
+              );
+            })}
           </div>
         </section>
 
@@ -249,16 +201,6 @@ export function Settings() {
             </div>
           </div>
         </section>
-
-        {/* Action Footer */}
-        <div className="flex items-center justify-end gap-3 pt-6">
-          <button className="px-4 py-2 text-sm font-medium text-text-secondary hover:text-text-primary transition-colors">
-            Discard changes
-          </button>
-          <button className="bg-primary hover:opacity-90 text-white px-6 py-2 rounded-md font-semibold text-sm transition-all shadow-lg shadow-primary/20">
-            Save Configuration
-          </button>
-        </div>
       </div>
     </div>
   );

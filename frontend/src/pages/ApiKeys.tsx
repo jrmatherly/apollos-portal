@@ -1,87 +1,83 @@
 import {
-  Copy,
-  Plus,
   ChevronDown,
   ArrowDown,
   ArrowUp,
   Columns,
   Check,
+  Loader2,
+  Key,
 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
-
-const mockApiKeys = [
-  {
-    id: "1",
-    key: "sk-•••••••••8k2",
-    alias: "Production-Main",
-    team: "Core Engine",
-    status: "Active",
-    created: "Oct 12, 2023",
-    expires: "Never",
-    spend: "$1,240.50",
-    lastUsed: "2026-02-27T01:10:00-08:00",
-  },
-  {
-    id: "2",
-    key: "sk-•••••••••f9w",
-    alias: "Dev-Test-Staging",
-    team: "Platform Eng",
-    status: "Expiring Soon",
-    created: "Jan 05, 2024",
-    expires: "7 Days",
-    spend: "$84.22",
-    lastUsed: "2026-02-26T14:30:00-08:00",
-  },
-  {
-    id: "3",
-    key: "sk-•••••••••3a1",
-    alias: "Analytics-Worker",
-    team: "Data Science",
-    status: "Active",
-    created: "Feb 18, 2024",
-    expires: "Mar 2025",
-    spend: "$312.00",
-    lastUsed: "2026-02-27T00:45:00-08:00",
-  },
-];
+import { useKeys, useRotateKey, useRevokeKey } from "../hooks/useKeys";
+import type { KeyListItem } from "../types/api";
 
 function formatDate(dateString: string) {
   const date = new Date(dateString);
   return new Intl.DateTimeFormat("en-US", {
     month: "short",
     day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
+    year: "numeric",
   }).format(date);
 }
 
-type SortColumn =
-  | "key"
-  | "alias"
-  | "team"
-  | "status"
-  | "created"
-  | "expires"
-  | "lastUsed"
-  | "spend";
+function formatExpiry(item: KeyListItem): string {
+  if (item.status === "revoked") return "Revoked";
+  if (item.status === "expired") return "Expired";
+  if (item.days_until_expiry == null) return "N/A";
+  if (item.days_until_expiry <= 0) return "Expired";
+  return `${item.days_until_expiry} days`;
+}
+
+function statusBadge(status: KeyListItem["status"]) {
+  switch (status) {
+    case "active":
+      return "bg-secondary/10 text-secondary border-secondary/20";
+    case "expiring_soon":
+      return "bg-warning/10 text-warning border-warning/20";
+    case "expired":
+      return "bg-destructive/10 text-destructive border-destructive/20";
+    case "revoked":
+    case "rotated":
+      return "bg-surface-border/50 text-text-secondary border-surface-border";
+  }
+}
+
+function statusLabel(status: KeyListItem["status"]): string {
+  switch (status) {
+    case "active":
+      return "Active";
+    case "expiring_soon":
+      return "Expiring Soon";
+    case "expired":
+      return "Expired";
+    case "revoked":
+      return "Revoked";
+    case "rotated":
+      return "Rotated";
+  }
+}
+
+type SortColumn = "alias" | "team" | "status" | "created" | "expires" | "spend";
 
 export function ApiKeys() {
+  const { data, isLoading, error } = useKeys();
+  const rotateKey = useRotateKey();
+  const revokeKey = useRevokeKey();
+
   const [sortConfig, setSortConfig] = useState<{
     key: SortColumn;
     direction: "asc" | "desc";
   }>({
-    key: "lastUsed",
+    key: "created",
     direction: "desc",
   });
 
   const [visibleColumns, setVisibleColumns] = useState({
-    key: true,
     alias: true,
     team: true,
     status: true,
-    created: false, // Hidden by default to reduce horizontal scrolling
+    created: false,
     expires: true,
-    lastUsed: true,
     spend: true,
     actions: true,
   });
@@ -109,10 +105,7 @@ export function ApiKeys() {
         direction: sortConfig.direction === "asc" ? "desc" : "asc",
       });
     } else {
-      setSortConfig({
-        key: column,
-        direction: "asc",
-      });
+      setSortConfig({ key: column, direction: "asc" });
     }
   };
 
@@ -120,24 +113,61 @@ export function ApiKeys() {
     setVisibleColumns((prev) => ({ ...prev, [col]: !prev[col] }));
   };
 
-  const sortedKeys = [...mockApiKeys].sort((a, b) => {
-    let aValue: any = a[sortConfig.key as keyof typeof a];
-    let bValue: any = b[sortConfig.key as keyof typeof b];
+  if (isLoading) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
-    if (sortConfig.key === "lastUsed" || sortConfig.key === "created") {
-      aValue = new Date(aValue).getTime();
-      bValue = new Date(bValue).getTime();
-    } else if (sortConfig.key === "spend") {
-      aValue = parseFloat(aValue.replace(/[^0-9.-]+/g, ""));
-      bValue = parseFloat(bValue.replace(/[^0-9.-]+/g, ""));
+  if (error) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-400">Failed to load API keys</p>
+          <p className="mt-1 text-sm text-zinc-500">{String(error)}</p>
+        </div>
+      </div>
+    );
+  }
+
+  const activeKeys = data?.active ?? [];
+  const revokedKeys = data?.revoked ?? [];
+
+  const sortedKeys = [...activeKeys].sort((a, b) => {
+    let aValue: string | number = "";
+    let bValue: string | number = "";
+
+    switch (sortConfig.key) {
+      case "alias":
+        aValue = a.litellm_key_alias;
+        bValue = b.litellm_key_alias;
+        break;
+      case "team":
+        aValue = a.team_alias;
+        bValue = b.team_alias;
+        break;
+      case "status":
+        aValue = a.status;
+        bValue = b.status;
+        break;
+      case "created":
+        aValue = new Date(a.created_at).getTime();
+        bValue = new Date(b.created_at).getTime();
+        break;
+      case "expires":
+        aValue = a.days_until_expiry ?? 9999;
+        bValue = b.days_until_expiry ?? 9999;
+        break;
+      case "spend":
+        aValue = a.last_spend ?? 0;
+        bValue = b.last_spend ?? 0;
+        break;
     }
 
-    if (aValue < bValue) {
-      return sortConfig.direction === "asc" ? -1 : 1;
-    }
-    if (aValue > bValue) {
-      return sortConfig.direction === "asc" ? 1 : -1;
-    }
+    if (aValue < bValue) return sortConfig.direction === "asc" ? -1 : 1;
+    if (aValue > bValue) return sortConfig.direction === "asc" ? 1 : -1;
     return 0;
   });
 
@@ -211,216 +241,188 @@ export function ApiKeys() {
               </div>
             )}
           </div>
-          <button className="bg-primary hover:opacity-90 text-white px-4 py-2.5 rounded-md font-medium transition-all shadow-lg shadow-primary/10 flex items-center justify-center gap-2 w-full sm:w-auto">
-            <Plus className="w-4 h-4" />
-            Generate New Key
-          </button>
         </div>
       </header>
 
-      <section className="mb-10">
-        <div className="bg-surface border border-surface-border rounded-lg overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead className="bg-surface-border/10 border-b border-surface-border">
-                <tr>
-                  {visibleColumns.key && (
-                    <SortableHeader column="key" label="Key" />
-                  )}
-                  {visibleColumns.alias && (
-                    <SortableHeader column="alias" label="Alias" />
-                  )}
-                  {visibleColumns.team && (
-                    <SortableHeader column="team" label="Team" />
-                  )}
-                  {visibleColumns.status && (
-                    <SortableHeader column="status" label="Status" />
-                  )}
-                  {visibleColumns.created && (
-                    <SortableHeader column="created" label="Created" />
-                  )}
-                  {visibleColumns.expires && (
-                    <SortableHeader column="expires" label="Expires" />
-                  )}
-                  {visibleColumns.lastUsed && (
-                    <SortableHeader column="lastUsed" label="Last Used" />
-                  )}
-                  {visibleColumns.spend && (
-                    <SortableHeader
-                      column="spend"
-                      label="Spend"
-                      align="right"
-                    />
-                  )}
-                  {visibleColumns.actions && (
-                    <th className="px-6 py-3 text-[11px] font-bold text-text-secondary uppercase tracking-widest text-right whitespace-nowrap">
-                      Actions
-                    </th>
-                  )}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-surface-border">
-                {sortedKeys.map((key) => (
-                  <tr
-                    key={key.id}
-                    className="group hover:bg-surface-border/20 transition-colors"
-                  >
-                    {visibleColumns.key && (
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center gap-2">
-                          <span className="font-mono text-xs text-text-secondary tracking-widest">
-                            {key.key}
-                          </span>
-                          <button
-                            className="opacity-0 group-hover:opacity-100 text-text-secondary hover:text-text-primary transition-all"
-                            title="Copy Key"
-                          >
-                            <Copy className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </td>
-                    )}
+      {activeKeys.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-20 text-text-secondary">
+          <Key className="w-12 h-12 mb-4 opacity-50" />
+          <p className="text-lg font-medium">No active keys</p>
+          <p className="text-sm mt-1">Keys are generated during provisioning.</p>
+        </div>
+      ) : (
+        <section className="mb-10">
+          <div className="bg-surface border border-surface-border rounded-lg overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead className="bg-surface-border/10 border-b border-surface-border">
+                  <tr>
                     {visibleColumns.alias && (
-                      <td className="px-6 py-4 text-sm font-medium text-text-primary whitespace-nowrap">
-                        {key.alias}
-                      </td>
+                      <SortableHeader column="alias" label="Key Alias" />
                     )}
                     {visibleColumns.team && (
-                      <td className="px-6 py-4 text-sm text-text-secondary whitespace-nowrap">
-                        {key.team}
-                      </td>
+                      <SortableHeader column="team" label="Team" />
                     )}
                     {visibleColumns.status && (
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium border ${
-                            key.status === "Active"
-                              ? "bg-secondary/10 text-secondary border-secondary/20"
-                              : "bg-warning/10 text-warning border-warning/20"
-                          }`}
-                        >
-                          {key.status}
-                        </span>
-                      </td>
+                      <SortableHeader column="status" label="Status" />
                     )}
                     {visibleColumns.created && (
-                      <td className="px-6 py-4 text-sm text-text-secondary tabular-nums whitespace-nowrap">
-                        {key.created}
-                      </td>
+                      <SortableHeader column="created" label="Created" />
                     )}
                     {visibleColumns.expires && (
-                      <td className="px-6 py-4 text-sm text-text-secondary tabular-nums whitespace-nowrap">
-                        <span
-                          className={
-                            key.status === "Expiring Soon"
-                              ? "text-warning/80 font-medium"
-                              : ""
-                          }
-                        >
-                          {key.expires}
-                        </span>
-                      </td>
-                    )}
-                    {visibleColumns.lastUsed && (
-                      <td className="px-6 py-4 text-sm text-text-secondary tabular-nums whitespace-nowrap">
-                        {formatDate(key.lastUsed)}
-                      </td>
+                      <SortableHeader column="expires" label="Expires" />
                     )}
                     {visibleColumns.spend && (
-                      <td className="px-6 py-4 text-sm font-mono text-text-primary text-right tabular-nums whitespace-nowrap">
-                        {key.spend}
-                      </td>
+                      <SortableHeader
+                        column="spend"
+                        label="Spend"
+                        align="right"
+                      />
                     )}
                     {visibleColumns.actions && (
-                      <td className="px-6 py-4 text-right space-x-4 whitespace-nowrap">
-                        <button className="text-xs text-text-secondary hover:text-primary font-medium transition-colors">
-                          Rotate
-                        </button>
-                        <button className="text-xs text-text-secondary hover:text-destructive font-medium transition-colors">
-                          Revoke
-                        </button>
-                      </td>
+                      <th className="px-6 py-3 text-[11px] font-bold text-text-secondary uppercase tracking-widest text-right whitespace-nowrap">
+                        Actions
+                      </th>
                     )}
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-      <section className="pb-20">
-        <details className="group border border-surface-border rounded-lg bg-surface-border/10">
-          <summary className="flex items-center justify-between p-4 cursor-pointer hover:bg-surface-border/20 transition-colors select-none">
-            <div className="flex items-center gap-3">
-              <ChevronDown className="w-5 h-5 text-text-secondary group-open:rotate-180 transition-transform" />
-              <span className="text-sm font-medium text-text-primary">
-                Revoked Keys History
-              </span>
-              <span className="px-1.5 py-0.5 text-[10px] bg-surface-border text-text-secondary rounded-md border border-surface-border">
-                12
-              </span>
-            </div>
-          </summary>
-          <div className="p-4 pt-0">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse opacity-70">
-                <thead className="border-b border-surface-border bg-surface-border/5">
-                  <tr>
-                    <th className="py-3 px-4 text-[10px] font-bold text-text-secondary uppercase tracking-widest whitespace-nowrap">
-                      Key
-                    </th>
-                    <th className="py-3 px-4 text-[10px] font-bold text-text-secondary uppercase tracking-widest whitespace-nowrap">
-                      Alias
-                    </th>
-                    <th className="py-3 px-4 text-[10px] font-bold text-text-secondary uppercase tracking-widest whitespace-nowrap">
-                      Revoked Date
-                    </th>
-                    <th className="py-3 px-4 text-[10px] font-bold text-text-secondary uppercase tracking-widest whitespace-nowrap">
-                      Reason
-                    </th>
-                  </tr>
                 </thead>
-                <tbody className="divide-y divide-surface-border/50">
-                  <tr className="hover:bg-surface-border/10 transition-colors">
-                    <td className="py-3 px-4 text-xs font-mono text-text-secondary whitespace-nowrap">
-                      sk-•••••••x2y
-                    </td>
-                    <td className="py-3 px-4 text-xs text-text-secondary whitespace-nowrap">
-                      Legacy-Bot
-                    </td>
-                    <td className="py-3 px-4 text-xs text-text-secondary tabular-nums whitespace-nowrap">
-                      Jan 02, 2024
-                    </td>
-                    <td className="py-3 px-4 text-xs text-text-secondary whitespace-nowrap">
-                      Compromised
-                    </td>
-                  </tr>
-                  <tr className="hover:bg-surface-border/10 transition-colors">
-                    <td className="py-3 px-4 text-xs font-mono text-text-secondary whitespace-nowrap">
-                      sk-•••••••p0l
-                    </td>
-                    <td className="py-3 px-4 text-xs text-text-secondary whitespace-nowrap">
-                      Temp-Testing
-                    </td>
-                    <td className="py-3 px-4 text-xs text-text-secondary tabular-nums whitespace-nowrap">
-                      Dec 15, 2023
-                    </td>
-                    <td className="py-3 px-4 text-xs text-text-secondary whitespace-nowrap">
-                      Expired
-                    </td>
-                  </tr>
+                <tbody className="divide-y divide-surface-border">
+                  {sortedKeys.map((item) => (
+                    <tr
+                      key={item.id}
+                      className="group hover:bg-surface-border/20 transition-colors"
+                    >
+                      {visibleColumns.alias && (
+                        <td className="px-6 py-4 text-sm font-medium text-text-primary whitespace-nowrap">
+                          {item.litellm_key_alias}
+                        </td>
+                      )}
+                      {visibleColumns.team && (
+                        <td className="px-6 py-4 text-sm text-text-secondary whitespace-nowrap">
+                          {item.team_alias}
+                        </td>
+                      )}
+                      {visibleColumns.status && (
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span
+                            className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium border ${statusBadge(item.status)}`}
+                          >
+                            {statusLabel(item.status)}
+                          </span>
+                        </td>
+                      )}
+                      {visibleColumns.created && (
+                        <td className="px-6 py-4 text-sm text-text-secondary tabular-nums whitespace-nowrap">
+                          {formatDate(item.created_at)}
+                        </td>
+                      )}
+                      {visibleColumns.expires && (
+                        <td className="px-6 py-4 text-sm text-text-secondary tabular-nums whitespace-nowrap">
+                          <span
+                            className={
+                              item.status === "expiring_soon"
+                                ? "text-warning/80 font-medium"
+                                : ""
+                            }
+                          >
+                            {formatExpiry(item)}
+                          </span>
+                        </td>
+                      )}
+                      {visibleColumns.spend && (
+                        <td className="px-6 py-4 text-sm font-mono text-text-primary text-right tabular-nums whitespace-nowrap">
+                          {item.last_spend != null
+                            ? `$${item.last_spend.toFixed(2)}`
+                            : "-"}
+                        </td>
+                      )}
+                      {visibleColumns.actions && (
+                        <td className="px-6 py-4 text-right space-x-4 whitespace-nowrap">
+                          <button
+                            onClick={() => rotateKey.mutate(item.id)}
+                            disabled={rotateKey.isPending}
+                            className="text-xs text-text-secondary hover:text-primary font-medium transition-colors disabled:opacity-50"
+                          >
+                            Rotate
+                          </button>
+                          <button
+                            onClick={() => revokeKey.mutate(item.id)}
+                            disabled={revokeKey.isPending}
+                            className="text-xs text-text-secondary hover:text-destructive font-medium transition-colors disabled:opacity-50"
+                          >
+                            Revoke
+                          </button>
+                        </td>
+                      )}
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
-            <div className="mt-4 text-center">
-              <button className="text-xs text-text-secondary hover:text-text-primary transition-colors underline decoration-surface-border underline-offset-4">
-                View full history
-              </button>
-            </div>
           </div>
-        </details>
-      </section>
+        </section>
+      )}
+
+      {revokedKeys.length > 0 && (
+        <section className="pb-20">
+          <details className="group border border-surface-border rounded-lg bg-surface-border/10">
+            <summary className="flex items-center justify-between p-4 cursor-pointer hover:bg-surface-border/20 transition-colors select-none">
+              <div className="flex items-center gap-3">
+                <ChevronDown className="w-5 h-5 text-text-secondary group-open:rotate-180 transition-transform" />
+                <span className="text-sm font-medium text-text-primary">
+                  Revoked Keys History
+                </span>
+                <span className="px-1.5 py-0.5 text-[10px] bg-surface-border text-text-secondary rounded-md border border-surface-border">
+                  {revokedKeys.length}
+                </span>
+              </div>
+            </summary>
+            <div className="p-4 pt-0">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse opacity-70">
+                  <thead className="border-b border-surface-border bg-surface-border/5">
+                    <tr>
+                      <th className="py-3 px-4 text-[10px] font-bold text-text-secondary uppercase tracking-widest whitespace-nowrap">
+                        Alias
+                      </th>
+                      <th className="py-3 px-4 text-[10px] font-bold text-text-secondary uppercase tracking-widest whitespace-nowrap">
+                        Team
+                      </th>
+                      <th className="py-3 px-4 text-[10px] font-bold text-text-secondary uppercase tracking-widest whitespace-nowrap">
+                        Status
+                      </th>
+                      <th className="py-3 px-4 text-[10px] font-bold text-text-secondary uppercase tracking-widest whitespace-nowrap">
+                        Created
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-surface-border/50">
+                    {revokedKeys.map((item) => (
+                      <tr
+                        key={item.id}
+                        className="hover:bg-surface-border/10 transition-colors"
+                      >
+                        <td className="py-3 px-4 text-xs text-text-secondary whitespace-nowrap">
+                          {item.litellm_key_alias}
+                        </td>
+                        <td className="py-3 px-4 text-xs text-text-secondary whitespace-nowrap">
+                          {item.team_alias}
+                        </td>
+                        <td className="py-3 px-4 text-xs text-text-secondary whitespace-nowrap capitalize">
+                          {item.status}
+                        </td>
+                        <td className="py-3 px-4 text-xs text-text-secondary tabular-nums whitespace-nowrap">
+                          {formatDate(item.created_at)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </details>
+        </section>
+      )}
     </div>
   );
 }

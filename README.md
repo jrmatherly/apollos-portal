@@ -83,7 +83,7 @@ npm run dev
 ```bash
 cd cli
 uv sync
-uv run apollos configure   # Enter tenant ID, client ID, portal URL
+uv run apollos configure    # Enter tenant ID, client ID, portal URL
 uv run apollos login        # Device-code flow
 uv run apollos whoami
 ```
