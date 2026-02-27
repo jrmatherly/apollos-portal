@@ -1,40 +1,41 @@
-# Virtual environment
+# === Dependencies (rebuilt in container) ===
 .venv/
 
-# Python cache
+# === Python cache ===
 __pycache__/
 *.pyc
 *.pyo
 *.egg-info/
 
-# Environment files
+# === Environment & secrets ===
 .env
 .env.local
 .env.*.local
+teams.yaml
 
-# Tests
+# === Tests ===
 tests/
 .pytest_cache/
 
-# Linting/tooling
+# === Runtime & cache ===
+*.log
 .ruff_cache/
 
-# Git
-.git/
-.gitignore
+# === OS ===
+.DS_Store
+Thumbs.db
 
-# IDE
+# === IDE ===
 .idea/
 .vscode/
 *.swp
 *.swo
+*~
 
-# OS
-.DS_Store
+# === Git ===
+.git/
+.gitignore
 
-# Sensitive config (mounted at runtime)
-teams.yaml
-
-# Docker
+# === Docker ===
 Dockerfile
 .dockerignore

@@ -1,4 +1,26 @@
+# === Dependencies ===
 node_modules/
+
+# === Build output ===
 dist/
+build/
+
+# === Environment & secrets ===
 .env
 .env.local
+.env.*.local
+
+# === Runtime & cache ===
+*.log
+.cache/
+
+# === OS ===
+.DS_Store
+Thumbs.db
+
+# === IDE ===
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
