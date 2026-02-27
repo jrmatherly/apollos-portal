@@ -1,11 +1,17 @@
+from __future__ import annotations
+
 import uuid
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import DateTime, ForeignKey, String, UniqueConstraint, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base
+
+if TYPE_CHECKING:
+    from app.models.provisioned_user import ProvisionedUser
 
 
 class UserTeamMembership(Base):
@@ -20,4 +26,4 @@ class UserTeamMembership(Base):
     litellm_role: Mapped[str] = mapped_column(String(50), default="internal_user", nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
-    user: Mapped["ProvisionedUser"] = relationship(back_populates="team_memberships")
+    user: Mapped[ProvisionedUser] = relationship(back_populates="team_memberships")

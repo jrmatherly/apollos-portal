@@ -1,7 +1,9 @@
 /**
  * API client for Apollos AI Portal backend.
- * All requests go through the Vite dev proxy (/api → localhost:8000).
+ * All requests go through the Vite dev proxy (/api -> localhost:8000).
  */
+
+import { msalInstance, loginRequest } from "./msal";
 
 const API_BASE = "/api/v1";
 
@@ -15,6 +17,21 @@ class ApiError extends Error {
   }
 }
 
+async function getToken(): Promise<string | null> {
+  const account = msalInstance.getActiveAccount();
+  if (!account) return null;
+
+  try {
+    const response = await msalInstance.acquireTokenSilent({
+      ...loginRequest,
+      account,
+    });
+    return response.accessToken;
+  } catch {
+    return null;
+  }
+}
+
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const url = `${API_BASE}${path}`;
   const headers: Record<string, string> = {
@@ -22,8 +39,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     ...((options.headers as Record<string, string>) || {}),
   };
 
-  // Add auth token if available
-  const token = sessionStorage.getItem("access_token");
+  const token = await getToken();
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
   }

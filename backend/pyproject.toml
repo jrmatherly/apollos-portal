@@ -3,28 +3,28 @@ name = "apollos-portal-backend"
 version = "0.1.0"
 requires-python = ">=3.12"
 dependencies = [
-    "fastapi>=0.115.0",
-    "uvicorn[standard]>=0.34.0",
-    "httpx>=0.28.0",
-    "pydantic>=2.10.0",
-    "pydantic-settings>=2.7.0",
-    "sqlalchemy[asyncio]>=2.0.36",
-    "asyncpg>=0.30.0",
-    "alembic>=1.14.0",
-    "msal>=1.31.0",
-    "msgraph-sdk>=1.14.0",
-    "aiosmtplib>=3.0.2",
-    "apscheduler>=3.11.0",
-    "pyyaml>=6.0.2",
-    "structlog>=24.4.0",
-    "python-multipart>=0.0.19",
+    "fastapi>=0.133.1",
+    "uvicorn[standard]>=0.41.0",
+    "httpx>=0.28.1",
+    "pydantic>=2.12.5",
+    "pydantic-settings>=2.13.1",
+    "sqlalchemy[asyncio]>=2.0.47",
+    "asyncpg>=0.31.0",
+    "alembic>=1.18.4",
+    "msal>=1.35.0",
+    "msgraph-sdk>=1.55.0",
+    "aiosmtplib>=5.1.0",
+    "apscheduler>=3.11.2",
+    "pyyaml>=6.0.3",
+    "structlog>=25.5.0",
+    "python-multipart>=0.0.22",
 ]
 
 [dependency-groups]
 dev = [
-    "ruff>=0.8.6",
-    "pytest>=8.3.4",
-    "pytest-asyncio>=0.24.0",
+    "ruff>=0.15.4",
+    "pytest>=9.0.2",
+    "pytest-asyncio>=1.3.0",
     "httpx",
 ]
 
