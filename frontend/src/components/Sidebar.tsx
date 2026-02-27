@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { useAuth } from "../contexts/AuthContext";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -26,6 +27,17 @@ const navItems = [
 ];
 
 export function Sidebar() {
+  const { user, logout } = useAuth();
+
+  const displayName = user?.name || "User";
+  const displayEmail = user?.username || "";
+  const initials = displayName
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+
   return (
     <aside className="w-64 flex-shrink-0 border-r border-surface-border bg-surface flex flex-col h-full fixed z-50">
       <div className="p-6">
@@ -35,10 +47,10 @@ export function Sidebar() {
           </div>
           <div>
             <h1 className="text-sm font-bold tracking-tight text-text-primary">
-              NEXUS AI
+              Apollos AI
             </h1>
             <p className="text-[10px] text-text-secondary font-medium uppercase tracking-widest">
-              Enterprise
+              Self-Service Portal
             </p>
           </div>
         </div>
@@ -63,20 +75,23 @@ export function Sidebar() {
         </nav>
       </div>
       <div className="mt-auto p-4 border-t border-surface-border">
-        <div className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-surface-border/50 transition-colors cursor-pointer group">
+        <button
+          onClick={() => logout()}
+          className="w-full flex items-center gap-3 px-3 py-2 rounded-md hover:bg-surface-border/50 transition-colors cursor-pointer group"
+        >
           <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xs ring-2 ring-transparent group-hover:ring-primary/50 transition-all">
-            JD
+            {initials}
           </div>
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 text-left">
             <p className="text-sm font-medium text-text-primary truncate">
-              John Doe
+              {displayName}
             </p>
             <p className="text-xs text-text-secondary truncate">
-              Enterprise Admin
+              {displayEmail}
             </p>
           </div>
           <LogOut className="w-4 h-4 text-text-secondary group-hover:text-text-primary transition-colors" />
-        </div>
+        </button>
       </div>
     </aside>
   );
