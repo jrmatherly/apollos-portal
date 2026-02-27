@@ -51,9 +51,7 @@ class TestGetTokenRoles:
     async def test_extracts_roles(self):
         """Build a fake JWT with roles in payload and verify extraction."""
         header = base64.urlsafe_b64encode(json.dumps({"alg": "RS256"}).encode()).rstrip(b"=")
-        payload = base64.urlsafe_b64encode(
-            json.dumps({"roles": ["Portal.User", "Portal.Admin"]}).encode()
-        ).rstrip(b"=")
+        payload = base64.urlsafe_b64encode(json.dumps({"roles": ["Portal.User", "Portal.Admin"]}).encode()).rstrip(b"=")
         signature = base64.urlsafe_b64encode(b"fakesig").rstrip(b"=")
         token = f"{header.decode()}.{payload.decode()}.{signature.decode()}"
 
@@ -64,9 +62,7 @@ class TestGetTokenRoles:
     async def test_no_roles_claim(self):
         """JWT without roles claim returns empty list."""
         header = base64.urlsafe_b64encode(json.dumps({"alg": "RS256"}).encode()).rstrip(b"=")
-        payload = base64.urlsafe_b64encode(
-            json.dumps({"sub": "user-1"}).encode()
-        ).rstrip(b"=")
+        payload = base64.urlsafe_b64encode(json.dumps({"sub": "user-1"}).encode()).rstrip(b"=")
         signature = base64.urlsafe_b64encode(b"fakesig").rstrip(b"=")
         token = f"{header.decode()}.{payload.decode()}.{signature.decode()}"
 

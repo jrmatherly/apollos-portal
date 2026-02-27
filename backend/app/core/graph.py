@@ -42,16 +42,11 @@ class GraphClient:
         token = await self._get_app_token()
         groups: list[dict[str, Any]] = []
 
-        url = (
-            f"{self.GRAPH_BASE}/users/{user_oid}/memberOf/microsoft.graph.group"
-            f"?$select=id,displayName&$top=999"
-        )
+        url = f"{self.GRAPH_BASE}/users/{user_oid}/memberOf/microsoft.graph.group?$select=id,displayName&$top=999"
 
         async with httpx.AsyncClient() as client:
             while url:
-                resp = await client.get(
-                    url, headers={"Authorization": f"Bearer {token}"}
-                )
+                resp = await client.get(url, headers={"Authorization": f"Bearer {token}"})
                 resp.raise_for_status()
                 data = resp.json()
                 groups.extend(data.get("value", []))

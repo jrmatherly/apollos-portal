@@ -88,9 +88,7 @@ def login() -> dict:
     # Initiate device-code flow
     flow = app.initiate_device_flow(scopes=SCOPES)
     if "user_code" not in flow:
-        raise RuntimeError(
-            f"Device code flow failed: {flow.get('error_description', 'Unknown error')}"
-        )
+        raise RuntimeError(f"Device code flow failed: {flow.get('error_description', 'Unknown error')}")
 
     # Print the device code message for the user
     print(flow["message"])

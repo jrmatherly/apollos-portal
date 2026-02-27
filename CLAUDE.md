@@ -59,6 +59,12 @@
 - PostgreSQL 18 (SCRAM-SHA-256 auth, explicit PGDATA)
 - Node 24, Python 3.12, uv workspace (root pyproject.toml)
 
+## Claude Code Automations
+- Skills: `/api-doc` (sync endpoint docs), `/new-endpoint` (scaffold FastAPI endpoint)
+- Agents: `security-reviewer` (OWASP review), `docs-reviewer` (cross-ref docs vs code)
+- Hooks auto-format Python (ruff) and TS/MDX (biome) on edit; block `.env`, `teams.yaml`, and lock files
+- Editing `.claude/settings.json` with the Edit tool fails on long escaped commands — use Write instead
+
 ## Serena MCP
 - Project name: `apollos-portal` (config: `.serena/project.yml`)
 - Languages: Python + TypeScript (dual language server)

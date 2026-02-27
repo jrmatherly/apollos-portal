@@ -77,9 +77,7 @@ def _to_list_item(k: ProvisionedKey) -> KeyListItem:
 
 async def _get_db_user(session: AsyncSession, user: CurrentUser) -> ProvisionedUser:
     """Get the portal DB user or raise 404."""
-    result = await session.execute(
-        select(ProvisionedUser).where(ProvisionedUser.entra_oid == user.oid)
-    )
+    result = await session.execute(select(ProvisionedUser).where(ProvisionedUser.entra_oid == user.oid))
     db_user = result.scalar_one_or_none()
     if not db_user:
         raise LookupError("User not provisioned")
@@ -139,6 +137,7 @@ async def create_key(
     )
     if existing.scalar_one_or_none():
         import time
+
         key_alias = f"{key_alias}-{int(time.time()) % 10000}"
 
     expires_at = datetime.now(UTC) + timedelta(days=db_user.default_key_duration_days)
@@ -225,6 +224,7 @@ async def rotate_key(
     )
     if existing.scalar_one_or_none():
         import time
+
         new_key_alias = f"{new_key_alias}-{int(time.time()) % 10000}"
 
     expires_at = datetime.now(UTC) + timedelta(days=db_user.default_key_duration_days)

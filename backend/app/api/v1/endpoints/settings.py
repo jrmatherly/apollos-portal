@@ -17,9 +17,7 @@ async def get_settings_endpoint(
     session: AsyncSession = Depends(get_session),
 ):
     """Get the current user's preferences."""
-    result = await session.execute(
-        select(ProvisionedUser).where(ProvisionedUser.entra_oid == user.oid)
-    )
+    result = await session.execute(select(ProvisionedUser).where(ProvisionedUser.entra_oid == user.oid))
     db_user = result.scalar_one_or_none()
     if not db_user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not provisioned")
@@ -40,9 +38,7 @@ async def update_settings(
     session: AsyncSession = Depends(get_session),
 ):
     """Update the current user's preferences."""
-    result = await session.execute(
-        select(ProvisionedUser).where(ProvisionedUser.entra_oid == user.oid)
-    )
+    result = await session.execute(select(ProvisionedUser).where(ProvisionedUser.entra_oid == user.oid))
     db_user = result.scalar_one_or_none()
     if not db_user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not provisioned")

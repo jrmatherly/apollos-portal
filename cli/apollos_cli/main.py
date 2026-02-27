@@ -81,7 +81,10 @@ def whoami():
     table.add_column("Value")
     table.add_row("Name", account.get("name", "N/A"))
     table.add_row("Username", account.get("username", "N/A"))
-    table.add_row("Tenant", account.get("home_account_id", "N/A").split(".")[1] if "." in account.get("home_account_id", "") else "N/A")
+    table.add_row(
+        "Tenant",
+        account.get("home_account_id", "N/A").split(".")[1] if "." in account.get("home_account_id", "") else "N/A",
+    )
     console.print(table)
 
 

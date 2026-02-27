@@ -25,9 +25,7 @@ def get_msal_confidential_client(settings: Settings) -> msal.ConfidentialClientA
 
 async def _get_jwks_keys(tenant_id: str) -> dict[str, Any]:
     """Fetch OpenID Connect signing keys from Entra ID."""
-    openid_config_url = (
-        f"https://login.microsoftonline.com/{tenant_id}/v2.0/.well-known/openid-configuration"
-    )
+    openid_config_url = f"https://login.microsoftonline.com/{tenant_id}/v2.0/.well-known/openid-configuration"
     async with httpx.AsyncClient() as client:
         config_resp = await client.get(openid_config_url)
         config_resp.raise_for_status()
@@ -103,6 +101,7 @@ class CurrentUser:
     @property
     def is_admin(self) -> bool:
         from app.config import get_settings
+
         return get_settings().portal_admin_role in self.roles
 
 

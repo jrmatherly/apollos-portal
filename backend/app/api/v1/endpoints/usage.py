@@ -24,9 +24,7 @@ async def get_usage(
     end_date: str | None = Query(None),
 ):
     """Get usage/spend data for the current user."""
-    result = await session.execute(
-        select(ProvisionedUser).where(ProvisionedUser.entra_oid == user.oid)
-    )
+    result = await session.execute(select(ProvisionedUser).where(ProvisionedUser.entra_oid == user.oid))
     db_user = result.scalar_one_or_none()
     if not db_user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not provisioned")

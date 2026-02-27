@@ -24,9 +24,7 @@ async def get_models(
     teams_config: TeamsConfig = Depends(get_teams_config),
 ):
     """List available models filtered by user's team access."""
-    result = await session.execute(
-        select(ProvisionedUser).where(ProvisionedUser.entra_oid == user.oid)
-    )
+    result = await session.execute(select(ProvisionedUser).where(ProvisionedUser.entra_oid == user.oid))
     db_user = result.scalar_one_or_none()
     if not db_user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not provisioned")
@@ -44,9 +42,7 @@ async def get_models(
     except Exception:
         logger.exception("Failed to fetch models from LiteLLM, falling back to config")
         # Return just the model names from teams config if LiteLLM is unreachable
-        return ModelsResponse(
-            models=[ModelInfo(model_name=m) for m in sorted(allowed_models)]
-        )
+        return ModelsResponse(models=[ModelInfo(model_name=m) for m in sorted(allowed_models)])
 
     # Filter to only allowed models
     filtered = []

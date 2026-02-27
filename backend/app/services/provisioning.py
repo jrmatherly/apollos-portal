@@ -42,9 +42,7 @@ async def get_provision_status(
     user: CurrentUser,
 ) -> ProvisionStatusResponse:
     """Check if a user is already provisioned."""
-    result = await session.execute(
-        select(ProvisionedUser).where(ProvisionedUser.entra_oid == user.oid)
-    )
+    result = await session.execute(select(ProvisionedUser).where(ProvisionedUser.entra_oid == user.oid))
     db_user = result.scalar_one_or_none()
 
     if not db_user:
@@ -142,9 +140,7 @@ async def provision_user(
             )
 
     # 5. Create or find user in DB + LiteLLM
-    result = await session.execute(
-        select(ProvisionedUser).where(ProvisionedUser.entra_oid == user.oid)
-    )
+    result = await session.execute(select(ProvisionedUser).where(ProvisionedUser.entra_oid == user.oid))
     db_user = result.scalar_one_or_none()
 
     if not db_user:
@@ -239,9 +235,7 @@ async def provision_user(
         email_prefix = user.email.split("@")[0]
         key_alias = f"{email_prefix}-{slug}"
 
-        expires_at = datetime.now(UTC) + timedelta(
-            days=db_user.default_key_duration_days
-        )
+        expires_at = datetime.now(UTC) + timedelta(days=db_user.default_key_duration_days)
 
         key_resp = await litellm.generate_key(
             user_id=db_user.litellm_user_id or user.email,
