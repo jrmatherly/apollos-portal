@@ -39,3 +39,11 @@
 - React 19.2+, Vite 7.3+, @azure/msal-browser 5.3+, TypeScript 5.9+
 - PostgreSQL 18 (SCRAM-SHA-256 auth, explicit PGDATA)
 - Node 24, Python 3.12
+
+## Serena MCP
+- Project name: `apollos-portal` (config: `.serena/project.yml`)
+- Languages: Python + TypeScript (dual language server)
+- Activate by name, not path: `activate_project("apollos-portal")` — path-based activation creates a new project with defaults
+- Index symbols: `uvx --from git+https://github.com/oraios/serena serena project index`
+- `$/typescriptVersion` warning during indexing is harmless — ignore it
+- Memories stored in `.serena/memories/` — read on session start for project context

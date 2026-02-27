@@ -1,0 +1,28 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "for file in $CLAUDE_FILE_PATHS; do if echo \"$file\" | grep -q '\\.py$'; then cd /Users/jason/dev/ai-stack/mcp-gateway/litellm-portal/backend && uv run ruff check --fix \"$file\" 2>/dev/null && uv run ruff format \"$file\" 2>/dev/null; fi; done",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "for file in $CLAUDE_FILE_PATHS; do if echo \"$file\" | grep -qE '(\\.env|\\.env\\..+|teams\\.yaml)$'; then echo 'BLOCKED: Cannot edit secret/config files (.env, teams.yaml)' >&2; exit 1; fi; done",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}
