@@ -1,0 +1,32 @@
+# Code Style and Conventions
+
+## Python (Backend + CLI)
+- **Package manager**: uv (not pip)
+- **Linter**: ruff (line-length=120, target=py312, select=E,F,I,N,W,UP)
+- **Type hints**: Use throughout, `from __future__ import annotations` in model files
+- **SQLAlchemy models**: Use `TYPE_CHECKING` imports for forward references to avoid ruff F821
+- **Config**: All values via `app.config.Settings` (Pydantic BaseSettings), never hardcode URLs/secrets
+- **Naming**: snake_case for functions/variables, PascalCase for classes
+- **Imports**: Sorted by ruff (isort-compatible), stdlib → third-party → local
+- **Tests**: pytest with pytest-asyncio (strict mode), httpx ASGITransport for endpoint tests
+
+## TypeScript (Frontend)
+- **Framework**: React 19 with functional components and hooks
+- **Build**: Vite 7 with @vitejs/plugin-react
+- **Styling**: Tailwind CSS 4 with custom design tokens (bg-primary, text-text-primary, etc.)
+- **Env vars**: Must use `VITE_` prefix, accessed via `import.meta.env`
+- **Type declarations**: `frontend/src/vite-env.d.ts` must exist (Vite client types)
+- **Auth**: MSAL browser v5, PKCE redirect flow, `useAuth()` hook from `AuthContext`
+- **Routing**: React Router v7 with `ProtectedRoute` wrapper
+- **Lint**: `tsc --noEmit` (no ESLint configured yet)
+
+## Git
+- `.scratchpad/` is gitignored — never stage or commit
+- `backend/teams.yaml` is gitignored — use `teams.yaml.example` as template
+- Conventional commits: `feat:`, `fix:`, `chore:`, `refactor:`, `docs:`
+- Co-author line: `Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>`
+
+## Docker
+- Backend context: `./backend`, Frontend context: `./frontend`
+- `.dockerignore` files in both `backend/` and `frontend/`
+- PostgreSQL 18 with explicit PGDATA, SCRAM-SHA-256 auth
