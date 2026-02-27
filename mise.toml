@@ -1,0 +1,57 @@
+[tasks.dev]
+description = "Start all development services"
+run = "docker compose up"
+
+[tasks."dev:backend"]
+description = "Start backend only (requires DB)"
+dir = "backend"
+run = "uv run uvicorn app.main:app --reload --port 8000"
+
+[tasks."dev:frontend"]
+description = "Start frontend only"
+dir = "frontend"
+run = "npm run dev"
+
+[tasks.migrate]
+description = "Run database migrations"
+dir = "backend"
+run = "uv run alembic upgrade head"
+
+[tasks."migrate:generate"]
+description = "Generate a new migration"
+dir = "backend"
+run = "uv run alembic revision --autogenerate -m \"$1\""
+
+[tasks.lint]
+description = "Run linters"
+run = [
+  "cd backend && uv run ruff check .",
+  "cd frontend && npm run lint",
+]
+
+[tasks.format]
+description = "Format code"
+run = [
+  "cd backend && uv run ruff format .",
+]
+
+[tasks.test]
+description = "Run tests"
+dir = "backend"
+run = "uv run pytest -v"
+
+[tasks."docker:up"]
+description = "Start Docker services"
+run = "docker compose up -d"
+
+[tasks."docker:down"]
+description = "Stop Docker services"
+run = "docker compose down"
+
+[tasks."docker:reset"]
+description = "Reset Docker services and volumes"
+run = "docker compose down -v && docker compose up -d"
+
+[tasks."db:shell"]
+description = "Open psql shell"
+run = "docker compose exec db psql -U portal -d apollos_portal"

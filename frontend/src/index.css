@@ -1,0 +1,64 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap");
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --color-bg-primary: var(--bg-primary);
+  --color-surface: var(--surface);
+  --color-surface-border: var(--surface-border);
+  --color-primary: var(--primary);
+  --color-secondary: var(--secondary);
+  --color-destructive: var(--destructive);
+  --color-warning: var(--warning);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+}
+
+@layer base {
+  :root {
+    --bg-primary: #fafbfc;
+    --surface: #ffffff;
+    --surface-border: #e5e7eb;
+    --primary: #6366f1;
+    --secondary: #14b8a6;
+    --destructive: #ef4444;
+    --warning: #f59e0b;
+    --text-primary: #111827;
+    --text-secondary: #6b7280;
+    --text-muted: #4b5563;
+  }
+
+  .dark {
+    --bg-primary: #0a0f1e;
+    --surface: #111827;
+    --surface-border: #1f2937;
+    --primary: #6366f1;
+    --secondary: #14b8a6;
+    --destructive: #ef4444;
+    --warning: #f59e0b;
+    --text-primary: #f9fafb;
+    --text-secondary: #9ca3af;
+    --text-muted: #4b5563;
+  }
+
+  body {
+    @apply bg-bg-primary text-text-primary font-sans antialiased;
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
