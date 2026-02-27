@@ -14,16 +14,30 @@ const data = [
 ];
 
 export function Usage() {
-  const [isLoading, setIsLoading] = useState(true);
+  const [isChartLoading, setIsChartLoading] = useState(true);
+  const [isModelBreakdownLoading, setIsModelBreakdownLoading] = useState(true);
+  const [isMetricsLoading, setIsMetricsLoading] = useState(true);
+  const [isLogLoading, setIsLogLoading] = useState(true);
   const [dateRange, setDateRange] = useState('30d');
   const [activeMetric, setActiveMetric] = useState<'Tokens' | 'Requests' | 'Costs'>('Tokens');
 
   useEffect(() => {
-    setIsLoading(true);
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
-    return () => clearTimeout(timer);
+    setIsChartLoading(true);
+    setIsModelBreakdownLoading(true);
+    setIsMetricsLoading(true);
+    setIsLogLoading(true);
+
+    const t1 = setTimeout(() => setIsMetricsLoading(false), 400);
+    const t2 = setTimeout(() => setIsChartLoading(false), 800);
+    const t3 = setTimeout(() => setIsModelBreakdownLoading(false), 1200);
+    const t4 = setTimeout(() => setIsLogLoading(false), 1500);
+
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+      clearTimeout(t4);
+    };
   }, [dateRange]);
 
   return (
@@ -70,19 +84,19 @@ export function Usage() {
             <option>Dev-Personal</option>
           </select>
         </div>
-        <div className="ml-auto flex items-center gap-1 bg-surface-border/10 p-1 rounded-lg border border-surface-border">
+        <div className="ml-auto flex items-center gap-1 bg-surface border border-surface-border p-1 rounded-lg shadow-sm">
           {['Tokens', 'Requests', 'Costs'].map((metric) => (
             <button
               key={metric}
               onClick={() => setActiveMetric(metric as any)}
-              className={`relative px-4 py-1.5 text-xs font-medium rounded-md transition-colors ${
-                activeMetric === metric ? 'text-text-primary' : 'text-text-secondary hover:text-text-primary'
+              className={`relative px-4 py-1.5 text-xs font-semibold rounded-md transition-colors ${
+                activeMetric === metric ? 'text-white' : 'text-text-secondary hover:text-text-primary hover:bg-surface-border/10'
               }`}
             >
               {activeMetric === metric && (
                 <motion.div
                   layoutId="activeMetric"
-                  className="absolute inset-0 bg-surface border border-surface-border shadow-sm rounded-md"
+                  className="absolute inset-0 bg-primary shadow-md rounded-md"
                   transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
                 />
               )}
@@ -110,7 +124,7 @@ export function Usage() {
           </div>
         </div>
         <div className="h-[300px] w-full">
-          {isLoading ? (
+          {isChartLoading ? (
             <div className="w-full h-full flex items-center justify-center bg-surface-border/5 rounded-lg animate-pulse">
               <Loader2 className="w-8 h-8 text-text-secondary animate-spin" />
             </div>
@@ -158,7 +172,7 @@ export function Usage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-surface-border">
-              {isLoading ? (
+              {isModelBreakdownLoading ? (
                 [...Array(3)].map((_, i) => (
                   <tr key={i}>
                     <td className="px-6 py-4"><div className="h-4 bg-surface-border/20 rounded animate-pulse w-24"></div></td>
@@ -212,7 +226,7 @@ export function Usage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <div className="bg-surface border border-surface-border p-6 rounded-xl hover:border-surface-border/80 transition-colors">
           <p className="text-xs font-bold text-text-secondary uppercase tracking-widest mb-1">Input Tokens</p>
-          {isLoading ? (
+          {isMetricsLoading ? (
             <div className="h-9 bg-surface-border/20 rounded animate-pulse w-32 mt-1"></div>
           ) : (
             <>
@@ -226,7 +240,7 @@ export function Usage() {
         </div>
         <div className="bg-surface border border-surface-border p-6 rounded-xl hover:border-surface-border/80 transition-colors">
           <p className="text-xs font-bold text-text-secondary uppercase tracking-widest mb-1">Output Tokens</p>
-          {isLoading ? (
+          {isMetricsLoading ? (
             <div className="h-9 bg-surface-border/20 rounded animate-pulse w-32 mt-1"></div>
           ) : (
             <>
@@ -240,7 +254,7 @@ export function Usage() {
         </div>
         <div className="bg-surface border border-surface-border p-6 rounded-xl hover:border-surface-border/80 transition-colors">
           <p className="text-xs font-bold text-text-secondary uppercase tracking-widest mb-1">Total Cost</p>
-          {isLoading ? (
+          {isMetricsLoading ? (
             <div className="h-9 bg-surface-border/20 rounded animate-pulse w-32 mt-1"></div>
           ) : (
             <>
@@ -254,7 +268,7 @@ export function Usage() {
         </div>
         <div className="bg-surface border border-surface-border p-6 rounded-xl hover:border-surface-border/80 transition-colors">
           <p className="text-xs font-bold text-text-secondary uppercase tracking-widest mb-1">Avg Cost/Req</p>
-          {isLoading ? (
+          {isMetricsLoading ? (
             <div className="h-9 bg-surface-border/20 rounded animate-pulse w-24 mt-1"></div>
           ) : (
             <>
@@ -296,7 +310,7 @@ export function Usage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-surface-border">
-              {isLoading ? (
+              {isLogLoading ? (
                 [...Array(4)].map((_, i) => (
                   <tr key={i}>
                     <td className="px-6 py-4"><div className="h-4 bg-surface-border/20 rounded animate-pulse w-32"></div></td>
