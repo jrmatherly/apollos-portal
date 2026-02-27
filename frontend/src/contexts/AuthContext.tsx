@@ -32,6 +32,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const init = async () => {
       try {
+        // MSAL v5 requires explicit initialization before use
+        await msalInstance.initialize();
+
         // Handle redirect response (if returning from login)
         const response = await msalInstance.handleRedirectPromise();
         if (response?.account) {
