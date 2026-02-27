@@ -3,14 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { Sidebar } from './components/Sidebar';
-import { Dashboard } from './pages/Dashboard';
-import { ApiKeys } from './pages/ApiKeys';
-import { Usage } from './pages/Usage';
-import { Models } from './pages/Models';
-import { Teams } from './pages/Teams';
-import { Settings } from './pages/Settings';
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Sidebar } from "./components/Sidebar";
+import { Dashboard } from "./pages/Dashboard";
+import { ApiKeys } from "./pages/ApiKeys";
+import { Usage } from "./pages/Usage";
+import { Models } from "./pages/Models";
+import { Teams } from "./pages/Teams";
+import { Settings } from "./pages/Settings";
 
 export default function App() {
   return (

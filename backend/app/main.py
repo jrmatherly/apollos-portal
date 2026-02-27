@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 # Create app
 app = FastAPI(
-    title="LiteLLM Self-Service Portal",
+    title="Apollos AI Self-Service Portal",
     version="0.1.0",
     docs_url="/docs",
     redoc_url="/redoc",

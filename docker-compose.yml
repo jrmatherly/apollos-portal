@@ -1,18 +1,21 @@
 services:
   db:
-    image: postgres:17
-    container_name: litellm-portal-db
+    image: postgres:18
+    container_name: apollos-portal-db
     restart: unless-stopped
     environment:
       POSTGRES_USER: portal
       POSTGRES_PASSWORD: portal
-      POSTGRES_DB: litellm_portal
+      POSTGRES_DB: apollos_portal
+      POSTGRES_HOST_AUTH_METHOD: scram-sha-256
+      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256"
+      PGDATA: /var/lib/postgresql/18/docker
     ports:
       - "5432:5432"
     volumes:
-      - portal_db_data:/var/lib/postgresql/data
+      - portal_db_data:/var/lib/postgresql/18/docker
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U portal -d litellm_portal"]
+      test: ["CMD-SHELL", "pg_isready -U portal -d apollos_portal"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -21,12 +24,12 @@ services:
     build:
       context: ./backend
       dockerfile: ../docker/backend.Dockerfile
-    container_name: litellm-portal-backend
+    container_name: apollos-portal-backend
     restart: unless-stopped
     ports:
       - "8000:8000"
     environment:
-      DATABASE_URL: postgresql+asyncpg://portal:portal@db:5432/litellm_portal
+      DATABASE_URL: postgresql+asyncpg://portal:portal@db:5432/apollos_portal
     env_file:
       - ./backend/.env
     volumes:
@@ -40,7 +43,7 @@ services:
     build:
       context: ./frontend
       dockerfile: ../docker/frontend.Dockerfile
-    container_name: litellm-portal-frontend
+    container_name: apollos-portal-frontend
     restart: unless-stopped
     ports:
       - "3000:3000"

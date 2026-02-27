@@ -6,9 +6,13 @@ teams:
   - entra_group_id: "REPLACE-WITH-ENTRA-GROUP-OBJECT-ID"
     team_alias: "Engineering AI Team"
     models:
-      - "gpt-4o"
-      - "gpt-4o-mini"
+      - "gpt-5.2"
+      - "gpt-5.1-codex"
+      - "gpt-5"
+      - "gpt-5-mini"
+      - "gpt-5-nano"
       - "text-embedding-3-large"
+      - "text-embedding-3-small"
     max_budget: 500
     budget_duration: "30d"
     team_member_budget: 25

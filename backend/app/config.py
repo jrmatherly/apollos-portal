@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     litellm_master_key: str = ""
 
     # --- Database ---
-    database_url: str = "postgresql+asyncpg://portal:portal@localhost:5432/litellm_portal"
+    database_url: str = "postgresql+asyncpg://portal:portal@localhost:5432/apollos_portal"
 
     # --- Email (SMTP) ---
     smtp_host: str = ""

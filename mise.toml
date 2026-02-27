@@ -54,4 +54,4 @@ run = "docker compose down -v && docker compose up -d"
 
 [tasks."db:shell"]
 description = "Open psql shell"
-run = "docker compose exec db psql -U portal -d litellm_portal"
+run = "docker compose exec db psql -U portal -d apollos_portal"

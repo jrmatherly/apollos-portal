@@ -1,11 +1,11 @@
-# LiteLLM Self-Service Portal
+# Apollos AI Self-Service Portal
 
-A self-service portal for managing LiteLLM proxy access, API keys, usage, and team settings.
+A self-service portal for managing Apollos AI proxy access, API keys, usage, and team settings.
 
 ## Project Structure
 
 ```
-litellm-portal/
+apollos-portal/
 ├── frontend/    # React 19 + Vite SPA (Tailwind CSS)
 ├── backend/     # FastAPI backend service
 ├── cli/         # CLI tooling

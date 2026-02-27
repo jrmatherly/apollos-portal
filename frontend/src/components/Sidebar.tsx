@@ -1,19 +1,28 @@
-import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Key, BarChart3, Cpu, Users, Settings, LogOut, Zap } from 'lucide-react';
-import { clsx, type ClassValue } from 'clsx';
-import { twMerge } from 'tailwind-merge';
+import { NavLink } from "react-router-dom";
+import {
+  LayoutDashboard,
+  Key,
+  BarChart3,
+  Cpu,
+  Users,
+  Settings,
+  LogOut,
+  Zap,
+} from "lucide-react";
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
 const navItems = [
-  { name: 'Dashboard', path: '/', icon: LayoutDashboard },
-  { name: 'API Keys', path: '/keys', icon: Key },
-  { name: 'Usage', path: '/usage', icon: BarChart3 },
-  { name: 'Models', path: '/models', icon: Cpu },
-  { name: 'Teams', path: '/teams', icon: Users },
-  { name: 'Settings', path: '/settings', icon: Settings },
+  { name: "Dashboard", path: "/", icon: LayoutDashboard },
+  { name: "API Keys", path: "/keys", icon: Key },
+  { name: "Usage", path: "/usage", icon: BarChart3 },
+  { name: "Models", path: "/models", icon: Cpu },
+  { name: "Teams", path: "/teams", icon: Users },
+  { name: "Settings", path: "/settings", icon: Settings },
 ];
 
 export function Sidebar() {
@@ -25,8 +34,12 @@ export function Sidebar() {
             <Zap className="w-5 h-5 fill-current" />
           </div>
           <div>
-            <h1 className="text-sm font-bold tracking-tight text-text-primary">NEXUS AI</h1>
-            <p className="text-[10px] text-text-secondary font-medium uppercase tracking-widest">Enterprise</p>
+            <h1 className="text-sm font-bold tracking-tight text-text-primary">
+              NEXUS AI
+            </h1>
+            <p className="text-[10px] text-text-secondary font-medium uppercase tracking-widest">
+              Enterprise
+            </p>
           </div>
         </div>
         <nav className="space-y-1">
@@ -36,10 +49,10 @@ export function Sidebar() {
               to={item.path}
               className={({ isActive }) =>
                 cn(
-                  'flex items-center gap-3 px-3 py-2 rounded-md transition-colors font-medium text-sm',
+                  "flex items-center gap-3 px-3 py-2 rounded-md transition-colors font-medium text-sm",
                   isActive
-                    ? 'bg-primary/10 text-primary'
-                    : 'text-text-secondary hover:text-text-primary hover:bg-surface-border/50'
+                    ? "bg-primary/10 text-primary"
+                    : "text-text-secondary hover:text-text-primary hover:bg-surface-border/50",
                 )
               }
             >
@@ -55,8 +68,12 @@ export function Sidebar() {
             JD
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-text-primary truncate">John Doe</p>
-            <p className="text-xs text-text-secondary truncate">Enterprise Admin</p>
+            <p className="text-sm font-medium text-text-primary truncate">
+              John Doe
+            </p>
+            <p className="text-xs text-text-secondary truncate">
+              Enterprise Admin
+            </p>
           </div>
           <LogOut className="w-4 h-4 text-text-secondary group-hover:text-text-primary transition-colors" />
         </div>
