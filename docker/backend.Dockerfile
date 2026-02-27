@@ -30,6 +30,12 @@ WORKDIR /app
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1
 
+# uv is needed for dev mode (docker-compose command override uses `uv run`)
+COPY --from=ghcr.io/astral-sh/uv:0.10.6 /uv /usr/local/bin/uv
+
+# Copy workspace root files (needed for uv workspace resolution)
+COPY pyproject.toml uv.lock ./
+
 # Copy virtual environment from builder
 COPY --from=builder /app/.venv /app/.venv
 

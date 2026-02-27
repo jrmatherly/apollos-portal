@@ -10,6 +10,19 @@ export default defineConfig({
       "@": path.resolve(__dirname, "."),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          "vendor-react": ["react", "react-dom", "react-router-dom"],
+          "vendor-auth": ["@azure/msal-browser"],
+          "vendor-charts": ["recharts"],
+          "vendor-ui": ["lucide-react", "motion"],
+          "vendor-data": ["@tanstack/react-query"],
+        },
+      },
+    },
+  },
   server: {
     proxy: {
       "/api": {

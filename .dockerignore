@@ -1,0 +1,36 @@
+# Git
+.git/
+.github/
+.gitignore
+.gitattributes
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Claude / Serena
+.claude/
+.serena/
+
+# Scratchpad (planning docs, not tracked in git)
+.scratchpad/
+
+# Frontend (rebuilt in container)
+frontend/node_modules/
+frontend/dist/
+frontend/.cache/
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+
+# Misc
+*.md
+*.txt
+!pyproject.toml
+!uv.lock

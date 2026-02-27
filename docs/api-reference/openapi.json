@@ -1,0 +1,1240 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Apollos AI Self-Service Portal",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/api/v1/me": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Get Me",
+        "description": "Return the authenticated user's identity.",
+        "operationId": "get_me_api_v1_me_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/status": {
+      "get": {
+        "tags": [
+          "provision"
+        ],
+        "summary": "Check Status",
+        "description": "Check the current user's provisioning status.",
+        "operationId": "check_status_api_v1_status_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProvisionStatusResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/provision": {
+      "post": {
+        "tags": [
+          "provision"
+        ],
+        "summary": "Provision",
+        "description": "Run the full provisioning flow for the current user.",
+        "operationId": "provision_api_v1_provision_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProvisionResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/keys": {
+      "get": {
+        "tags": [
+          "keys"
+        ],
+        "summary": "Get Keys",
+        "description": "List all keys for the current user.",
+        "operationId": "get_keys_api_v1_keys_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KeyListResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/keys/new": {
+      "post": {
+        "tags": [
+          "keys"
+        ],
+        "summary": "Generate New Key",
+        "description": "Generate a new API key for the user on a specific team.",
+        "operationId": "generate_new_key_api_v1_keys_new_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KeyCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KeyCreateResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/keys/{key_id}/rotate": {
+      "post": {
+        "tags": [
+          "keys"
+        ],
+        "summary": "Rotate Existing Key",
+        "description": "Rotate a key: block old, generate new.",
+        "operationId": "rotate_existing_key_api_v1_keys__key_id__rotate_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "key_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Key Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KeyRotateResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/keys/{key_id}/revoke": {
+      "post": {
+        "tags": [
+          "keys"
+        ],
+        "summary": "Revoke Existing Key",
+        "description": "Revoke a key (soft-delete via block).",
+        "operationId": "revoke_existing_key_api_v1_keys__key_id__revoke_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "key_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Key Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KeyRevokeResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/teams": {
+      "get": {
+        "tags": [
+          "teams"
+        ],
+        "summary": "Get Teams",
+        "description": "List the current user's team memberships with spend data.",
+        "operationId": "get_teams_api_v1_teams_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamsResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/usage": {
+      "get": {
+        "tags": [
+          "usage"
+        ],
+        "summary": "Get Usage",
+        "description": "Get usage/spend data for the current user.",
+        "operationId": "get_usage_api_v1_usage_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "start_date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Start Date"
+            }
+          },
+          {
+            "name": "end_date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "End Date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsageResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/models": {
+      "get": {
+        "tags": [
+          "models"
+        ],
+        "summary": "Get Models",
+        "description": "List available models filtered by user's team access.",
+        "operationId": "get_models_api_v1_models_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModelsResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/settings": {
+      "get": {
+        "tags": [
+          "settings"
+        ],
+        "summary": "Get Settings Endpoint",
+        "description": "Get the current user's preferences.",
+        "operationId": "get_settings_endpoint_api_v1_settings_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserSettingsResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "settings"
+        ],
+        "summary": "Update Settings",
+        "description": "Update the current user's preferences.",
+        "operationId": "update_settings_api_v1_settings_patch",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserSettingsUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserSettingsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/health": {
+      "get": {
+        "summary": "Health",
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ready": {
+      "get": {
+        "summary": "Ready",
+        "operationId": "ready_ready_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "KeyCreateRequest": {
+        "properties": {
+          "team_id": {
+            "type": "string",
+            "title": "Team Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "team_id"
+        ],
+        "title": "KeyCreateRequest"
+      },
+      "KeyCreateResponse": {
+        "properties": {
+          "key_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Key Id"
+          },
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "key_alias": {
+            "type": "string",
+            "title": "Key Alias"
+          },
+          "team_alias": {
+            "type": "string",
+            "title": "Team Alias"
+          },
+          "portal_expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Portal Expires At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key_id",
+          "key",
+          "key_alias",
+          "team_alias",
+          "portal_expires_at"
+        ],
+        "title": "KeyCreateResponse"
+      },
+      "KeyDetail": {
+        "properties": {
+          "key_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Key Id"
+          },
+          "litellm_key_id": {
+            "type": "string",
+            "title": "Litellm Key Id"
+          },
+          "key_alias": {
+            "type": "string",
+            "title": "Key Alias"
+          },
+          "team_id": {
+            "type": "string",
+            "title": "Team Id"
+          },
+          "team_alias": {
+            "type": "string",
+            "title": "Team Alias"
+          },
+          "portal_expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Portal Expires At"
+          },
+          "key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Key"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key_id",
+          "litellm_key_id",
+          "key_alias",
+          "team_id",
+          "team_alias",
+          "portal_expires_at"
+        ],
+        "title": "KeyDetail"
+      },
+      "KeyListItem": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "litellm_key_alias": {
+            "type": "string",
+            "title": "Litellm Key Alias"
+          },
+          "team_id": {
+            "type": "string",
+            "title": "Team Id"
+          },
+          "team_alias": {
+            "type": "string",
+            "title": "Team Alias"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "portal_expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Portal Expires At"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "last_spend": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Spend"
+          },
+          "days_until_expiry": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Days Until Expiry"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "litellm_key_alias",
+          "team_id",
+          "team_alias",
+          "status",
+          "portal_expires_at",
+          "created_at"
+        ],
+        "title": "KeyListItem"
+      },
+      "KeyListResponse": {
+        "properties": {
+          "active": {
+            "items": {
+              "$ref": "#/components/schemas/KeyListItem"
+            },
+            "type": "array",
+            "title": "Active",
+            "default": []
+          },
+          "revoked": {
+            "items": {
+              "$ref": "#/components/schemas/KeyListItem"
+            },
+            "type": "array",
+            "title": "Revoked",
+            "default": []
+          }
+        },
+        "type": "object",
+        "title": "KeyListResponse"
+      },
+      "KeyRevokeResponse": {
+        "properties": {
+          "key_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Key Id"
+          },
+          "revoked_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Revoked At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key_id",
+          "revoked_at"
+        ],
+        "title": "KeyRevokeResponse"
+      },
+      "KeyRotateResponse": {
+        "properties": {
+          "old_key_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Old Key Id"
+          },
+          "new_key_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "New Key Id"
+          },
+          "new_key": {
+            "type": "string",
+            "title": "New Key"
+          },
+          "new_key_alias": {
+            "type": "string",
+            "title": "New Key Alias"
+          },
+          "portal_expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Portal Expires At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "old_key_id",
+          "new_key_id",
+          "new_key",
+          "new_key_alias",
+          "portal_expires_at"
+        ],
+        "title": "KeyRotateResponse"
+      },
+      "ModelInfo": {
+        "properties": {
+          "model_name": {
+            "type": "string",
+            "title": "Model Name"
+          },
+          "litellm_model_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Litellm Model Name"
+          },
+          "model_info": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Info"
+          }
+        },
+        "type": "object",
+        "required": [
+          "model_name"
+        ],
+        "title": "ModelInfo"
+      },
+      "ModelsResponse": {
+        "properties": {
+          "models": {
+            "items": {
+              "$ref": "#/components/schemas/ModelInfo"
+            },
+            "type": "array",
+            "title": "Models"
+          }
+        },
+        "type": "object",
+        "required": [
+          "models"
+        ],
+        "title": "ModelsResponse"
+      },
+      "ProvisionResponse": {
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          },
+          "litellm_user_id": {
+            "type": "string",
+            "title": "Litellm User Id"
+          },
+          "teams_provisioned": {
+            "items": {
+              "$ref": "#/components/schemas/TeamProvisionDetail"
+            },
+            "type": "array",
+            "title": "Teams Provisioned"
+          },
+          "keys_generated": {
+            "items": {
+              "$ref": "#/components/schemas/KeyDetail"
+            },
+            "type": "array",
+            "title": "Keys Generated"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user_id",
+          "litellm_user_id",
+          "teams_provisioned",
+          "keys_generated"
+        ],
+        "title": "ProvisionResponse"
+      },
+      "ProvisionStatusResponse": {
+        "properties": {
+          "is_provisioned": {
+            "type": "boolean",
+            "title": "Is Provisioned"
+          },
+          "user": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/UserSummary"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "teams": {
+            "items": {
+              "$ref": "#/components/schemas/TeamProvisionDetail"
+            },
+            "type": "array",
+            "title": "Teams",
+            "default": []
+          },
+          "keys": {
+            "items": {
+              "$ref": "#/components/schemas/KeyDetail"
+            },
+            "type": "array",
+            "title": "Keys",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "is_provisioned"
+        ],
+        "title": "ProvisionStatusResponse"
+      },
+      "TeamProvisionDetail": {
+        "properties": {
+          "team_id": {
+            "type": "string",
+            "title": "Team Id"
+          },
+          "team_alias": {
+            "type": "string",
+            "title": "Team Alias"
+          },
+          "role": {
+            "type": "string",
+            "title": "Role"
+          }
+        },
+        "type": "object",
+        "required": [
+          "team_id",
+          "team_alias",
+          "role"
+        ],
+        "title": "TeamProvisionDetail"
+      },
+      "TeamSummary": {
+        "properties": {
+          "team_id": {
+            "type": "string",
+            "title": "Team Id"
+          },
+          "team_alias": {
+            "type": "string",
+            "title": "Team Alias"
+          },
+          "models": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Models",
+            "default": []
+          },
+          "max_budget": {
+            "type": "number",
+            "title": "Max Budget",
+            "default": 0
+          },
+          "budget_duration": {
+            "type": "string",
+            "title": "Budget Duration",
+            "default": "30d"
+          },
+          "spend": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Spend"
+          },
+          "member_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Member Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "team_id",
+          "team_alias"
+        ],
+        "title": "TeamSummary"
+      },
+      "TeamsResponse": {
+        "properties": {
+          "teams": {
+            "items": {
+              "$ref": "#/components/schemas/TeamSummary"
+            },
+            "type": "array",
+            "title": "Teams"
+          }
+        },
+        "type": "object",
+        "required": [
+          "teams"
+        ],
+        "title": "TeamsResponse"
+      },
+      "UsageDataPoint": {
+        "properties": {
+          "date": {
+            "type": "string",
+            "title": "Date"
+          },
+          "model": {
+            "type": "string",
+            "title": "Model"
+          },
+          "input_tokens": {
+            "type": "integer",
+            "title": "Input Tokens",
+            "default": 0
+          },
+          "output_tokens": {
+            "type": "integer",
+            "title": "Output Tokens",
+            "default": 0
+          },
+          "spend": {
+            "type": "number",
+            "title": "Spend",
+            "default": 0
+          },
+          "requests": {
+            "type": "integer",
+            "title": "Requests",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "required": [
+          "date",
+          "model"
+        ],
+        "title": "UsageDataPoint"
+      },
+      "UsageResponse": {
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/UsageDataPoint"
+            },
+            "type": "array",
+            "title": "Data",
+            "default": []
+          },
+          "summary": {
+            "$ref": "#/components/schemas/UsageSummary",
+            "default": {
+              "total_spend": 0.0,
+              "total_tokens": 0,
+              "total_requests": 0
+            }
+          }
+        },
+        "type": "object",
+        "title": "UsageResponse"
+      },
+      "UsageSummary": {
+        "properties": {
+          "total_spend": {
+            "type": "number",
+            "title": "Total Spend",
+            "default": 0
+          },
+          "total_tokens": {
+            "type": "integer",
+            "title": "Total Tokens",
+            "default": 0
+          },
+          "total_requests": {
+            "type": "integer",
+            "title": "Total Requests",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "title": "UsageSummary"
+      },
+      "UserSettingsResponse": {
+        "properties": {
+          "default_key_duration_days": {
+            "type": "integer",
+            "title": "Default Key Duration Days"
+          },
+          "notify_14d": {
+            "type": "boolean",
+            "title": "Notify 14D"
+          },
+          "notify_7d": {
+            "type": "boolean",
+            "title": "Notify 7D"
+          },
+          "notify_3d": {
+            "type": "boolean",
+            "title": "Notify 3D"
+          },
+          "notify_1d": {
+            "type": "boolean",
+            "title": "Notify 1D"
+          }
+        },
+        "type": "object",
+        "required": [
+          "default_key_duration_days",
+          "notify_14d",
+          "notify_7d",
+          "notify_3d",
+          "notify_1d"
+        ],
+        "title": "UserSettingsResponse"
+      },
+      "UserSettingsUpdate": {
+        "properties": {
+          "default_key_duration_days": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Default Key Duration Days"
+          },
+          "notify_14d": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notify 14D"
+          },
+          "notify_7d": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notify 7D"
+          },
+          "notify_3d": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notify 3D"
+          },
+          "notify_1d": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notify 1D"
+          }
+        },
+        "type": "object",
+        "title": "UserSettingsUpdate"
+      },
+      "UserSummary": {
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "display_name": {
+            "type": "string",
+            "title": "Display Name"
+          },
+          "litellm_user_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Litellm User Id"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user_id",
+          "email",
+          "display_name",
+          "litellm_user_id",
+          "is_active",
+          "created_at"
+        ],
+        "title": "UserSummary"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    },
+    "securitySchemes": {
+      "HTTPBearer": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}
