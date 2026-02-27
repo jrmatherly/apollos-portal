@@ -28,6 +28,7 @@
 
 ## Conventions
 - Branding: "Apollos AI" — not "NEXUS AI", "LiteLLM Portal", or Stitch artifacts
+- GitHub repo: `jrmatherly/apollos-portal`
 - Backend config values must come from `app.config.Settings` (never hardcode URLs/secrets)
 - SQLAlchemy models use `from __future__ import annotations` + `TYPE_CHECKING` for forward refs
 - Frontend env vars use `VITE_` prefix, accessed via `import.meta.env`
@@ -36,12 +37,21 @@
 - `.scratchpad/` is gitignored — never stage or commit these files
 - `backend/teams.yaml` is gitignored — use `teams.yaml.example` as template
 
+## Documentation (docs/)
+- Built with Mintlify — no `mint build` command exists; `mint dev` is the only serve option
+- `docs/AGENTS.md` defines terminology, style, and content boundaries for AI-assisted docs work
+- `docs/docs.json` controls navigation — every page listed must have a matching `.mdx` file
+- Verify API endpoints and CLI commands against actual source before documenting
+- `essentials/` pages are hidden (not in navigation) — Mintlify tutorial leftovers kept for reference
+- Docker: `docker/docs.Dockerfile` runs `mint dev` on port 3000 (mapped to 3001 in compose)
+
 ## Testing
 - Backend: pytest with pytest-asyncio (strict mode), httpx ASGITransport for endpoint tests
 - Frontend: `tsc --noEmit` + `biome ci .` (no test runner yet)
 - Run before committing: `mise run qa` (runs all checks + tests)
 
 ## Tech Stack (Feb 2026)
+- Mintlify (docs platform, CLI v4.2+)
 - FastAPI 0.133+, SQLAlchemy 2.0.47+, MSAL 1.35+, Pydantic 2.12+
 - React 19.2+, Vite 7.3+, @azure/msal-browser 5.3+, TypeScript 5.9+
 - Biome 2.4.4 (frontend linter + formatter)
