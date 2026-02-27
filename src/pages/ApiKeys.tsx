@@ -54,12 +54,12 @@ export function ApiKeys() {
 
   return (
     <div className="p-8 max-w-7xl mx-auto w-full">
-      <header className="flex justify-between items-center mb-10">
+      <header className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-10">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight text-text-primary">API Keys</h1>
           <p className="text-text-secondary mt-1">Manage your keys and monitor authentication across your organization.</p>
         </div>
-        <button className="bg-primary hover:opacity-90 text-white px-4 py-2.5 rounded-md font-medium transition-all shadow-lg shadow-primary/10 flex items-center gap-2">
+        <button className="bg-primary hover:opacity-90 text-white px-4 py-2.5 rounded-md font-medium transition-all shadow-lg shadow-primary/10 flex items-center justify-center gap-2 w-full sm:w-auto">
           <Plus className="w-4 h-4" />
           Generate New Key
         </button>
@@ -71,24 +71,24 @@ export function ApiKeys() {
             <table className="w-full text-left border-collapse">
               <thead className="bg-surface-border/20 border-b border-surface-border">
                 <tr>
-                  <th className="px-6 py-4 text-xs font-semibold text-text-secondary uppercase tracking-wider">Key</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-text-secondary uppercase tracking-wider">Alias</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-text-secondary uppercase tracking-wider">Team</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-text-secondary uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-text-secondary uppercase tracking-wider">Created</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-text-secondary uppercase tracking-wider">Expires</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-text-primary uppercase tracking-wider flex items-center gap-1">
+                  <th className="px-6 py-4 text-xs font-semibold text-text-secondary uppercase tracking-wider whitespace-nowrap">Key</th>
+                  <th className="px-6 py-4 text-xs font-semibold text-text-secondary uppercase tracking-wider whitespace-nowrap">Alias</th>
+                  <th className="px-6 py-4 text-xs font-semibold text-text-secondary uppercase tracking-wider whitespace-nowrap">Team</th>
+                  <th className="px-6 py-4 text-xs font-semibold text-text-secondary uppercase tracking-wider whitespace-nowrap">Status</th>
+                  <th className="px-6 py-4 text-xs font-semibold text-text-secondary uppercase tracking-wider whitespace-nowrap">Created</th>
+                  <th className="px-6 py-4 text-xs font-semibold text-text-secondary uppercase tracking-wider whitespace-nowrap">Expires</th>
+                  <th className="px-6 py-4 text-xs font-semibold text-text-primary uppercase tracking-wider whitespace-nowrap flex items-center gap-1">
                     Last Used
                     <ArrowDown className="w-3 h-3" />
                   </th>
-                  <th className="px-6 py-4 text-xs font-semibold text-text-secondary uppercase tracking-wider">Spend</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-text-secondary uppercase tracking-wider text-right">Actions</th>
+                  <th className="px-6 py-4 text-xs font-semibold text-text-secondary uppercase tracking-wider whitespace-nowrap">Spend</th>
+                  <th className="px-6 py-4 text-xs font-semibold text-text-secondary uppercase tracking-wider text-right whitespace-nowrap">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-surface-border">
                 {keys.map((key) => (
                   <tr key={key.id} className="hover:bg-surface-border/10 transition-colors">
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-2">
                         <span className="font-mono text-text-secondary tracking-widest">{key.key}</span>
                         <button className="text-text-secondary hover:text-text-primary transition-colors" title="Copy Key">
@@ -96,9 +96,9 @@ export function ApiKeys() {
                         </button>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm font-medium text-text-primary">{key.alias}</td>
-                    <td className="px-6 py-4 text-sm text-text-secondary">{key.team}</td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-4 text-sm font-medium text-text-primary whitespace-nowrap">{key.alias}</td>
+                    <td className="px-6 py-4 text-sm text-text-secondary whitespace-nowrap">{key.team}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
                         key.status === 'Active' 
                           ? 'bg-secondary/10 text-secondary border-secondary/20' 
@@ -107,15 +107,15 @@ export function ApiKeys() {
                         {key.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-sm text-text-secondary">{key.created}</td>
-                    <td className="px-6 py-4 text-sm text-text-secondary">
+                    <td className="px-6 py-4 text-sm text-text-secondary whitespace-nowrap">{key.created}</td>
+                    <td className="px-6 py-4 text-sm text-text-secondary whitespace-nowrap">
                       <span className={key.status === 'Expiring Soon' ? 'text-warning/80' : ''}>
                         {key.expires}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-sm text-text-secondary">{formatDate(key.lastUsed)}</td>
-                    <td className="px-6 py-4 text-sm text-text-secondary">{key.spend}</td>
-                    <td className="px-6 py-4 text-right space-x-3">
+                    <td className="px-6 py-4 text-sm text-text-secondary whitespace-nowrap">{formatDate(key.lastUsed)}</td>
+                    <td className="px-6 py-4 text-sm text-text-secondary whitespace-nowrap">{key.spend}</td>
+                    <td className="px-6 py-4 text-right space-x-3 whitespace-nowrap">
                       <button className="text-xs text-primary hover:underline font-medium">Rotate</button>
                       <button className="text-xs text-destructive/70 hover:text-destructive font-medium transition-colors">Revoke</button>
                     </td>
@@ -141,24 +141,24 @@ export function ApiKeys() {
               <table className="w-full text-left border-collapse opacity-60">
                 <thead className="border-b border-surface-border">
                   <tr>
-                    <th className="py-3 px-2 text-[11px] font-semibold text-text-secondary uppercase">Key</th>
-                    <th className="py-3 px-2 text-[11px] font-semibold text-text-secondary uppercase">Alias</th>
-                    <th className="py-3 px-2 text-[11px] font-semibold text-text-secondary uppercase">Revoked Date</th>
-                    <th className="py-3 px-2 text-[11px] font-semibold text-text-secondary uppercase">Reason</th>
+                    <th className="py-3 px-2 text-[11px] font-semibold text-text-secondary uppercase whitespace-nowrap">Key</th>
+                    <th className="py-3 px-2 text-[11px] font-semibold text-text-secondary uppercase whitespace-nowrap">Alias</th>
+                    <th className="py-3 px-2 text-[11px] font-semibold text-text-secondary uppercase whitespace-nowrap">Revoked Date</th>
+                    <th className="py-3 px-2 text-[11px] font-semibold text-text-secondary uppercase whitespace-nowrap">Reason</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-surface-border/50">
                   <tr>
-                    <td className="py-3 px-2 text-xs font-mono text-text-secondary">sk-•••••••x2y</td>
-                    <td className="py-3 px-2 text-xs text-text-secondary">Legacy-Bot</td>
-                    <td className="py-3 px-2 text-xs text-text-secondary">Jan 02, 2024</td>
-                    <td className="py-3 px-2 text-xs text-text-secondary">Compromised</td>
+                    <td className="py-3 px-2 text-xs font-mono text-text-secondary whitespace-nowrap">sk-•••••••x2y</td>
+                    <td className="py-3 px-2 text-xs text-text-secondary whitespace-nowrap">Legacy-Bot</td>
+                    <td className="py-3 px-2 text-xs text-text-secondary whitespace-nowrap">Jan 02, 2024</td>
+                    <td className="py-3 px-2 text-xs text-text-secondary whitespace-nowrap">Compromised</td>
                   </tr>
                   <tr>
-                    <td className="py-3 px-2 text-xs font-mono text-text-secondary">sk-•••••••p0l</td>
-                    <td className="py-3 px-2 text-xs text-text-secondary">Temp-Testing</td>
-                    <td className="py-3 px-2 text-xs text-text-secondary">Dec 15, 2023</td>
-                    <td className="py-3 px-2 text-xs text-text-secondary">Expired</td>
+                    <td className="py-3 px-2 text-xs font-mono text-text-secondary whitespace-nowrap">sk-•••••••p0l</td>
+                    <td className="py-3 px-2 text-xs text-text-secondary whitespace-nowrap">Temp-Testing</td>
+                    <td className="py-3 px-2 text-xs text-text-secondary whitespace-nowrap">Dec 15, 2023</td>
+                    <td className="py-3 px-2 text-xs text-text-secondary whitespace-nowrap">Expired</td>
                   </tr>
                 </tbody>
               </table>
