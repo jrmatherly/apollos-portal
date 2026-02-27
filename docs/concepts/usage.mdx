@@ -1,0 +1,46 @@
+---
+title: "Usage tracking"
+description: "Monitor token consumption, costs, and request activity"
+---
+
+Apollos AI tracks usage across all LLM requests routed through the LiteLLM proxy. The usage data helps you monitor consumption, manage budgets, and understand which models your team relies on.
+
+## What's tracked
+
+For each request through the proxy, the following is recorded:
+
+- **Tokens** — prompt tokens and completion tokens
+- **Cost** — estimated cost based on model pricing
+- **Model** — which LLM model handled the request
+- **Team** — which team the API key belongs to
+- **Timestamp** — when the request was made
+
+## Viewing usage
+
+### Portal
+
+Go to **Usage** in the sidebar to see:
+
+- Total token consumption over a selected time range
+- Cost breakdown by model
+- Request volume trends
+- Per-team usage if you belong to multiple teams
+
+### API
+
+```bash
+curl /api/v1/usage \
+  -H "Authorization: Bearer <access-token>"
+```
+
+## Budget limits
+
+Each team has a configured maximum budget. When a team approaches or reaches its budget limit:
+
+- Requests may be throttled or rejected by the LiteLLM proxy
+- The portal displays a warning on the team's usage page
+- Team administrators can request a budget increase
+
+<Note>
+  Budget limits are configured in `teams.yaml` by the portal administrator. Individual users cannot change team budgets.
+</Note>

@@ -1,55 +1,44 @@
-# Mintlify Starter Kit
+# Apollos AI Documentation
 
-Use the starter kit to get your docs deployed and ready to customize.
+Documentation site for the Apollos AI self-service portal, built with [Mintlify](https://mintlify.com).
 
-Click the green **Use this template** button at the top of this repo to copy the Mintlify starter kit. The starter kit contains examples with
+## Local development
 
-- Guide pages
-- Navigation
-- Customizations
-- API reference pages
-- Use of popular components
-
-**[Follow the full quickstart guide](https://starter.mintlify.com/quickstart)**
-
-## AI-assisted writing
-
-Set up your AI coding tool to work with Mintlify:
+Install the [Mintlify CLI](https://www.npmjs.com/package/mint) and run a local preview:
 
 ```bash
-npx skills add https://mintlify.com/docs
-```
-
-This command installs Mintlify's documentation skill for your configured AI tools like Claude Code, Cursor, Windsurf, and others. The skill includes component reference, writing standards, and workflow guidance.
-
-See the [AI tools guides](/ai-tools) for tool-specific setup.
-
-## Development
-
-Install the [Mintlify CLI](https://www.npmjs.com/package/mint) to preview your documentation changes locally. To install, use the following command:
-
-```
 npm i -g mint
-```
-
-Run the following command at the root of your documentation, where your `docs.json` is located:
-
-```
+cd docs
 mint dev
 ```
 
 View your local preview at `http://localhost:3000`.
 
-## Publishing changes
+## AI-assisted writing
 
-Install our GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app) to propagate changes from your repo to your deployment. Changes are deployed to production automatically after pushing to the default branch.
+The Mintlify skill is installed for AI coding tools. See `AGENTS.md` for project-specific terminology and conventions.
 
-## Need help?
+## Validation
 
-### Troubleshooting
+```bash
+mint broken-links   # Check for broken links
+mint validate       # Validate the build
+```
 
-- If your dev environment isn't running: Run `mint update` to ensure you have the most recent version of the CLI.
-- If a page loads as a 404: Make sure you are running in a folder with a valid `docs.json`.
+## Structure
 
-### Resources
-- [Mintlify documentation](https://mintlify.com/docs)
+```
+docs/
+├── docs.json               # Site configuration
+├── AGENTS.md               # AI assistant context
+├── index.mdx               # Introduction
+├── quickstart.mdx          # User onboarding
+├── development.mdx         # Local dev setup
+├── concepts/               # Core concepts (auth, teams, keys, usage)
+├── cli/                    # CLI documentation
+├── api-reference/          # API endpoint documentation
+├── contributing/           # Contributor guides
+├── ai-tools/               # AI tool setup guides
+├── images/                 # Brand assets and images
+└── snippets/               # Reusable content snippets
+```

@@ -1,94 +1,142 @@
 ---
-title: 'Development'
-description: 'Preview changes locally to update your docs'
+title: "Development"
+description: "Set up the Apollos AI portal for local development"
 ---
 
 <Info>
   **Prerequisites**:
-  - Node.js version 19 or higher
-  - A docs repository with a `docs.json` file
+  - Python 3.12+ and [uv](https://docs.astral.sh/uv/)
+  - Node.js 24+ and npm
+  - Docker and Docker Compose
+  - A Microsoft Entra ID app registration (for authentication)
 </Info>
 
-Follow these steps to install and run Mintlify on your operating system.
+## Quick start with Docker
 
-<Steps>
-<Step title="Install the Mintlify CLI">
-
-```bash
-npm i -g mint
-```
-</Step>
-
-<Step title="Preview locally">
-
-Navigate to your docs directory where your `docs.json` file is located, and run the following command:
+The fastest way to run the full stack locally:
 
 ```bash
-mint dev
+git clone https://github.com/jrmatherly/apollos-portal.git
+cd apollos-portal
+docker compose up
 ```
 
-A local preview of your documentation will be available at `http://localhost:3000`.
+This starts PostgreSQL, the backend API, and the frontend. The portal is available at `http://localhost:5173`.
 
-</Step>
-</Steps>
+## Running services individually
 
-## Custom ports
-
-By default, Mintlify uses port 3000. You can customize the port Mintlify runs on by using the `--port` flag. For example, to run Mintlify on port 3333, use this command:
+### Backend
 
 ```bash
-mint dev --port 3333
+cd backend
+uv sync
+uv run alembic upgrade head   # Run database migrations
+uv run uvicorn app.main:app --reload --port 8000
 ```
 
-If you attempt to run Mintlify on a port that's already in use, it will use the next available port:
+The API is available at `http://localhost:8000`. Swagger UI is at `/docs` and ReDoc at `/redoc`.
 
-```md
-Port 3000 is already in use. Trying 3001 instead.
-```
-
-## Mintlify versions
-
-Please note that each CLI release is associated with a specific version of Mintlify. If your local preview does not align with the production version, please update the CLI:
+### Frontend
 
 ```bash
-npm mint update
+cd frontend
+npm install
+npm run dev
 ```
 
-## Validating links
+The frontend dev server starts at `http://localhost:5173` with hot module replacement.
 
-The CLI can assist with validating links in your documentation. To identify any broken links, use the following command:
+### CLI
 
 ```bash
-mint broken-links
+cd cli
+uv sync
+uv run apollos --help
 ```
 
-## Deployment
+## Environment variables
 
-If the deployment is successful, you should see the following:
+### Backend
 
-<Frame>
-  <img src="/images/checks-passed.png" alt="Screenshot of a deployment confirmation message that says All checks have passed." style={{ borderRadius: '0.5rem' }} />
-</Frame>
+Backend configuration is managed through the `app.config.Settings` class (Pydantic BaseSettings). Create a `.env` file in the `backend/` directory:
 
-## Code formatting
+```bash
+DATABASE_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/apollos
+LITELLM_BASE_URL=http://localhost:4000
+LITELLM_MASTER_KEY=sk-your-litellm-master-key
+AZURE_TENANT_ID=your-tenant-id
+AZURE_CLIENT_ID=your-client-id
+AZURE_CLIENT_SECRET=your-client-secret
+PORTAL_BASE_URL=http://localhost:5173
+```
 
-We suggest using extensions on your IDE to recognize and format MDX. If you're a VSCode user, consider the [MDX VSCode extension](https://marketplace.visualstudio.com/items?itemName=unifiedjs.vscode-mdx) for syntax highlighting, and [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) for code formatting.
+### Frontend
 
-## Troubleshooting
+Frontend environment variables use the `VITE_` prefix. Create a `.env` file in the `frontend/` directory:
 
-<AccordionGroup>
-  <Accordion title='Error: Could not load the "sharp" module using the darwin-arm64 runtime'>
+```bash
+VITE_API_BASE_URL=http://localhost:8000
+VITE_AZURE_CLIENT_ID=your-client-id
+VITE_AZURE_TENANT_ID=your-tenant-id
+```
 
-    This may be due to an outdated version of node. Try the following:
-    1. Remove the currently-installed version of the CLI: `npm remove -g mint`
-    2. Upgrade to Node v19 or higher.
-    3. Reinstall the CLI: `npm i -g mint`
-  </Accordion>
+## Running tests
 
-  <Accordion title="Issue: Encountering an unknown error">
-  
-    Solution: Go to the root of your device and delete the `~/.mintlify` folder. Then run `mint dev` again.
-  </Accordion>
-</AccordionGroup>
+```bash
+# Backend tests (from project root)
+uv run --package apollos-portal-backend pytest -v
 
-Curious about what changed in the latest CLI version? Check out the [CLI changelog](https://www.npmjs.com/package/mintlify?activeTab=versions).
+# Backend linting
+uv run --package apollos-portal-backend ruff check backend/
+
+# Frontend type checking
+cd frontend && npx tsc --noEmit
+
+# Frontend linting
+cd frontend && npx biome check .
+
+# Run all checks at once
+mise run qa
+```
+
+## Database migrations
+
+The backend uses Alembic for database migrations:
+
+```bash
+cd backend
+
+# Apply all migrations
+uv run alembic upgrade head
+
+# Create a new migration
+uv run alembic revision --autogenerate -m "description of change"
+
+# Roll back one migration
+uv run alembic downgrade -1
+```
+
+## Project structure
+
+```
+apollos-portal/
+├── backend/           # FastAPI API server
+│   ├── app/
+│   │   ├── api/v1/    # API endpoints (auth, keys, teams, usage, etc.)
+│   │   ├── core/      # Database, graph client, teams config
+│   │   ├── models/    # SQLAlchemy models
+│   │   └── services/  # LiteLLM client, business logic
+│   ├── alembic/       # Database migrations
+│   └── tests/         # pytest test suite
+├── frontend/          # React SPA
+│   └── src/
+│       ├── components/ # Shared components (Sidebar, ProtectedRoute)
+│       ├── contexts/   # React contexts (AuthContext)
+│       ├── hooks/      # Custom hooks (useKeys, useUsage, etc.)
+│       ├── pages/      # Route pages (Dashboard, ApiKeys, Teams, etc.)
+│       └── lib/        # API client, MSAL config
+├── cli/               # Click CLI
+├── docker/            # Dockerfiles
+├── docs/              # This documentation site (Mintlify)
+└── docker-compose.yml
+```

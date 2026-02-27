@@ -1,0 +1,64 @@
+---
+title: "Authentication"
+description: "How Entra ID authentication and team provisioning work in Apollos AI"
+---
+
+Apollos AI uses Microsoft Entra ID for authentication across all three components (portal, API, CLI). Each component uses a different OAuth 2.0 flow optimized for its context.
+
+## Authentication flows
+
+<Tabs>
+<Tab title="Portal (frontend)">
+  The portal uses **PKCE authorization code flow** via `@azure/msal-browser` v5.
+
+  1. User clicks **Sign in with Microsoft**
+  2. Browser redirects to Microsoft's authorization endpoint
+  3. User authenticates and consents
+  4. Browser receives an authorization code
+  5. MSAL exchanges the code for access and ID tokens
+  6. The portal sends the access token to the backend API with each request
+</Tab>
+
+<Tab title="API (backend)">
+  The backend uses **client credentials flow** for service-to-service calls (Microsoft Graph, LiteLLM) and validates user access tokens from the frontend.
+
+  - User tokens are validated against the Entra ID JWKS endpoint
+  - The `oid` (object ID) claim identifies the user
+  - Security group memberships are resolved via Microsoft Graph
+</Tab>
+
+<Tab title="CLI">
+  The CLI uses **device code flow** via the MSAL Python library.
+
+  1. User runs `apollos auth login`
+  2. CLI displays a URL and a code
+  3. User opens the URL in a browser and enters the code
+  4. After authentication, the CLI receives tokens
+  5. Tokens are cached locally for subsequent commands
+</Tab>
+</Tabs>
+
+## Team provisioning
+
+When a user first authenticates, the backend provisions them by:
+
+1. Validating their Entra ID access token
+2. Querying Microsoft Graph for their security group memberships
+3. Matching group IDs against the `teams.yaml` configuration
+4. Creating or updating the user's LiteLLM team memberships
+5. Returning the user's profile and team list
+
+This happens automatically on the `/api/v1/provision` endpoint, called after the first successful login.
+
+## Token validation
+
+The backend validates every request by:
+
+- Checking the `Authorization: Bearer <token>` header
+- Verifying the token signature against Entra ID's JWKS keys
+- Validating the audience, issuer, and expiration claims
+- Extracting the user's `oid` for identity resolution
+
+<Note>
+  The backend uses the `HTTPBearer` security scheme. Missing or invalid tokens return a `401 Unauthorized` response.
+</Note>

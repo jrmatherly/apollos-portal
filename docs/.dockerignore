@@ -1,0 +1,24 @@
+# === Dependencies ===
+node_modules/
+
+# === Draft content ===
+drafts/
+*.draft.mdx
+
+# === OS ===
+.DS_Store
+Thumbs.db
+
+# === IDE ===
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# === Git ===
+.git/
+.gitignore
+
+# === Docker ===
+.dockerignore

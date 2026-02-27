@@ -1,0 +1,68 @@
+---
+title: "CLI overview"
+description: "Manage Apollos AI from the command line"
+---
+
+The Apollos AI CLI (`apollos`) provides command-line access to authentication and profile lookups. It uses Microsoft Entra ID device code flow for authentication and caches tokens locally.
+
+## Installation
+
+From the repository:
+
+```bash
+cd cli
+uv sync
+```
+
+## Setup
+
+Before using the CLI, configure it with your Entra ID and portal settings:
+
+```bash
+uv run apollos configure
+```
+
+You'll be prompted for:
+- **Azure Tenant ID** — your Entra ID tenant
+- **Azure Client ID** — the app registration client ID
+- **Portal API URL** — the backend API base URL (default: `http://localhost:8000`)
+
+Configuration is saved to `~/.apollos/config.json`.
+
+## Authentication
+
+```bash
+# Sign in with device code flow
+uv run apollos login
+
+# Check who you're signed in as
+uv run apollos whoami
+
+# Sign out and clear cached tokens
+uv run apollos logout
+```
+
+The `login` command displays a URL and code. Open the URL in your browser, enter the code, and authenticate with your Entra ID credentials. Tokens are cached locally for subsequent commands.
+
+## Commands
+
+| Command | Description |
+|---|---|
+| `apollos configure` | Set up Azure tenant, client ID, and portal URL |
+| `apollos login` | Authenticate with device code flow |
+| `apollos logout` | Clear cached authentication tokens |
+| `apollos whoami` | Show the currently authenticated user |
+| `apollos me` | Fetch your profile from the portal backend |
+
+### Profile lookup
+
+```bash
+# Fetch your portal profile (teams, roles, admin status)
+uv run apollos me
+```
+
+This calls the `/api/v1/me` endpoint and displays your OID, name, email, admin status, and roles.
+
+<Note>
+  The CLI is under active development. Additional commands for key management and usage tracking are planned.
+</Note>

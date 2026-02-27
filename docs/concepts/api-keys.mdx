@@ -1,0 +1,65 @@
+---
+title: "API keys"
+description: "Create, manage, and use API keys for LLM proxy access"
+---
+
+API keys authenticate your requests to the LiteLLM proxy. Each key is scoped to a specific team and inherits that team's model access, rate limits, and budget.
+
+## Creating keys
+
+<Steps>
+<Step title="Open API Keys">
+  In the portal, go to **API Keys** in the sidebar.
+</Step>
+<Step title="Create a new key">
+  Click **Create key**, provide a name, and select the team to associate it with.
+</Step>
+<Step title="Copy the key">
+  Copy the generated key immediately. It is displayed only once and cannot be retrieved later.
+</Step>
+</Steps>
+
+You can also create keys via the API:
+
+```bash
+curl -X POST /api/v1/keys/new \
+  -H "Authorization: Bearer <access-token>" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "my-key", "team_id": "engineering"}'
+```
+
+## Using keys
+
+Include your API key in the `Authorization` header when making requests to the LiteLLM proxy:
+
+```bash
+curl -X POST https://your-litellm-proxy/chat/completions \
+  -H "Authorization: Bearer sk-your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [{"role": "user", "content": "Hello"}]
+  }'
+```
+
+The proxy validates the key, checks team permissions for the requested model, and routes the request to the appropriate LLM provider.
+
+## Managing keys
+
+From the **API Keys** page you can:
+
+- **View** all your active keys with their creation date and associated team
+- **Rotate** a key to generate a new secret while keeping the same key ID
+- **Revoke** keys that are no longer needed
+
+<Note>
+  Revoking a key is immediate and irreversible. Any application using that key will stop working.
+</Note>
+
+## Key scoping
+
+Each key is scoped to exactly one team. If you belong to multiple teams, create separate keys for each. This lets you:
+
+- Track usage per team independently
+- Rotate keys for one team without affecting others
+- Match keys to specific applications or environments

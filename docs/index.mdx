@@ -1,97 +1,52 @@
 ---
 title: "Introduction"
-description: "Welcome to the new home for your documentation"
+description: "Self-service portal for managing LLM API access through Microsoft Entra ID"
 ---
 
-## Setting up
+Apollos AI is a self-service portal for managing access to LLM APIs through a [LiteLLM](https://docs.litellm.ai/) proxy. Users authenticate with Microsoft Entra ID, get provisioned into teams based on security group memberships, and manage their own API keys, usage, and settings.
 
-Get your documentation site up and running in minutes.
+## How it works
 
-<Card
-  title="Start here"
-  icon="rocket"
-  href="/quickstart"
-  horizontal
->
-  Follow our three step quickstart guide.
-</Card>
+<Steps>
+<Step title="Authenticate">
+  Sign in with your Microsoft Entra ID account. The portal uses PKCE redirect flow for secure browser-based authentication.
+</Step>
+<Step title="Get provisioned">
+  On first login, the portal maps your Entra ID security group memberships to LiteLLM teams. Each team has its own model access, rate limits, and budgets.
+</Step>
+<Step title="Create API keys">
+  Generate API keys scoped to your teams. Use these keys to make LLM requests through the proxy endpoint.
+</Step>
+<Step title="Monitor usage">
+  Track your token consumption, request counts, and costs per model and team from the portal dashboard.
+</Step>
+</Steps>
 
-## Make it yours
+## Explore
 
-Design a docs site that looks great and empowers your users.
-
-<Columns cols={2}>
-  <Card
-    title="Edit locally"
-    icon="pen-to-square"
-    href="/development"
-  >
-    Edit your docs locally and preview them in real time.
+<CardGroup cols={2}>
+  <Card title="Quickstart" icon="rocket" href="/quickstart">
+    Get your first API key and make an LLM request in minutes.
   </Card>
-  <Card
-    title="Customize your site"
-    icon="palette"
-    href="/essentials/settings"
-  >
-    Customize the design and colors of your site to match your brand.
+  <Card title="Authentication" icon="lock" href="/concepts/authentication">
+    How Entra ID authentication and team provisioning work.
   </Card>
-    <Card
-    title="Set up navigation"
-    icon="map"
-    href="/essentials/navigation"
-  >
-    Organize your docs to help users find what they need and succeed with your product.
+  <Card title="API keys" icon="key" href="/concepts/api-keys">
+    Create, manage, and rotate your API keys.
   </Card>
-  <Card
-    title="API documentation"
-    icon="terminal"
-    href="/api-reference/introduction"
-  >
-    Auto-generate API documentation from OpenAPI specifications.
+  <Card title="API reference" icon="code" href="/api-reference/introduction">
+    Backend API endpoints for programmatic access.
   </Card>
-</Columns>
+</CardGroup>
 
-## Create beautiful pages
+## Architecture
 
-Everything you need to create world-class documentation.
+The portal consists of three components:
 
-<Columns cols={2}>
-  <Card
-    title="Write with MDX"
-    icon="pen-fancy"
-    href="/essentials/markdown"
-  >
-    Use MDX to style your docs pages.
-  </Card>
-  <Card
-    title="Code samples"
-    icon="code"
-    href="/essentials/code"
-  >
-    Add sample code to demonstrate how to use your product.
-  </Card>
-  <Card
-    title="Images"
-    icon="image"
-    href="/essentials/images"
-  >
-    Display images and other media.
-  </Card>
-  <Card
-    title="Reusable snippets"
-    icon="recycle"
-    href="/essentials/reusable-snippets"
-  >
-    Write once and reuse across your docs.
-  </Card>
-</Columns>
+| Component | Technology | Purpose |
+|---|---|---|
+| **Portal** (frontend) | React 19, Vite 7, TypeScript | Web UI for key management, usage, and settings |
+| **API** (backend) | FastAPI, SQLAlchemy, PostgreSQL | REST API, auth validation, LiteLLM proxy integration |
+| **CLI** | Click, MSAL, httpx | Command-line interface with device-code auth |
 
-## Need inspiration?
-
-<Card
-  title="See complete examples"
-  icon="stars"
-  href="https://mintlify.com/customers"
->
-  Browse our showcase of exceptional documentation sites.
-</Card>
+All three components authenticate against Microsoft Entra ID and interact with a LiteLLM proxy instance for LLM routing and budget management.
