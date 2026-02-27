@@ -9,6 +9,7 @@ apollos-portal/
 ├── backend/          # FastAPI API server (Python 3.12)
 ├── frontend/         # React 19 + Vite SPA (Node 24)
 ├── cli/              # CLI with device-code auth (Python 3.12)
+├── docs/             # Mintlify documentation site
 ├── docker/           # Dockerfiles
 ├── docker-compose.yml
 └── mise.toml         # Task runner
@@ -23,6 +24,8 @@ apollos-portal/
 | CLI | Click, MSAL Python, Rich |
 | Database | PostgreSQL 18 |
 | Auth | Microsoft Entra ID (PKCE redirect + client credentials + device-code) |
+| Tooling | uv (workspace), Ruff (lint/format), Biome v2 (frontend lint/format) |
+| Docs | Mintlify |
 
 ## Prerequisites
 
@@ -96,9 +99,12 @@ uv run apollos whoami
 mise run dev              # Start all services (docker compose up)
 mise run dev:backend      # Backend only with hot reload
 mise run dev:frontend     # Frontend only
+mise run dev:docs         # Mintlify docs preview server
 mise run test             # Run backend tests
-mise run lint             # Run ruff + tsc
-mise run format           # Format Python code
+mise run lint             # Ruff (backend + cli) + Biome (frontend)
+mise run format           # Format all code (Ruff + Biome)
+mise run check            # Read-only lint + format + typecheck (CI equivalent)
+mise run qa               # Full quality gate (check + test)
 mise run migrate          # Run database migrations
 mise run migrate:generate # Generate a new migration
 mise run db:shell         # Open psql shell
@@ -111,12 +117,17 @@ mise run docker:reset     # Reset Docker services and volumes
 # Tests
 cd backend && uv run pytest -v
 
-# Lint
-cd backend && uv run ruff check .
-cd frontend && npx tsc --noEmit
+# Lint (Python — workspace-level)
+uv run --package apollos-portal-backend ruff check backend/
+uv run --package apollos-cli ruff check cli/
+
+# Lint (frontend — Biome + typecheck)
+cd frontend && npx biome check . && npx tsc --noEmit
 
 # Format
-cd backend && uv run ruff format .
+uv run --package apollos-portal-backend ruff format backend/
+uv run --package apollos-cli ruff format cli/
+cd frontend && npx biome format --write .
 ```
 
 ## Configuration

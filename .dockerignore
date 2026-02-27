@@ -15,10 +15,13 @@
 .claude/
 .serena/
 
-# Scratchpad (planning docs, not tracked in git)
+# Scratchpad
 .scratchpad/
 
-# Frontend (rebuilt in container)
+# CLI (not needed in backend image)
+cli/
+
+# Frontend (rebuilt in its own container)
 frontend/node_modules/
 frontend/dist/
 frontend/.cache/
@@ -28,9 +31,12 @@ __pycache__/
 *.py[cod]
 *.egg-info/
 .venv/
+.pytest_cache/
+.ruff_cache/
 
-# Misc
+# Runtime
+*.log
+
+# Docs
 *.md
 *.txt
-!pyproject.toml
-!uv.lock
