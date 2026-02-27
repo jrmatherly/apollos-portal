@@ -1,5 +1,5 @@
-import { Copy, Plus, ChevronDown, ArrowDown } from 'lucide-react';
-import { useState } from 'react';
+import { Copy, Plus, ChevronDown, ArrowDown, ArrowUp, Columns, Check } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
 
 const mockApiKeys = [
   {
@@ -47,9 +47,92 @@ function formatDate(dateString: string) {
   }).format(date);
 }
 
+type SortColumn = 'key' | 'alias' | 'team' | 'status' | 'created' | 'expires' | 'lastUsed' | 'spend';
+
 export function ApiKeys() {
-  const [keys] = useState(() => 
-    [...mockApiKeys].sort((a, b) => new Date(b.lastUsed).getTime() - new Date(a.lastUsed).getTime())
+  const [sortConfig, setSortConfig] = useState<{ key: SortColumn; direction: 'asc' | 'desc' }>({
+    key: 'lastUsed',
+    direction: 'desc',
+  });
+
+  const [visibleColumns, setVisibleColumns] = useState({
+    key: true,
+    alias: true,
+    team: true,
+    status: true,
+    created: false, // Hidden by default to reduce horizontal scrolling
+    expires: true,
+    lastUsed: true,
+    spend: true,
+    actions: true,
+  });
+
+  const [showColumnDropdown, setShowColumnDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowColumnDropdown(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleSort = (column: SortColumn) => {
+    if (sortConfig.key === column) {
+      setSortConfig({
+        key: column,
+        direction: sortConfig.direction === 'asc' ? 'desc' : 'asc',
+      });
+    } else {
+      setSortConfig({
+        key: column,
+        direction: 'asc',
+      });
+    }
+  };
+
+  const toggleColumn = (col: keyof typeof visibleColumns) => {
+    setVisibleColumns(prev => ({ ...prev, [col]: !prev[col] }));
+  };
+
+  const sortedKeys = [...mockApiKeys].sort((a, b) => {
+    let aValue: any = a[sortConfig.key as keyof typeof a];
+    let bValue: any = b[sortConfig.key as keyof typeof b];
+
+    if (sortConfig.key === 'lastUsed' || sortConfig.key === 'created') {
+      aValue = new Date(aValue).getTime();
+      bValue = new Date(bValue).getTime();
+    } else if (sortConfig.key === 'spend') {
+      aValue = parseFloat(aValue.replace(/[^0-9.-]+/g, ""));
+      bValue = parseFloat(bValue.replace(/[^0-9.-]+/g, ""));
+    }
+
+    if (aValue < bValue) {
+      return sortConfig.direction === 'asc' ? -1 : 1;
+    }
+    if (aValue > bValue) {
+      return sortConfig.direction === 'asc' ? 1 : -1;
+    }
+    return 0;
+  });
+
+  const SortableHeader = ({ column, label, align = 'left' }: { column: SortColumn, label: string, align?: 'left' | 'right' }) => (
+    <th 
+      className={`group/th px-6 py-3 text-[11px] font-bold text-text-secondary uppercase tracking-widest whitespace-nowrap cursor-pointer hover:bg-surface-border/20 transition-colors select-none ${align === 'right' ? 'text-right' : 'text-left'}`}
+      onClick={() => handleSort(column)}
+    >
+      <div className={`flex items-center gap-1 ${align === 'right' ? 'justify-end' : ''}`}>
+        {label}
+        {sortConfig.key === column ? (
+          sortConfig.direction === 'asc' ? <ArrowUp className="w-3 h-3 text-primary" /> : <ArrowDown className="w-3 h-3 text-primary" />
+        ) : (
+          <ArrowDown className="w-3 h-3 opacity-0 group-hover/th:opacity-30 transition-opacity" />
+        )}
+      </div>
+    </th>
   );
 
   return (
@@ -59,66 +142,96 @@ export function ApiKeys() {
           <h1 className="text-3xl font-semibold tracking-tight text-text-primary">API Keys</h1>
           <p className="text-text-secondary mt-1">Manage your keys and monitor authentication across your organization.</p>
         </div>
-        <button className="bg-primary hover:opacity-90 text-white px-4 py-2.5 rounded-md font-medium transition-all shadow-lg shadow-primary/10 flex items-center justify-center gap-2 w-full sm:w-auto">
-          <Plus className="w-4 h-4" />
-          Generate New Key
-        </button>
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          <div className="relative" ref={dropdownRef}>
+            <button 
+              onClick={() => setShowColumnDropdown(!showColumnDropdown)}
+              className="bg-surface border border-surface-border hover:bg-surface-border/20 text-text-primary px-4 py-2.5 rounded-md font-medium transition-all flex items-center justify-center gap-2 w-full sm:w-auto"
+            >
+              <Columns className="w-4 h-4" />
+              Columns
+            </button>
+            {showColumnDropdown && (
+              <div className="absolute right-0 mt-2 w-48 bg-surface border border-surface-border rounded-lg shadow-xl z-20 py-1">
+                {Object.entries(visibleColumns).map(([key, isVisible]) => (
+                  <button
+                    key={key}
+                    onClick={() => toggleColumn(key as keyof typeof visibleColumns)}
+                    className="w-full text-left px-4 py-2 text-sm text-text-secondary hover:bg-surface-border/20 flex items-center justify-between"
+                  >
+                    <span className="capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
+                    {isVisible && <Check className="w-4 h-4 text-primary" />}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          <button className="bg-primary hover:opacity-90 text-white px-4 py-2.5 rounded-md font-medium transition-all shadow-lg shadow-primary/10 flex items-center justify-center gap-2 w-full sm:w-auto">
+            <Plus className="w-4 h-4" />
+            Generate New Key
+          </button>
+        </div>
       </header>
 
       <section className="mb-10">
         <div className="bg-surface border border-surface-border rounded-lg overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
-              <thead className="bg-surface-border/20 border-b border-surface-border">
+              <thead className="bg-surface-border/10 border-b border-surface-border">
                 <tr>
-                  <th className="px-6 py-4 text-xs font-semibold text-text-secondary uppercase tracking-wider whitespace-nowrap">Key</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-text-secondary uppercase tracking-wider whitespace-nowrap">Alias</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-text-secondary uppercase tracking-wider whitespace-nowrap">Team</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-text-secondary uppercase tracking-wider whitespace-nowrap">Status</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-text-secondary uppercase tracking-wider whitespace-nowrap">Created</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-text-secondary uppercase tracking-wider whitespace-nowrap">Expires</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-text-primary uppercase tracking-wider whitespace-nowrap flex items-center gap-1">
-                    Last Used
-                    <ArrowDown className="w-3 h-3" />
-                  </th>
-                  <th className="px-6 py-4 text-xs font-semibold text-text-secondary uppercase tracking-wider whitespace-nowrap">Spend</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-text-secondary uppercase tracking-wider text-right whitespace-nowrap">Actions</th>
+                  {visibleColumns.key && <SortableHeader column="key" label="Key" />}
+                  {visibleColumns.alias && <SortableHeader column="alias" label="Alias" />}
+                  {visibleColumns.team && <SortableHeader column="team" label="Team" />}
+                  {visibleColumns.status && <SortableHeader column="status" label="Status" />}
+                  {visibleColumns.created && <SortableHeader column="created" label="Created" />}
+                  {visibleColumns.expires && <SortableHeader column="expires" label="Expires" />}
+                  {visibleColumns.lastUsed && <SortableHeader column="lastUsed" label="Last Used" />}
+                  {visibleColumns.spend && <SortableHeader column="spend" label="Spend" align="right" />}
+                  {visibleColumns.actions && <th className="px-6 py-3 text-[11px] font-bold text-text-secondary uppercase tracking-widest text-right whitespace-nowrap">Actions</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-surface-border">
-                {keys.map((key) => (
-                  <tr key={key.id} className="hover:bg-surface-border/10 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono text-text-secondary tracking-widest">{key.key}</span>
-                        <button className="text-text-secondary hover:text-text-primary transition-colors" title="Copy Key">
-                          <Copy className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-sm font-medium text-text-primary whitespace-nowrap">{key.alias}</td>
-                    <td className="px-6 py-4 text-sm text-text-secondary whitespace-nowrap">{key.team}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
-                        key.status === 'Active' 
-                          ? 'bg-secondary/10 text-secondary border-secondary/20' 
-                          : 'bg-warning/10 text-warning border-warning/20'
-                      }`}>
-                        {key.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-text-secondary whitespace-nowrap">{key.created}</td>
-                    <td className="px-6 py-4 text-sm text-text-secondary whitespace-nowrap">
-                      <span className={key.status === 'Expiring Soon' ? 'text-warning/80' : ''}>
-                        {key.expires}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-text-secondary whitespace-nowrap">{formatDate(key.lastUsed)}</td>
-                    <td className="px-6 py-4 text-sm text-text-secondary whitespace-nowrap">{key.spend}</td>
-                    <td className="px-6 py-4 text-right space-x-3 whitespace-nowrap">
-                      <button className="text-xs text-primary hover:underline font-medium">Rotate</button>
-                      <button className="text-xs text-destructive/70 hover:text-destructive font-medium transition-colors">Revoke</button>
-                    </td>
+                {sortedKeys.map((key) => (
+                  <tr key={key.id} className="group hover:bg-surface-border/20 transition-colors">
+                    {visibleColumns.key && (
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-xs text-text-secondary tracking-widest">{key.key}</span>
+                          <button className="opacity-0 group-hover:opacity-100 text-text-secondary hover:text-text-primary transition-all" title="Copy Key">
+                            <Copy className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </td>
+                    )}
+                    {visibleColumns.alias && <td className="px-6 py-4 text-sm font-medium text-text-primary whitespace-nowrap">{key.alias}</td>}
+                    {visibleColumns.team && <td className="px-6 py-4 text-sm text-text-secondary whitespace-nowrap">{key.team}</td>}
+                    {visibleColumns.status && (
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium border ${
+                          key.status === 'Active' 
+                            ? 'bg-secondary/10 text-secondary border-secondary/20' 
+                            : 'bg-warning/10 text-warning border-warning/20'
+                        }`}>
+                          {key.status}
+                        </span>
+                      </td>
+                    )}
+                    {visibleColumns.created && <td className="px-6 py-4 text-sm text-text-secondary tabular-nums whitespace-nowrap">{key.created}</td>}
+                    {visibleColumns.expires && (
+                      <td className="px-6 py-4 text-sm text-text-secondary tabular-nums whitespace-nowrap">
+                        <span className={key.status === 'Expiring Soon' ? 'text-warning/80 font-medium' : ''}>
+                          {key.expires}
+                        </span>
+                      </td>
+                    )}
+                    {visibleColumns.lastUsed && <td className="px-6 py-4 text-sm text-text-secondary tabular-nums whitespace-nowrap">{formatDate(key.lastUsed)}</td>}
+                    {visibleColumns.spend && <td className="px-6 py-4 text-sm font-mono text-text-primary text-right tabular-nums whitespace-nowrap">{key.spend}</td>}
+                    {visibleColumns.actions && (
+                      <td className="px-6 py-4 text-right space-x-4 whitespace-nowrap">
+                        <button className="text-xs text-text-secondary hover:text-primary font-medium transition-colors">Rotate</button>
+                        <button className="text-xs text-text-secondary hover:text-destructive font-medium transition-colors">Revoke</button>
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>
@@ -138,27 +251,27 @@ export function ApiKeys() {
           </summary>
           <div className="p-4 pt-0">
             <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse opacity-60">
-                <thead className="border-b border-surface-border">
+              <table className="w-full text-left border-collapse opacity-70">
+                <thead className="border-b border-surface-border bg-surface-border/5">
                   <tr>
-                    <th className="py-3 px-2 text-[11px] font-semibold text-text-secondary uppercase whitespace-nowrap">Key</th>
-                    <th className="py-3 px-2 text-[11px] font-semibold text-text-secondary uppercase whitespace-nowrap">Alias</th>
-                    <th className="py-3 px-2 text-[11px] font-semibold text-text-secondary uppercase whitespace-nowrap">Revoked Date</th>
-                    <th className="py-3 px-2 text-[11px] font-semibold text-text-secondary uppercase whitespace-nowrap">Reason</th>
+                    <th className="py-3 px-4 text-[10px] font-bold text-text-secondary uppercase tracking-widest whitespace-nowrap">Key</th>
+                    <th className="py-3 px-4 text-[10px] font-bold text-text-secondary uppercase tracking-widest whitespace-nowrap">Alias</th>
+                    <th className="py-3 px-4 text-[10px] font-bold text-text-secondary uppercase tracking-widest whitespace-nowrap">Revoked Date</th>
+                    <th className="py-3 px-4 text-[10px] font-bold text-text-secondary uppercase tracking-widest whitespace-nowrap">Reason</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-surface-border/50">
-                  <tr>
-                    <td className="py-3 px-2 text-xs font-mono text-text-secondary whitespace-nowrap">sk-•••••••x2y</td>
-                    <td className="py-3 px-2 text-xs text-text-secondary whitespace-nowrap">Legacy-Bot</td>
-                    <td className="py-3 px-2 text-xs text-text-secondary whitespace-nowrap">Jan 02, 2024</td>
-                    <td className="py-3 px-2 text-xs text-text-secondary whitespace-nowrap">Compromised</td>
+                  <tr className="hover:bg-surface-border/10 transition-colors">
+                    <td className="py-3 px-4 text-xs font-mono text-text-secondary whitespace-nowrap">sk-•••••••x2y</td>
+                    <td className="py-3 px-4 text-xs text-text-secondary whitespace-nowrap">Legacy-Bot</td>
+                    <td className="py-3 px-4 text-xs text-text-secondary tabular-nums whitespace-nowrap">Jan 02, 2024</td>
+                    <td className="py-3 px-4 text-xs text-text-secondary whitespace-nowrap">Compromised</td>
                   </tr>
-                  <tr>
-                    <td className="py-3 px-2 text-xs font-mono text-text-secondary whitespace-nowrap">sk-•••••••p0l</td>
-                    <td className="py-3 px-2 text-xs text-text-secondary whitespace-nowrap">Temp-Testing</td>
-                    <td className="py-3 px-2 text-xs text-text-secondary whitespace-nowrap">Dec 15, 2023</td>
-                    <td className="py-3 px-2 text-xs text-text-secondary whitespace-nowrap">Expired</td>
+                  <tr className="hover:bg-surface-border/10 transition-colors">
+                    <td className="py-3 px-4 text-xs font-mono text-text-secondary whitespace-nowrap">sk-•••••••p0l</td>
+                    <td className="py-3 px-4 text-xs text-text-secondary whitespace-nowrap">Temp-Testing</td>
+                    <td className="py-3 px-4 text-xs text-text-secondary tabular-nums whitespace-nowrap">Dec 15, 2023</td>
+                    <td className="py-3 px-4 text-xs text-text-secondary whitespace-nowrap">Expired</td>
                   </tr>
                 </tbody>
               </table>
