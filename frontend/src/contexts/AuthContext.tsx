@@ -1,16 +1,6 @@
-import {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useCallback,
-  type ReactNode,
-} from "react";
-import {
-  type AccountInfo,
-  InteractionRequiredAuthError,
-} from "@azure/msal-browser";
-import { msalInstance, loginRequest } from "../lib/msal";
+import { type AccountInfo, InteractionRequiredAuthError } from "@azure/msal-browser";
+import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from "react";
+import { loginRequest, msalInstance } from "../lib/msal";
 
 interface AuthContextType {
   isAuthenticated: boolean;

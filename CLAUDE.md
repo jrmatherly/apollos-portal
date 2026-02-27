@@ -8,16 +8,20 @@
 - `.scratchpad/` — Planning docs, NOT tracked in git
 
 ## Commands
-- Backend tests: `cd backend && uv run pytest -v`
-- Backend lint: `cd backend && uv run ruff check .`
-- Backend lint fix: `cd backend && uv run ruff check . --fix`
+- Pre-commit gate: `mise run qa`
+- Backend tests: `uv run --package apollos-portal-backend pytest -v` (from backend/)
+- Backend lint: `uv run --package apollos-portal-backend ruff check backend/`
+- Backend lint fix: `uv run --package apollos-portal-backend ruff check --fix backend/`
+- CLI lint: `uv run --package apollos-cli ruff check cli/`
+- Frontend lint: `cd frontend && npx biome check .`
+- Frontend format: `cd frontend && npx biome format --write .`
 - Frontend type check: `cd frontend && npx tsc --noEmit`
 - Frontend dev: `cd frontend && npm run dev`
 - CLI help: `cd cli && uv run apollos --help`
 - All services: `docker compose up`
 - DB migrations: `cd backend && uv run alembic upgrade head`
 - Upgrade Python deps: `uv lock --upgrade`
-- Check outdated Node deps: `npm outdated`
+- Check outdated Node deps: `cd frontend && npm outdated`
 
 ## Conventions
 - Branding: "Apollos AI" — not "NEXUS AI", "LiteLLM Portal", or Stitch artifacts
@@ -31,14 +35,16 @@
 
 ## Testing
 - Backend: pytest with pytest-asyncio (strict mode), httpx ASGITransport for endpoint tests
-- Frontend: `tsc --noEmit` as lint step (no test runner yet)
-- Run both before committing: `cd backend && uv run pytest -v && uv run ruff check . && cd ../frontend && npx tsc --noEmit`
+- Frontend: `tsc --noEmit` + `biome ci .` (no test runner yet)
+- Run before committing: `mise run qa` (runs all checks + tests)
 
 ## Tech Stack (Feb 2026)
 - FastAPI 0.133+, SQLAlchemy 2.0.47+, MSAL 1.35+, Pydantic 2.12+
 - React 19.2+, Vite 7.3+, @azure/msal-browser 5.3+, TypeScript 5.9+
+- Biome 2.4.4 (frontend linter + formatter)
+- Ruff 0.15.4+ (Python linter + formatter, workspace-level config)
 - PostgreSQL 18 (SCRAM-SHA-256 auth, explicit PGDATA)
-- Node 24, Python 3.12
+- Node 24, Python 3.12, uv workspace (root pyproject.toml)
 
 ## Serena MCP
 - Project name: `apollos-portal` (config: `.serena/project.yml`)

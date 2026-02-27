@@ -2,10 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "../lib/api";
 import type { UsageResponse } from "../types/api";
 
-export function useUsage(params?: {
-  startDate?: string;
-  endDate?: string;
-}) {
+export function useUsage(params?: { startDate?: string; endDate?: string }) {
   const searchParams = new URLSearchParams();
   if (params?.startDate) searchParams.set("start_date", params.startDate);
   if (params?.endDate) searchParams.set("end_date", params.endDate);

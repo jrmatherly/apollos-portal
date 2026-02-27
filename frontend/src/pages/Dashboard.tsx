@@ -1,14 +1,14 @@
-import { TrendingUp, Clock, Loader2 } from "lucide-react";
+import { Clock, Loader2, TrendingUp } from "lucide-react";
+import { useMemo } from "react";
 import {
-  AreaChart,
   Area,
+  AreaChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
 } from "recharts";
-import { useMemo } from "react";
 import { useKeys } from "../hooks/useKeys";
 import { useTeams } from "../hooks/useTeams";
 import { useUsage } from "../hooks/useUsage";
@@ -18,8 +18,7 @@ export function Dashboard() {
   const teamsQuery = useTeams();
   const usageQuery = useUsage();
 
-  const isLoading =
-    keysQuery.isLoading || teamsQuery.isLoading || usageQuery.isLoading;
+  const isLoading = keysQuery.isLoading || teamsQuery.isLoading || usageQuery.isLoading;
 
   // Derive dashboard stats
   const activeKeyCount = keysQuery.data?.active?.length ?? 0;
@@ -38,8 +37,7 @@ export function Dashboard() {
 
   // Build chart data from usage: aggregate spend by date
   const { chartData, modelNames } = useMemo(() => {
-    if (!usageQuery.data?.data)
-      return { chartData: [], modelNames: [] as string[] };
+    if (!usageQuery.data?.data) return { chartData: [], modelNames: [] as string[] };
 
     const dateMap = new Map<string, Record<string, number>>();
     const models = new Set<string>();
@@ -61,21 +59,12 @@ export function Dashboard() {
   }, [usageQuery.data]);
 
   const totalBudget = useMemo(() => {
-    return (teamsQuery.data?.teams ?? []).reduce(
-      (sum, t) => sum + (t.max_budget ?? 0),
-      0,
-    );
+    return (teamsQuery.data?.teams ?? []).reduce((sum, t) => sum + (t.max_budget ?? 0), 0);
   }, [teamsQuery.data]);
 
-  const spendPct =
-    totalBudget > 0 ? Math.round((totalSpend / totalBudget) * 100) : 0;
+  const spendPct = totalBudget > 0 ? Math.round((totalSpend / totalBudget) * 100) : 0;
 
-  const chartColors = [
-    "var(--primary)",
-    "var(--secondary)",
-    "var(--warning)",
-    "#a855f7",
-  ];
+  const chartColors = ["var(--primary)", "var(--secondary)", "var(--warning)", "#a855f7"];
 
   return (
     <div className="p-8 max-w-7xl mx-auto w-full">
@@ -94,9 +83,7 @@ export function Dashboard() {
         {/* Active Keys */}
         <div className="bg-surface border border-surface-border rounded-lg p-5 flex flex-col justify-between">
           <div className="flex justify-between items-start">
-            <span className="text-sm font-medium text-text-secondary">
-              Active Keys
-            </span>
+            <span className="text-sm font-medium text-text-secondary">Active Keys</span>
             <div className="flex items-center gap-1.5 bg-secondary/10 px-2 py-1 rounded-full border border-secondary/20">
               <span className="w-2 h-2 bg-secondary rounded-full animate-pulse" />
               <span className="text-[10px] uppercase font-bold text-secondary tracking-wider">
@@ -123,9 +110,7 @@ export function Dashboard() {
         {/* Current Spend */}
         <div className="bg-surface border border-surface-border rounded-lg p-5">
           <div className="flex justify-between items-start mb-4">
-            <span className="text-sm font-medium text-text-secondary">
-              Current Spend
-            </span>
+            <span className="text-sm font-medium text-text-secondary">Current Spend</span>
             <TrendingUp className="w-5 h-5 text-primary" />
           </div>
           {isLoading ? (
@@ -157,9 +142,7 @@ export function Dashboard() {
         {/* Total Tokens */}
         <div className="bg-surface border border-surface-border rounded-lg p-5">
           <div className="flex justify-between items-start mb-4">
-            <span className="text-sm font-medium text-text-secondary">
-              Total Tokens
-            </span>
+            <span className="text-sm font-medium text-text-secondary">Total Tokens</span>
           </div>
           {isLoading ? (
             <div className="h-9 bg-surface-border/20 rounded animate-pulse w-24" />
@@ -177,9 +160,7 @@ export function Dashboard() {
         {/* Next Expiry */}
         <div className="bg-surface border border-surface-border rounded-lg p-5">
           <div className="flex justify-between items-start mb-4">
-            <span className="text-sm font-medium text-text-secondary">
-              Next Expiry
-            </span>
+            <span className="text-sm font-medium text-text-secondary">Next Expiry</span>
             <Clock className="w-5 h-5 text-text-secondary" />
           </div>
           {isLoading ? (
@@ -187,15 +168,11 @@ export function Dashboard() {
           ) : nextExpiry ? (
             <div className="mt-1">
               <div className="inline-flex items-center px-3 py-1 rounded-md bg-warning/10 border border-warning/20 text-warning mb-2">
-                <span className="text-lg font-bold font-mono">
-                  {nextExpiry.days_until_expiry}d
-                </span>
+                <span className="text-lg font-bold font-mono">{nextExpiry.days_until_expiry}d</span>
               </div>
               <p className="text-xs text-text-secondary">
                 Key:{" "}
-                <span className="font-mono text-text-primary">
-                  {nextExpiry.litellm_key_alias}
-                </span>
+                <span className="font-mono text-text-primary">{nextExpiry.litellm_key_alias}</span>
               </p>
             </div>
           ) : (
@@ -207,9 +184,7 @@ export function Dashboard() {
       {/* Spend Chart */}
       <div className="bg-surface border border-surface-border rounded-lg flex-1 flex flex-col overflow-hidden h-[400px]">
         <div className="px-6 py-4 border-b border-surface-border flex justify-between items-center">
-          <h2 className="text-lg font-semibold text-text-primary">
-            Daily Spend
-          </h2>
+          <h2 className="text-lg font-semibold text-text-primary">Daily Spend</h2>
           <div className="flex items-center gap-6">
             {modelNames.slice(0, 4).map((model, i) => (
               <div key={model} className="flex items-center gap-2">
@@ -235,20 +210,10 @@ export function Dashboard() {
             </div>
           ) : (
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart
-                data={chartData}
-                margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-              >
+              <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                 <defs>
                   {modelNames.slice(0, 4).map((model, i) => (
-                    <linearGradient
-                      key={model}
-                      id={`dashColor${i}`}
-                      x1="0"
-                      y1="0"
-                      x2="0"
-                      y2="1"
-                    >
+                    <linearGradient key={model} id={`dashColor${i}`} x1="0" y1="0" x2="0" y2="1">
                       <stop
                         offset="5%"
                         stopColor={chartColors[i % chartColors.length]}

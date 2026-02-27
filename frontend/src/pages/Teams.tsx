@@ -35,9 +35,7 @@ export function Teams() {
     <div className="p-8 max-w-7xl mx-auto w-full">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight text-text-primary">
-            Team Management
-          </h2>
+          <h2 className="text-3xl font-bold tracking-tight text-text-primary">Team Management</h2>
           <p className="text-text-secondary mt-1">
             View your team allocations and LLM resource usage.
           </p>
@@ -70,9 +68,7 @@ export function Teams() {
                     Active
                   </span>
                 </div>
-                <h3 className="text-lg font-bold mb-1 text-text-primary">
-                  {team.team_alias}
-                </h3>
+                <h3 className="text-lg font-bold mb-1 text-text-primary">{team.team_alias}</h3>
                 {team.member_count != null && (
                   <p className="text-sm text-text-secondary mb-6">
                     {team.member_count} Member{team.member_count !== 1 ? "s" : ""}

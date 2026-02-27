@@ -6,7 +6,6 @@ from unittest.mock import MagicMock
 
 import httpx
 import pytest
-
 from app.services.litellm_client import LiteLLMClient
 
 

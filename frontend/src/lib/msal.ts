@@ -1,4 +1,4 @@
-import { PublicClientApplication, Configuration, LogLevel } from "@azure/msal-browser";
+import { type Configuration, LogLevel, PublicClientApplication } from "@azure/msal-browser";
 
 const msalConfig: Configuration = {
   auth: {

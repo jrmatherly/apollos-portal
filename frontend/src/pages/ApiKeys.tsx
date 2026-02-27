@@ -1,14 +1,6 @@
-import {
-  ChevronDown,
-  ArrowDown,
-  ArrowUp,
-  Columns,
-  Check,
-  Loader2,
-  Key,
-} from "lucide-react";
-import { useState, useRef, useEffect } from "react";
-import { useKeys, useRotateKey, useRevokeKey } from "../hooks/useKeys";
+import { ArrowDown, ArrowUp, Check, ChevronDown, Columns, Key, Loader2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { useKeys, useRevokeKey, useRotateKey } from "../hooks/useKeys";
 import type { KeyListItem } from "../types/api";
 
 function formatDate(dateString: string) {
@@ -87,10 +79,7 @@ export function ApiKeys() {
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setShowColumnDropdown(false);
       }
     }
@@ -184,9 +173,7 @@ export function ApiKeys() {
       className={`group/th px-6 py-3 text-[11px] font-bold text-text-secondary uppercase tracking-widest whitespace-nowrap cursor-pointer hover:bg-surface-border/20 transition-colors select-none ${align === "right" ? "text-right" : "text-left"}`}
       onClick={() => handleSort(column)}
     >
-      <div
-        className={`flex items-center gap-1 ${align === "right" ? "justify-end" : ""}`}
-      >
+      <div className={`flex items-center gap-1 ${align === "right" ? "justify-end" : ""}`}>
         {label}
         {sortConfig.key === column ? (
           sortConfig.direction === "asc" ? (
@@ -205,17 +192,15 @@ export function ApiKeys() {
     <div className="p-8 max-w-7xl mx-auto w-full">
       <header className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-10">
         <div>
-          <h1 className="text-3xl font-semibold tracking-tight text-text-primary">
-            API Keys
-          </h1>
+          <h1 className="text-3xl font-semibold tracking-tight text-text-primary">API Keys</h1>
           <p className="text-text-secondary mt-1">
-            Manage your keys and monitor authentication across your
-            organization.
+            Manage your keys and monitor authentication across your organization.
           </p>
         </div>
         <div className="flex items-center gap-3 w-full sm:w-auto">
           <div className="relative" ref={dropdownRef}>
             <button
+              type="button"
               onClick={() => setShowColumnDropdown(!showColumnDropdown)}
               className="bg-surface border border-surface-border hover:bg-surface-border/20 text-text-primary px-4 py-2.5 rounded-md font-medium transition-all flex items-center justify-center gap-2 w-full sm:w-auto"
             >
@@ -226,15 +211,12 @@ export function ApiKeys() {
               <div className="absolute right-0 mt-2 w-48 bg-surface border border-surface-border rounded-lg shadow-xl z-20 py-1">
                 {Object.entries(visibleColumns).map(([key, isVisible]) => (
                   <button
+                    type="button"
                     key={key}
-                    onClick={() =>
-                      toggleColumn(key as keyof typeof visibleColumns)
-                    }
+                    onClick={() => toggleColumn(key as keyof typeof visibleColumns)}
                     className="w-full text-left px-4 py-2 text-sm text-text-secondary hover:bg-surface-border/20 flex items-center justify-between"
                   >
-                    <span className="capitalize">
-                      {key.replace(/([A-Z])/g, " $1").trim()}
-                    </span>
+                    <span className="capitalize">{key.replace(/([A-Z])/g, " $1").trim()}</span>
                     {isVisible && <Check className="w-4 h-4 text-primary" />}
                   </button>
                 ))}
@@ -257,27 +239,13 @@ export function ApiKeys() {
               <table className="w-full text-left border-collapse">
                 <thead className="bg-surface-border/10 border-b border-surface-border">
                   <tr>
-                    {visibleColumns.alias && (
-                      <SortableHeader column="alias" label="Key Alias" />
-                    )}
-                    {visibleColumns.team && (
-                      <SortableHeader column="team" label="Team" />
-                    )}
-                    {visibleColumns.status && (
-                      <SortableHeader column="status" label="Status" />
-                    )}
-                    {visibleColumns.created && (
-                      <SortableHeader column="created" label="Created" />
-                    )}
-                    {visibleColumns.expires && (
-                      <SortableHeader column="expires" label="Expires" />
-                    )}
+                    {visibleColumns.alias && <SortableHeader column="alias" label="Key Alias" />}
+                    {visibleColumns.team && <SortableHeader column="team" label="Team" />}
+                    {visibleColumns.status && <SortableHeader column="status" label="Status" />}
+                    {visibleColumns.created && <SortableHeader column="created" label="Created" />}
+                    {visibleColumns.expires && <SortableHeader column="expires" label="Expires" />}
                     {visibleColumns.spend && (
-                      <SortableHeader
-                        column="spend"
-                        label="Spend"
-                        align="right"
-                      />
+                      <SortableHeader column="spend" label="Spend" align="right" />
                     )}
                     {visibleColumns.actions && (
                       <th className="px-6 py-3 text-[11px] font-bold text-text-secondary uppercase tracking-widest text-right whitespace-nowrap">
@@ -320,9 +288,7 @@ export function ApiKeys() {
                         <td className="px-6 py-4 text-sm text-text-secondary tabular-nums whitespace-nowrap">
                           <span
                             className={
-                              item.status === "expiring_soon"
-                                ? "text-warning/80 font-medium"
-                                : ""
+                              item.status === "expiring_soon" ? "text-warning/80 font-medium" : ""
                             }
                           >
                             {formatExpiry(item)}
@@ -331,14 +297,13 @@ export function ApiKeys() {
                       )}
                       {visibleColumns.spend && (
                         <td className="px-6 py-4 text-sm font-mono text-text-primary text-right tabular-nums whitespace-nowrap">
-                          {item.last_spend != null
-                            ? `$${item.last_spend.toFixed(2)}`
-                            : "-"}
+                          {item.last_spend != null ? `$${item.last_spend.toFixed(2)}` : "-"}
                         </td>
                       )}
                       {visibleColumns.actions && (
                         <td className="px-6 py-4 text-right space-x-4 whitespace-nowrap">
                           <button
+                            type="button"
                             onClick={() => rotateKey.mutate(item.id)}
                             disabled={rotateKey.isPending}
                             className="text-xs text-text-secondary hover:text-primary font-medium transition-colors disabled:opacity-50"
@@ -346,6 +311,7 @@ export function ApiKeys() {
                             Rotate
                           </button>
                           <button
+                            type="button"
                             onClick={() => revokeKey.mutate(item.id)}
                             disabled={revokeKey.isPending}
                             className="text-xs text-text-secondary hover:text-destructive font-medium transition-colors disabled:opacity-50"
@@ -369,9 +335,7 @@ export function ApiKeys() {
             <summary className="flex items-center justify-between p-4 cursor-pointer hover:bg-surface-border/20 transition-colors select-none">
               <div className="flex items-center gap-3">
                 <ChevronDown className="w-5 h-5 text-text-secondary group-open:rotate-180 transition-transform" />
-                <span className="text-sm font-medium text-text-primary">
-                  Revoked Keys History
-                </span>
+                <span className="text-sm font-medium text-text-primary">Revoked Keys History</span>
                 <span className="px-1.5 py-0.5 text-[10px] bg-surface-border text-text-secondary rounded-md border border-surface-border">
                   {revokedKeys.length}
                 </span>
@@ -398,10 +362,7 @@ export function ApiKeys() {
                   </thead>
                   <tbody className="divide-y divide-surface-border/50">
                     {revokedKeys.map((item) => (
-                      <tr
-                        key={item.id}
-                        className="hover:bg-surface-border/10 transition-colors"
-                      >
+                      <tr key={item.id} className="hover:bg-surface-border/10 transition-colors">
                         <td className="py-3 px-4 text-xs text-text-secondary whitespace-nowrap">
                           {item.litellm_key_alias}
                         </td>

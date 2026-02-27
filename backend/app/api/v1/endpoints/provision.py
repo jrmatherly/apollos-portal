@@ -42,4 +42,4 @@ async def provision(
             settings.default_key_duration_days,
         )
     except PermissionError as e:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e)) from None

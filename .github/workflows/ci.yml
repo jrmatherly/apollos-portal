@@ -20,6 +20,7 @@ jobs:
       backend: ${{ steps.filter.outputs.backend }}
       frontend: ${{ steps.filter.outputs.frontend }}
       cli: ${{ steps.filter.outputs.cli }}
+      python: ${{ steps.filter.outputs.python }}
     steps:
       - uses: actions/checkout@v6
       - uses: dorny/paths-filter@v3
@@ -28,15 +29,48 @@ jobs:
           filters: |
             backend:
               - 'backend/**'
+              - 'pyproject.toml'
+              - 'uv.lock'
               - 'docker/backend.Dockerfile'
             frontend:
               - 'frontend/**'
+              - 'biome.json'
               - 'docker/frontend.Dockerfile'
             cli:
               - 'cli/**'
+              - 'pyproject.toml'
+              - 'uv.lock'
+            python:
+              - 'backend/**'
+              - 'cli/**'
+              - 'pyproject.toml'
+              - 'uv.lock'
 
-  backend:
-    name: Backend (lint + test)
+  python-lint:
+    name: Python lint
+    needs: changes
+    if: needs.changes.outputs.python == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: astral-sh/setup-uv@v7
+        with:
+          python-version: "3.12"
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Install dependencies
+        run: uv sync --all-packages
+
+      - name: Ruff check
+        run: uv run ruff check --output-format github backend/ cli/
+
+      - name: Ruff format check
+        run: uv run ruff format --check backend/ cli/
+
+  backend-test:
+    name: Backend test
     needs: changes
     if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
@@ -50,19 +84,16 @@ jobs:
         with:
           python-version: "3.12"
           enable-cache: true
-          cache-dependency-glob: "backend/uv.lock"
+          cache-dependency-glob: "uv.lock"
 
       - name: Install dependencies
-        run: uv sync
-
-      - name: Lint
-        run: uv run ruff check .
+        run: uv sync --package apollos-portal-backend
 
       - name: Test
         run: uv run pytest -v
 
   frontend:
-    name: Frontend (type-check)
+    name: Frontend (typecheck + Biome)
     needs: changes
     if: needs.changes.outputs.frontend == 'true'
     runs-on: ubuntu-latest
@@ -81,6 +112,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Biome CI
+        run: npx biome ci ..
+
       - name: Type check
         run: npx tsc --noEmit
 
@@ -89,9 +123,6 @@ jobs:
     needs: changes
     if: needs.changes.outputs.cli == 'true'
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: cli
     steps:
       - uses: actions/checkout@v6
 
@@ -99,10 +130,13 @@ jobs:
         with:
           python-version: "3.12"
           enable-cache: true
-          cache-dependency-glob: "cli/uv.lock"
+          cache-dependency-glob: "uv.lock"
 
       - name: Install dependencies
-        run: uv sync
+        run: uv sync --package apollos-cli
+
+      - name: Lint
+        run: uv run --package apollos-cli ruff check cli/
 
       - name: Verify entry point
-        run: uv run python -c "from apollos_cli.main import cli; print('CLI entry point OK')"
+        run: uv run --package apollos-cli python -c "from apollos_cli.main import cli; print('CLI entry point OK')"

@@ -6,8 +6,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "for file in $CLAUDE_FILE_PATHS; do if echo \"$file\" | grep -q '\\.py$'; then cd /Users/jason/dev/ai-stack/mcp-gateway/litellm-portal/backend && uv run ruff check --fix \"$file\" 2>/dev/null && uv run ruff format \"$file\" 2>/dev/null; fi; done",
-            "timeout": 10
+            "command": "for file in $CLAUDE_FILE_PATHS; do if echo \"$file\" | grep -q '\\.py$'; then if echo \"$file\" | grep -q '/cli/'; then uv run --package apollos-cli ruff check --fix \"$file\" 2>/dev/null && uv run --package apollos-cli ruff format \"$file\" 2>/dev/null; elif echo \"$file\" | grep -q '/backend/'; then uv run --package apollos-portal-backend ruff check --fix \"$file\" 2>/dev/null && uv run --package apollos-portal-backend ruff format \"$file\" 2>/dev/null; fi; elif echo \"$file\" | grep -qE '\\.(ts|tsx|js|jsx)$'; then cd \"$(git rev-parse --show-toplevel)\" && npx @biomejs/biome check --write \"$file\" 2>/dev/null; fi; done",
+            "timeout": 15
           }
         ]
       }

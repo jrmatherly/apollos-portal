@@ -22,23 +22,65 @@ description = "Generate a new migration"
 dir = "backend"
 run = "uv run alembic revision --autogenerate -m \"$1\""
 
+[tasks."lint:backend"]
+description = "Lint backend Python code"
+run = "uv run --package apollos-portal-backend ruff check backend/"
+
+[tasks."lint:cli"]
+description = "Lint CLI Python code"
+run = "uv run --package apollos-cli ruff check cli/"
+
+[tasks."lint:frontend"]
+description = "Lint frontend TypeScript code"
+dir = "frontend"
+run = "npx biome check ."
+
 [tasks.lint]
-description = "Run linters"
-run = [
-  "cd backend && uv run ruff check .",
-  "cd frontend && npm run lint",
-]
+description = "Run all linters"
+depends = ["lint:backend", "lint:cli", "lint:frontend"]
+
+[tasks."format:backend"]
+description = "Format backend Python code"
+run = "uv run --package apollos-portal-backend ruff format backend/"
+
+[tasks."format:cli"]
+description = "Format CLI Python code"
+run = "uv run --package apollos-cli ruff format cli/"
+
+[tasks."format:frontend"]
+description = "Format frontend TypeScript code"
+dir = "frontend"
+run = "npx biome format --write ."
 
 [tasks.format]
-description = "Format code"
-run = [
-  "cd backend && uv run ruff format .",
-]
+description = "Format all code"
+depends = ["format:backend", "format:cli", "format:frontend"]
+
+[tasks."check:backend"]
+description = "Check backend (lint + format, read-only)"
+run = "uv run --package apollos-portal-backend ruff check backend/ && uv run --package apollos-portal-backend ruff format --check backend/"
+
+[tasks."check:cli"]
+description = "Check CLI (lint + format, read-only)"
+run = "uv run --package apollos-cli ruff check cli/ && uv run --package apollos-cli ruff format --check cli/"
+
+[tasks."check:frontend"]
+description = "Check frontend (Biome CI + typecheck)"
+dir = "frontend"
+run = "npx biome ci . && npx tsc --noEmit"
+
+[tasks.check]
+description = "Run all checks (read-only)"
+depends = ["check:backend", "check:cli", "check:frontend"]
 
 [tasks.test]
-description = "Run tests"
+description = "Run backend tests"
 dir = "backend"
 run = "uv run pytest -v"
+
+[tasks.qa]
+description = "Full quality gate (checks + tests)"
+depends = ["check", "test"]
 
 [tasks."docker:up"]
 description = "Start Docker services"

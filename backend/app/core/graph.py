@@ -1,5 +1,5 @@
 import logging
-from typing import Any
+from typing import Any, ClassVar
 
 import msal
 
@@ -12,7 +12,7 @@ class GraphClient:
     """Microsoft Graph API client using client credentials (app-only) flow."""
 
     GRAPH_BASE = "https://graph.microsoft.com/v1.0"
-    GRAPH_SCOPE = ["https://graph.microsoft.com/.default"]
+    GRAPH_SCOPE: ClassVar[list[str]] = ["https://graph.microsoft.com/.default"]
 
     def __init__(self, settings: Settings):
         self.settings = settings

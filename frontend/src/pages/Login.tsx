@@ -1,6 +1,6 @@
-import { useAuth } from "../contexts/AuthContext";
+import { LogIn, Shield, Zap } from "lucide-react";
 import { Navigate } from "react-router-dom";
-import { LogIn, Zap, Shield } from "lucide-react";
+import { useAuth } from "../contexts/AuthContext";
 
 export function Login() {
   const { isAuthenticated, isLoading, login, error } = useAuth();
@@ -45,6 +45,7 @@ export function Login() {
           )}
 
           <button
+            type="button"
             onClick={login}
             className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white font-medium py-3 px-4 rounded-lg transition-colors"
           >

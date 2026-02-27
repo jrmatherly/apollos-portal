@@ -1,5 +1,5 @@
-import type { ReactNode } from "react";
 import { Loader2, Rocket } from "lucide-react";
+import type { ReactNode } from "react";
 import { useProvision, useProvisionStatus } from "../hooks/useProvisioning";
 
 export function ProvisioningGate({ children }: { children: ReactNode }) {
@@ -30,20 +30,16 @@ export function ProvisioningGate({ children }: { children: ReactNode }) {
       <div className="flex h-full items-center justify-center">
         <div className="max-w-md rounded-xl border border-zinc-700 bg-zinc-800/50 p-8 text-center">
           <Rocket className="mx-auto h-12 w-12 text-blue-500" />
-          <h2 className="mt-4 text-2xl font-semibold text-white">
-            Welcome to Apollos AI
-          </h2>
+          <h2 className="mt-4 text-2xl font-semibold text-white">Welcome to Apollos AI</h2>
           <p className="mt-2 text-zinc-400">
-            Your account needs to be provisioned before you can access the
-            portal. This will set up your teams and generate API keys based on
-            your organization access.
+            Your account needs to be provisioned before you can access the portal. This will set up
+            your teams and generate API keys based on your organization access.
           </p>
           {provision.error && (
-            <p className="mt-3 text-sm text-red-400">
-              {String(provision.error)}
-            </p>
+            <p className="mt-3 text-sm text-red-400">{String(provision.error)}</p>
           )}
           <button
+            type="button"
             onClick={() => provision.mutate()}
             disabled={provision.isPending}
             className="mt-6 inline-flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-3 text-sm font-medium text-white transition hover:bg-blue-700 disabled:opacity-50"

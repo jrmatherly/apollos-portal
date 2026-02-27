@@ -6,8 +6,8 @@ from app.models.provisioned_user import ProvisionedUser
 from app.models.user_team_membership import UserTeamMembership
 
 __all__ = [
-    "Base",
     "AuditLog",
+    "Base",
     "KeyNotification",
     "ProvisionedKey",
     "ProvisionedUser",

@@ -1,4 +1,4 @@
-import { KeyRound, Bell, Palette, Loader2 } from "lucide-react";
+import { Bell, KeyRound, Loader2, Palette } from "lucide-react";
 import { useSettings, useUpdateSettings } from "../hooks/useSettings";
 
 export function Settings() {
@@ -32,10 +32,18 @@ export function Settings() {
   ];
 
   const notifications = [
-    { key: "notify_14d" as const, label: "14-day warning", desc: "Early notice for key replacement" },
+    {
+      key: "notify_14d" as const,
+      label: "14-day warning",
+      desc: "Early notice for key replacement",
+    },
     { key: "notify_7d" as const, label: "7-day warning", desc: "Standard rotation reminder" },
     { key: "notify_3d" as const, label: "3-day warning", desc: "Urgent notice for expiring keys" },
-    { key: "notify_1d" as const, label: "1-day final warning", desc: "Critical alert for immediate action" },
+    {
+      key: "notify_1d" as const,
+      label: "1-day final warning",
+      desc: "Critical alert for immediate action",
+    },
   ];
 
   const handleDurationChange = (days: number) => {
@@ -50,9 +58,7 @@ export function Settings() {
   return (
     <div className="p-8 max-w-4xl mx-auto w-full">
       <header className="mb-10">
-        <h2 className="text-3xl font-bold tracking-tight text-text-primary">
-          Settings
-        </h2>
+        <h2 className="text-3xl font-bold tracking-tight text-text-primary">Settings</h2>
         <p className="text-text-secondary mt-2">
           Manage your security preferences and notification configurations.
         </p>
@@ -91,9 +97,7 @@ export function Settings() {
                   />
                   <div className="ml-4 flex-1">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-semibold text-text-primary">
-                        {d.label}
-                      </span>
+                      <span className="text-sm font-semibold text-text-primary">{d.label}</span>
                       {d.badge && (
                         <span className="px-2 py-0.5 rounded-full bg-secondary/10 text-secondary text-[10px] font-bold uppercase tracking-wider">
                           {d.badge}
@@ -125,12 +129,11 @@ export function Settings() {
               return (
                 <div key={n.key} className="flex items-center justify-between py-4">
                   <div>
-                    <p className="text-sm font-medium text-text-primary">
-                      {n.label}
-                    </p>
+                    <p className="text-sm font-medium text-text-primary">{n.label}</p>
                     <p className="text-xs text-text-secondary">{n.desc}</p>
                   </div>
                   <button
+                    type="button"
                     onClick={() => handleToggle(n.key)}
                     className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
                       enabled ? "bg-primary" : "bg-surface-border"
@@ -169,9 +172,7 @@ export function Settings() {
                   <div className="w-3 h-3 bg-gray-100 rounded"></div>
                 </div>
               </div>
-              <p className="text-xs font-medium text-center text-text-primary">
-                Light Mode
-              </p>
+              <p className="text-xs font-medium text-center text-text-primary">Light Mode</p>
             </div>
             <div className="cursor-pointer group">
               <div className="aspect-video rounded-md bg-[#0A0F1E] border border-primary p-2 mb-2 flex flex-col gap-1 overflow-hidden ring-2 ring-primary transition-all shadow-[0_0_15px_-5px_rgba(99,102,241,0.4)]">
@@ -182,9 +183,7 @@ export function Settings() {
                   <div className="w-3 h-3 bg-[#111827] rounded"></div>
                 </div>
               </div>
-              <p className="text-xs font-medium text-center text-primary">
-                Dark Mode
-              </p>
+              <p className="text-xs font-medium text-center text-primary">Dark Mode</p>
             </div>
             <div className="cursor-pointer group">
               <div className="aspect-video rounded-md bg-gradient-to-br from-white to-[#0A0F1E] border border-surface-border p-2 mb-2 flex flex-col gap-1 overflow-hidden group-hover:ring-2 ring-primary transition-all">
@@ -195,9 +194,7 @@ export function Settings() {
                   <div className="w-3 h-3 bg-gray-400/20 rounded"></div>
                 </div>
               </div>
-              <p className="text-xs font-medium text-center text-text-primary">
-                System Default
-              </p>
+              <p className="text-xs font-medium text-center text-text-primary">System Default</p>
             </div>
           </div>
         </section>

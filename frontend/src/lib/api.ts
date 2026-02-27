@@ -3,7 +3,7 @@
  * All requests go through the Vite dev proxy (/api -> localhost:8000).
  */
 
-import { msalInstance, loginRequest } from "./msal";
+import { loginRequest, msalInstance } from "./msal";
 
 const API_BASE = "/api/v1";
 
@@ -41,7 +41,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
   const token = await getToken();
   if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
+    headers.Authorization = `Bearer ${token}`;
   }
 
   const response = await fetch(url, { ...options, headers });

@@ -19,7 +19,7 @@ async def get_keys(
     try:
         return await list_user_keys(session, user)
     except LookupError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from None
 
 
 @router.post("/keys/new", response_model=KeyCreateResponse)
@@ -33,7 +33,7 @@ async def generate_new_key(
     try:
         return await create_key(session, litellm, user, body.team_id)
     except PermissionError as e:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e)) from None
 
 
 @router.post("/keys/{key_id}/rotate", response_model=KeyRotateResponse)
@@ -47,9 +47,9 @@ async def rotate_existing_key(
     try:
         return await rotate_key(session, litellm, user, key_id)
     except LookupError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from None
     except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)) from None
 
 
 @router.post("/keys/{key_id}/revoke", response_model=KeyRevokeResponse)
@@ -63,6 +63,6 @@ async def revoke_existing_key(
     try:
         return await revoke_key(session, litellm, user, key_id)
     except LookupError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from None
     except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)) from None

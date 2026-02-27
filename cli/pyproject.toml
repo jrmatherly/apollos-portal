@@ -2,7 +2,7 @@
 name = "apollos-cli"
 version = "0.1.0"
 description = "CLI for Apollos AI Self-Service Portal"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 dependencies = [
     "click>=8.3.1",
     "msal>=1.35.0",
@@ -12,6 +12,9 @@ dependencies = [
 
 [project.scripts]
 apollos = "apollos_cli.main:cli"
+
+[dependency-groups]
+dev = ["ruff>=0.15.4"]
 
 [build-system]
 requires = ["hatchling"]

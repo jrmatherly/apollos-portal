@@ -1,17 +1,14 @@
+import { Calendar, Loader2 } from "lucide-react";
+import { useMemo, useState } from "react";
 import {
-  Calendar,
-  Loader2,
-} from "lucide-react";
-import {
-  AreaChart,
   Area,
+  AreaChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
 } from "recharts";
-import { useState, useMemo } from "react";
 import { useUsage } from "../hooks/useUsage";
 
 function getDateRange(range: string): { startDate?: string; endDate?: string } {
@@ -67,10 +64,7 @@ export function Usage() {
   // Aggregate per-model breakdown
   const modelBreakdown = useMemo(() => {
     if (!data?.data) return [];
-    const agg = new Map<
-      string,
-      { input_tokens: number; output_tokens: number; spend: number }
-    >();
+    const agg = new Map<string, { input_tokens: number; output_tokens: number; spend: number }>();
     for (const dp of data.data) {
       const existing = agg.get(dp.model) ?? {
         input_tokens: 0,
@@ -112,9 +106,7 @@ export function Usage() {
   return (
     <div className="p-8 max-w-7xl mx-auto w-full space-y-8">
       <header className="flex items-center justify-between mb-8">
-        <h2 className="text-2xl font-semibold text-text-primary">
-          Usage Analytics
-        </h2>
+        <h2 className="text-2xl font-semibold text-text-primary">Usage Analytics</h2>
         <div className="flex items-center gap-3">
           <div className="relative">
             <select
@@ -202,20 +194,10 @@ export function Usage() {
             </div>
           ) : (
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart
-                data={chartData}
-                margin={{ top: 10, right: 0, left: 0, bottom: 0 }}
-              >
+              <AreaChart data={chartData} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
                 <defs>
                   {modelNames.slice(0, 6).map((model, i) => (
-                    <linearGradient
-                      key={model}
-                      id={`color-${i}`}
-                      x1="0"
-                      y1="0"
-                      x2="0"
-                      y2="1"
-                    >
+                    <linearGradient key={model} id={`color-${i}`} x1="0" y1="0" x2="0" y2="1">
                       <stop
                         offset="5%"
                         stopColor={chartColors[i % chartColors.length]}
@@ -316,31 +298,22 @@ export function Usage() {
                 ))
               ) : modelBreakdown.length === 0 ? (
                 <tr>
-                  <td
-                    colSpan={4}
-                    className="px-6 py-8 text-center text-text-secondary"
-                  >
+                  <td colSpan={4} className="px-6 py-8 text-center text-text-secondary">
                     No usage data
                   </td>
                 </tr>
               ) : (
                 modelBreakdown.map((row, i) => (
-                  <tr
-                    key={row.model}
-                    className="hover:bg-surface-border/10 transition-colors"
-                  >
+                  <tr key={row.model} className="hover:bg-surface-border/10 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
                         <span
                           className="w-2 h-2 rounded-full"
                           style={{
-                            backgroundColor:
-                              chartColors[i % chartColors.length],
+                            backgroundColor: chartColors[i % chartColors.length],
                           }}
                         />
-                        <span className="text-sm font-medium text-text-primary">
-                          {row.model}
-                        </span>
+                        <span className="text-sm font-medium text-text-primary">{row.model}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4 text-right font-mono text-sm text-text-secondary">

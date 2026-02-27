@@ -1,4 +1,4 @@
-import { Loader2, Box } from "lucide-react";
+import { Box, Loader2 } from "lucide-react";
 import { useModels } from "../hooks/useModels";
 
 export function Models() {

@@ -30,10 +30,3 @@ dev = [
 
 [tool.pytest.ini_options]
 asyncio_mode = "strict"
-
-[tool.ruff]
-line-length = 120
-target-version = "py312"
-
-[tool.ruff.lint]
-select = ["E", "F", "I", "N", "W", "UP"]
