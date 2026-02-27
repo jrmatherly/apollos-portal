@@ -89,15 +89,17 @@ export function Usage() {
         </div>
       </header>
 
-      <div className="flex flex-wrap items-center gap-4">
-        <div className="relative min-w-[220px]" ref={modelDropdownRef}>
-          <label className="absolute -top-2 left-2 px-1 bg-bg-primary text-[10px] text-text-secondary font-bold uppercase tracking-wider z-10">Model</label>
+      <div className="flex flex-wrap items-end gap-4">
+        <div className="flex flex-col gap-1.5 relative min-w-[240px]" ref={modelDropdownRef}>
+          <label className="text-[11px] font-bold text-text-secondary uppercase tracking-widest flex items-center gap-1">
+            Filter by Model
+          </label>
           <div 
-            className="w-full bg-surface border border-surface-border text-text-primary text-sm rounded-md py-2 px-3 cursor-pointer flex justify-between items-center hover:border-surface-border/80 transition-colors"
+            className="w-full bg-surface border border-surface-border text-text-primary text-sm rounded-md py-2 px-3 cursor-pointer flex justify-between items-center hover:border-surface-border/80 transition-colors shadow-sm"
             onClick={() => setIsModelDropdownOpen(!isModelDropdownOpen)}
           >
-            <span className="truncate pr-4">
-              {selectedModels.length === 0 ? 'All Models' : `${selectedModels.length} Selected`}
+            <span className="truncate pr-4 font-medium">
+              {selectedModels.length === 0 ? 'All Models' : `${selectedModels.length} Models Selected`}
             </span>
             <ChevronDown className="w-4 h-4 text-text-secondary flex-shrink-0" />
           </div>
@@ -108,10 +110,10 @@ export function Usage() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.15 }}
-                className="absolute top-full left-0 mt-1 w-full bg-surface border border-surface-border rounded-md shadow-xl z-20 py-1 max-h-60 overflow-y-auto"
+                className="absolute top-full left-0 mt-2 w-full bg-surface border border-surface-border rounded-md shadow-xl z-20 py-1 max-h-60 overflow-y-auto"
               >
                 {selectedModels.length > 0 && (
-                  <div className="px-3 py-2 border-b border-surface-border flex justify-between items-center">
+                  <div className="px-3 py-2 border-b border-surface-border flex justify-between items-center bg-surface-border/5">
                     <span className="text-xs text-text-secondary font-medium">{selectedModels.length} selected</span>
                     <button 
                       onClick={(e) => { e.stopPropagation(); setSelectedModels([]); }} 
@@ -122,7 +124,7 @@ export function Usage() {
                   </div>
                 )}
                 {availableModels.map(model => (
-                  <label key={model} className="flex items-center px-3 py-2 hover:bg-surface-border/10 cursor-pointer gap-3 group">
+                  <label key={model} className="flex items-center px-3 py-2.5 hover:bg-surface-border/10 cursor-pointer gap-3 group">
                     <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${selectedModels.includes(model) ? 'bg-primary border-primary text-white' : 'border-surface-border group-hover:border-primary/50'}`}>
                       {selectedModels.includes(model) && <Check className="w-3 h-3" />}
                     </div>
@@ -143,14 +145,16 @@ export function Usage() {
           </AnimatePresence>
         </div>
 
-        <div className="relative min-w-[220px]" ref={keyDropdownRef}>
-          <label className="absolute -top-2 left-2 px-1 bg-bg-primary text-[10px] text-text-secondary font-bold uppercase tracking-wider z-10">API Key</label>
+        <div className="flex flex-col gap-1.5 relative min-w-[240px]" ref={keyDropdownRef}>
+          <label className="text-[11px] font-bold text-text-secondary uppercase tracking-widest flex items-center gap-1">
+            Filter by API Key
+          </label>
           <div 
-            className="w-full bg-surface border border-surface-border text-text-primary text-sm rounded-md py-2 px-3 cursor-pointer flex justify-between items-center hover:border-surface-border/80 transition-colors"
+            className="w-full bg-surface border border-surface-border text-text-primary text-sm rounded-md py-2 px-3 cursor-pointer flex justify-between items-center hover:border-surface-border/80 transition-colors shadow-sm"
             onClick={() => setIsKeyDropdownOpen(!isKeyDropdownOpen)}
           >
-            <span className="truncate pr-4">
-              {selectedKeys.length === 0 ? 'All Keys' : `${selectedKeys.length} Selected`}
+            <span className="truncate pr-4 font-medium">
+              {selectedKeys.length === 0 ? 'All Keys' : `${selectedKeys.length} Keys Selected`}
             </span>
             <ChevronDown className="w-4 h-4 text-text-secondary flex-shrink-0" />
           </div>
@@ -161,10 +165,10 @@ export function Usage() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.15 }}
-                className="absolute top-full left-0 mt-1 w-full bg-surface border border-surface-border rounded-md shadow-xl z-20 py-1 max-h-60 overflow-y-auto"
+                className="absolute top-full left-0 mt-2 w-full bg-surface border border-surface-border rounded-md shadow-xl z-20 py-1 max-h-60 overflow-y-auto"
               >
                 {selectedKeys.length > 0 && (
-                  <div className="px-3 py-2 border-b border-surface-border flex justify-between items-center">
+                  <div className="px-3 py-2 border-b border-surface-border flex justify-between items-center bg-surface-border/5">
                     <span className="text-xs text-text-secondary font-medium">{selectedKeys.length} selected</span>
                     <button 
                       onClick={(e) => { e.stopPropagation(); setSelectedKeys([]); }} 
@@ -175,7 +179,7 @@ export function Usage() {
                   </div>
                 )}
                 {availableKeys.map(key => (
-                  <label key={key} className="flex items-center px-3 py-2 hover:bg-surface-border/10 cursor-pointer gap-3 group">
+                  <label key={key} className="flex items-center px-3 py-2.5 hover:bg-surface-border/10 cursor-pointer gap-3 group">
                     <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${selectedKeys.includes(key) ? 'bg-primary border-primary text-white' : 'border-surface-border group-hover:border-primary/50'}`}>
                       {selectedKeys.includes(key) && <Check className="w-3 h-3" />}
                     </div>
@@ -195,23 +199,23 @@ export function Usage() {
             )}
           </AnimatePresence>
         </div>
-        <div className="ml-auto flex items-center gap-1 bg-surface border border-surface-border p-1 rounded-lg shadow-sm">
+        <div className="ml-auto flex items-center p-1 bg-surface-border/10 rounded-lg border border-surface-border/50 shadow-inner">
           {['Tokens', 'Requests', 'Costs'].map((metric) => (
             <button
               key={metric}
               onClick={() => setActiveMetric(metric as any)}
-              className={`relative px-4 py-1.5 text-xs font-semibold rounded-md transition-colors ${
-                activeMetric === metric ? 'text-white' : 'text-text-secondary hover:text-text-primary hover:bg-surface-border/10'
+              className={`relative px-5 py-2 text-xs font-bold rounded-md transition-all ${
+                activeMetric === metric ? 'text-text-primary shadow-sm' : 'text-text-secondary hover:text-text-primary hover:bg-surface-border/10'
               }`}
             >
               {activeMetric === metric && (
                 <motion.div
                   layoutId="activeMetric"
-                  className="absolute inset-0 bg-primary shadow-md rounded-md"
+                  className="absolute inset-0 bg-surface border border-surface-border rounded-md"
                   transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
                 />
               )}
-              <span className="relative z-10">{metric}</span>
+              <span className="relative z-10 tracking-wide">{metric}</span>
             </button>
           ))}
         </div>
@@ -220,8 +224,18 @@ export function Usage() {
       <div className="bg-surface border border-surface-border rounded-xl p-6 shadow-sm">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h3 className="text-sm font-semibold text-text-secondary uppercase tracking-widest">Token Consumption</h3>
-            <p className="text-2xl font-bold font-mono text-primary mt-1">2,042,593 <span className="text-xs font-sans text-text-secondary">Total Tokens</span></p>
+            <h3 className="text-sm font-semibold text-text-secondary uppercase tracking-widest">
+              {activeMetric === 'Tokens' ? 'Token Consumption' : activeMetric === 'Requests' ? 'API Requests' : 'Total Costs'}
+            </h3>
+            <div className="flex items-baseline gap-3 mt-1">
+              <p className="text-2xl font-bold font-mono text-primary">
+                {activeMetric === 'Tokens' ? '2,042,593' : activeMetric === 'Requests' ? '14,205' : '$4,282.50'}
+              </p>
+              <div className="flex items-center text-secondary gap-1 text-xs font-medium bg-secondary/10 px-2 py-1 rounded-md border border-secondary/20">
+                <TrendingUp className="w-3 h-3" />
+                <span>14.5% vs previous period</span>
+              </div>
+            </div>
           </div>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
@@ -394,8 +408,13 @@ export function Usage() {
             </>
           )}
         </div>
-        <div className="bg-surface border border-surface-border p-6 rounded-xl hover:border-surface-border/80 transition-colors">
-          <p className="text-xs font-bold text-text-secondary uppercase tracking-widest mb-1">Avg Cost/Req</p>
+        <div className="bg-surface border border-surface-border p-6 rounded-xl hover:border-surface-border/80 transition-colors group/card relative">
+          <div className="flex items-center justify-between mb-1">
+            <p className="text-xs font-bold text-text-secondary uppercase tracking-widest">Avg Cost/Req</p>
+            <div className="cursor-help" title="Calculated by dividing Total Cost by the Total Number of Requests in the selected period.">
+              <Info className="w-4 h-4 text-text-secondary opacity-50 group-hover/card:opacity-100 transition-opacity" />
+            </div>
+          </div>
           {isMetricsLoading ? (
             <div className="h-9 bg-surface-border/20 rounded animate-pulse w-24 mt-1"></div>
           ) : (
