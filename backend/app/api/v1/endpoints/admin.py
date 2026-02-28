@@ -302,7 +302,7 @@ async def admin_export_audit_log(
 
     return StreamingResponse(
         iter([generate_csv()]),
-        media_type="text/csv",
+        media_type="text/csv; charset=utf-8",
         headers={"Content-Disposition": "attachment; filename=audit_log.csv"},
     )
 
