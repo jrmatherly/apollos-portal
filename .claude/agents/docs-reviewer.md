@@ -26,7 +26,7 @@ Flag commands documented but not implemented, and implemented commands not docum
 
 ### 3. Environment variable accuracy
 
-Read `backend/app/core/config.py` (Settings class) and `frontend/src/vite-env.d.ts`. Compare against:
+Read `backend/app/config.py` (Settings class) and `frontend/src/vite-env.d.ts`. Compare against:
 
 - `docs/development.mdx` — env var table
 - `docs/contributing/development.mdx` — setup instructions

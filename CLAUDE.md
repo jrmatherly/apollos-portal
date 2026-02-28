@@ -60,7 +60,10 @@
 - OpenAPI spec wired into docs.json via tab-level `openapi` field — endpoint pages auto-generated from spec
 - Mintlify `openapi` field goes on the tab object, NOT at docs.json top level — top-level causes validation errors
 - `mint validate` and `mint broken-links` must run from `docs/` directory (requires `docs.json` in CWD)
-- `llms.txt`, `llms-full.txt`, `skill.md` are manually maintained (self-hosted via `mint dev`, not Mintlify cloud)
+- `docs/llms.txt` (1.9KB) — lightweight doc index; read to discover what docs exist
+- `docs/llms-full.txt` (37KB) — full docs content; read on-demand only when you need comprehensive documentation context (never auto-load)
+- `docs/skill.md` — AI agent instruction file for docs contributions
+- All three are auto-generated (`mise run docs:llms`) and self-hosted via `mint dev`, not Mintlify cloud
 - Docker: `docker/docs.Dockerfile` runs `mint dev` on port 3000 (mapped to 3001 in compose)
 
 ## Testing
