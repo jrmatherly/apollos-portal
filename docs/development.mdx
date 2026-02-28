@@ -122,10 +122,11 @@ uv run alembic downgrade -1
 apollos-portal/
 ├── backend/           # FastAPI API server
 │   ├── app/
-│   │   ├── api/v1/    # API endpoints (auth, keys, teams, usage, etc.)
-│   │   ├── core/      # Database, graph client, teams config
-│   │   ├── models/    # SQLAlchemy models
-│   │   └── services/  # LiteLLM client, business logic
+│   │   ├── api/v1/endpoints/  # auth, keys, teams, usage, models, settings, provision, admin
+│   │   ├── core/              # auth, database, graph client, teams config, logging, exceptions, rate limiting, scheduler
+│   │   ├── models/            # SQLAlchemy models (users, keys, teams, audit, notifications)
+│   │   ├── services/          # LiteLLM client, provisioning, key lifecycle, email, admin, audit
+│   │   └── templates/email/   # Jinja2 email templates (expiry warnings, rotation, deprovisioning)
 │   ├── alembic/       # Database migrations
 │   └── tests/         # pytest test suite
 ├── frontend/          # React SPA
