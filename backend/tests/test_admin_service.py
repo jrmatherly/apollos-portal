@@ -219,3 +219,59 @@ class TestAdminReprovisionUser:
 
             with pytest.raises(ValueError, match="already active"):
                 await admin_reprovision_user(session, admin, str(user.id))
+
+
+class TestQueryAuditLog:
+    @pytest.mark.asyncio(loop_scope="function")
+    async def test_query_audit_log_returns_paginated_results(self):
+        """query_audit_log returns (entries, total_count) tuple."""
+        session = AsyncMock()
+        mock_count_result = MagicMock()
+        mock_count_result.scalar_one.return_value = 1
+        mock_entries_result = MagicMock()
+        fake_entry = MagicMock()
+        mock_entries_result.scalars.return_value.all.return_value = [fake_entry]
+        session.execute = AsyncMock(side_effect=[mock_count_result, mock_entries_result])
+
+        with patch("app.services.admin_service.log_action", new_callable=AsyncMock):
+            from app.services.admin_service import query_audit_log
+
+            entries, total = await query_audit_log(session, page=1, page_size=50)
+        assert entries == [fake_entry]
+        assert total == 1
+
+
+class TestListAllKeys:
+    @pytest.mark.asyncio(loop_scope="function")
+    async def test_list_all_keys_default_active(self):
+        """list_all_keys defaults to active keys only."""
+        session = AsyncMock()
+        mock_count = MagicMock()
+        mock_count.scalar_one.return_value = 0
+        mock_keys = MagicMock()
+        mock_keys.scalars.return_value.all.return_value = []
+        session.execute = AsyncMock(side_effect=[mock_count, mock_keys])
+
+        with patch("app.services.admin_service.log_action", new_callable=AsyncMock):
+            from app.services.admin_service import list_all_keys
+
+            keys, total = await list_all_keys(session)
+        assert total == 0
+        assert keys == []
+
+    @pytest.mark.asyncio(loop_scope="function")
+    async def test_list_all_keys_with_status_filter(self):
+        """list_all_keys accepts optional status parameter."""
+        session = AsyncMock()
+        mock_count = MagicMock()
+        mock_count.scalar_one.return_value = 0
+        mock_keys = MagicMock()
+        mock_keys.scalars.return_value.all.return_value = []
+        session.execute = AsyncMock(side_effect=[mock_count, mock_keys])
+
+        with patch("app.services.admin_service.log_action", new_callable=AsyncMock):
+            from app.services.admin_service import list_all_keys
+
+            keys, total = await list_all_keys(session, status="revoked")
+        assert total == 0
+        assert keys == []

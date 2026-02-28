@@ -65,15 +65,16 @@ async def list_all_keys(
     *,
     page: int = 1,
     page_size: int = 50,
+    status: str = "active",
 ) -> tuple[list[ProvisionedKey], int]:
-    """List all keys across all users with pagination."""
-    count_q = select(func.count()).select_from(ProvisionedKey).where(ProvisionedKey.status == "active")
+    """List all keys across all users with pagination, filtered by status."""
+    count_q = select(func.count()).select_from(ProvisionedKey).where(ProvisionedKey.status == status)
     total = (await session.execute(count_q)).scalar_one()
 
     q = (
         select(ProvisionedKey)
         .options(selectinload(ProvisionedKey.user))
-        .where(ProvisionedKey.status == "active")
+        .where(ProvisionedKey.status == status)
         .order_by(ProvisionedKey.created_at.desc())
         .offset((page - 1) * page_size)
         .limit(page_size)
@@ -205,27 +206,27 @@ async def query_audit_log(
     page_size: int = 50,
 ) -> tuple[list[AuditLog], int]:
     """Query audit log with filters and pagination."""
-    base = select(AuditLog)
-    count_base = select(func.count()).select_from(AuditLog)
-
+    conditions: list = []
     if actor_email:
-        base = base.where(AuditLog.actor_email == actor_email)
-        count_base = count_base.where(AuditLog.actor_email == actor_email)
+        conditions.append(AuditLog.actor_email == actor_email)
     if action:
-        base = base.where(AuditLog.action == action)
-        count_base = count_base.where(AuditLog.action == action)
+        conditions.append(AuditLog.action == action)
     if target_type:
-        base = base.where(AuditLog.target_type == target_type)
-        count_base = count_base.where(AuditLog.target_type == target_type)
+        conditions.append(AuditLog.target_type == target_type)
     if start_date:
-        base = base.where(AuditLog.created_at >= start_date)
-        count_base = count_base.where(AuditLog.created_at >= start_date)
+        conditions.append(AuditLog.created_at >= start_date)
     if end_date:
-        base = base.where(AuditLog.created_at <= end_date)
-        count_base = count_base.where(AuditLog.created_at <= end_date)
+        conditions.append(AuditLog.created_at <= end_date)
 
-    total = (await session.execute(count_base)).scalar_one()
+    count_q = select(func.count()).select_from(AuditLog).where(*conditions)
+    total = (await session.execute(count_q)).scalar_one()
 
-    q = base.order_by(AuditLog.created_at.desc()).offset((page - 1) * page_size).limit(page_size)
+    q = (
+        select(AuditLog)
+        .where(*conditions)
+        .order_by(AuditLog.created_at.desc())
+        .offset((page - 1) * page_size)
+        .limit(page_size)
+    )
     result = await session.execute(q)
     return list(result.scalars().all()), total
