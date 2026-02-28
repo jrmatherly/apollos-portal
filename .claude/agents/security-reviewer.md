@@ -15,6 +15,8 @@ Review code changes for:
 9. **CSV Injection (CWE-1236)**: Any CSV export must sanitize cells starting with `=`, `+`, `-`, `@`, `\t`, `\r`
 10. **Admin Authorization**: Admin endpoints must use `require_admin` dependency, not just `get_current_user`
 11. **Dependency Risks**: Known vulnerabilities in pinned versions
+12. **Entra ID Groups Anti-Pattern**: NEVER read group memberships from JWT `groups` claim — Entra ID has a 200-group hard limit and silently returns `_claim_sources` overage indicator instead of groups. Always use Graph API `/users/{oid}/memberOf` with Application permission (`GroupMember.Read.All`)
+13. **Graph API Pagination**: Any Graph API call must follow `@odata.nextLink` pages to get complete results — partial results are a silent data loss bug
 
 ## Output Format
 

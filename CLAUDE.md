@@ -44,6 +44,9 @@
 - slowapi rate limiting: key function runs before endpoint body — use `RateLimitUserMiddleware` (pure ASGI) for per-user OID extraction from JWT
 - structlog logging: use `structlog.stdlib.get_logger(__name__)` at module level, after all imports (avoids ruff E402)
 - External API error handling pattern: wrap calls (e.g. `litellm.block_key()`) in try/except, log with structlog, continue — reconciliation jobs resolve drift
+- Entra ID group resolution: NEVER use JWT `groups` claim (200-group overage limit silently breaks) — always use Graph API `/users/{oid}/memberOf` with client credentials
+- Token validation: v1 validates by calling Graph `/me` with user's bearer token (not local JWKS) — see `backend/app/core/auth.py`
+- Graph API pagination: always follow `@odata.nextLink` pages; use `$top=999` to minimize round trips — see `backend/app/core/graph.py`
 
 ## Documentation (docs/)
 - Built with Mintlify — no `mint build` command exists; `mint dev` is the only serve option

@@ -1,0 +1,300 @@
+---
+title: "Entra ID setup"
+description: "Configure Microsoft Entra ID app registration, permissions, and security groups for the portal"
+---
+
+<Info>
+  You need **Global Administrator** or **Application Administrator** role in Microsoft Entra ID to complete this setup.
+</Info>
+
+The portal requires a single App Registration in Entra ID that handles user authentication (browser and CLI) and backend service calls to Microsoft Graph for group membership resolution.
+
+You also need:
+- Security groups that map to LiteLLM teams
+- An App Role for portal administrators
+- Application-level permissions for Microsoft Graph
+
+## Create the app registration
+
+<Steps>
+<Step title="Register the application">
+  Navigate to [Azure Portal](https://portal.azure.com) → **Microsoft Entra ID** → **App registrations** → **New registration**.
+
+  | Field | Value |
+  |---|---|
+  | **Name** | `Apollos AI Self-Service Portal` |
+  | **Supported account types** | `Accounts in this organizational directory only` (single tenant) |
+  | **Redirect URI** | Select **Single-page application (SPA)** → `http://localhost:5173/auth/callback` |
+
+  <Warning>
+    The redirect URI must be under the **Single-page application** platform, not **Web**. MSAL.js uses auth code + PKCE for token redemption, which Entra ID only permits for the SPA platform. Using the Web platform causes `AADSTS9002326: Cross-origin token redemption is permitted only for the 'Single-Page Application' client-type`.
+  </Warning>
+</Step>
+
+<Step title="Note the application identifiers">
+  After registration, copy these values for the portal `.env` files:
+
+  | Value | Environment variable |
+  |---|---|
+  | **Application (client) ID** | `AZURE_CLIENT_ID` / `VITE_AZURE_CLIENT_ID` |
+  | **Directory (tenant) ID** | `AZURE_TENANT_ID` / `VITE_AZURE_TENANT_ID` |
+</Step>
+
+<Step title="Create a client secret">
+  Go to **Certificates & secrets** → **Client secrets** → **New client secret**.
+
+  | Field | Value |
+  |---|---|
+  | **Description** | `apollos-portal-backend` |
+  | **Expires** | `24 months` |
+
+  Copy the secret value immediately — it is only shown once. Store it as `AZURE_CLIENT_SECRET` in the backend `.env` (or a secrets manager).
+
+  <Note>
+    Set a calendar reminder to rotate this secret before it expires.
+  </Note>
+</Step>
+</Steps>
+
+## Configure API permissions
+
+The backend reads user profiles and group memberships via Microsoft Graph. The portal uses Graph API calls exclusively for group resolution — the JWT `groups` claim has a 200-group limit and silently drops groups for users in many security groups.
+
+<Steps>
+<Step title="Add delegated permission">
+  Go to **API permissions** → **Add a permission** → **Microsoft Graph** → **Delegated permissions**.
+
+  Add `User.Read` — this lets the backend read the signed-in user's profile (name, email, OID).
+</Step>
+
+<Step title="Add application permission">
+  Go to **Add a permission** → **Microsoft Graph** → **Application permissions**.
+
+  Add `GroupMember.Read.All` — this lets the backend read group memberships for any user via client credentials flow.
+
+  <Accordion title="Why application permission instead of delegated?">
+    Delegated `GroupMember.Read.All` requires the on-behalf-of (OBO) flow, which adds complexity and depends on the user's token having the correct scope. Application permission lets the backend call Graph API directly using its own credentials (client credentials flow), which is simpler, more reliable, and works even when the user's token has expired.
+  </Accordion>
+</Step>
+
+<Step title="Grant admin consent">
+  Click **Grant admin consent for [your tenant]**. Verify the status column shows **Granted** for all permissions.
+
+  | Permission | Type | Admin consent | Purpose |
+  |---|---|---|---|
+  | `User.Read` | Delegated | Not required | User profile (name, email) |
+  | `GroupMember.Read.All` | Application | Required | Group memberships for team mapping |
+</Step>
+</Steps>
+
+<Accordion title="Why not the JWT groups claim?">
+  Enterprise users are commonly members of 200+ security groups (nested groups, distribution lists, dynamic groups). When the group count exceeds 200, Entra ID replaces the `groups` array with a `_claim_sources` overage indicator — the claim silently stops working. Rather than building two code paths (claim + Graph API fallback), the portal uses Graph API exclusively. This is the only reliable approach at scale.
+</Accordion>
+
+## Configure authentication settings
+
+Go to **Authentication** in your App Registration.
+
+<Steps>
+<Step title="Set redirect URIs">
+  Under **Single-page application** → **Redirect URIs**, add:
+
+  ```
+  http://localhost:5173/auth/callback          (development)
+  https://ai-portal.company.com/auth/callback  (production)
+  ```
+</Step>
+
+<Step title="Disable implicit grant">
+  Under **Implicit grant and hybrid flows**, leave both unchecked:
+  - Access tokens — unchecked
+  - ID tokens — unchecked
+
+  The portal uses auth code + PKCE, not implicit flow.
+</Step>
+
+<Step title="Enable public client flows (for CLI)">
+  Under **Advanced settings**, set **Allow public client flows** → **Yes**.
+
+  This is required for the CLI's MSAL device-code flow. If you don't plan to use the CLI, leave this as **No**.
+</Step>
+</Steps>
+
+## Create app roles
+
+App Roles control who is a portal administrator versus a regular user.
+
+Go to **App roles** → **Create app role**:
+
+| Field | Value |
+|---|---|
+| **Display name** | `Portal Administrator` |
+| **Allowed member types** | `Users/Groups` |
+| **Value** | `portal_admin` |
+| **Description** | `Full administrative access to the Apollos AI provisioning portal` |
+| **Enable this app role** | Checked |
+
+<Note>
+  Regular portal users don't need an explicit role — security group membership is sufficient for access. The `portal_admin` role grants access to the admin dashboard, audit logs, and user management.
+</Note>
+
+## Set up security groups
+
+### Create team groups
+
+Create a security group for each LiteLLM team. Go to **Microsoft Entra ID** → **Groups** → **New group**:
+
+| Field | Value |
+|---|---|
+| **Group type** | Security |
+| **Group name** | `SG-AI-Engineering-Team` (your naming convention) |
+| **Group description** | `Members provisioned into the Engineering AI Team on LiteLLM` |
+| **Membership type** | Assigned (or Dynamic for attribute-based membership) |
+
+Note the **Object ID** of each group — these go into the portal's `teams.yaml`:
+
+```yaml
+teams:
+  - entra_group_id: "<Object ID from Azure>"
+    team_alias: "Engineering AI Team"
+    models: ["gpt-4o", "gpt-4o-mini"]
+    max_budget: 500
+    budget_duration: "30d"
+```
+
+### Create a gate group (recommended)
+
+Create a separate "gate" security group that controls who can access the portal, independent of team assignment:
+
+| Group | Purpose |
+|---|---|
+| `SG-AI-Platform-Users` | Must be a member to access the portal |
+| `SG-AI-Engineering-Team` | Determines which LiteLLM team the user joins |
+
+A user must be in the gate group **and** at least one team group. This lets you:
+- Add someone to `SG-AI-Platform-Users` without immediately assigning a team
+- Remove someone from `SG-AI-Platform-Users` to block all portal access without touching team groups
+
+Configure in `teams.yaml`:
+
+```yaml
+required_groups:
+  - "<Object ID of SG-AI-Platform-Users>"
+```
+
+## Assign groups to the enterprise application
+
+The App Registration creates a corresponding Enterprise Application. Go to **Microsoft Entra ID** → **Enterprise applications** → find your portal app → **Users and groups** → **Add user/group**.
+
+| Group | Role | Purpose |
+|---|---|---|
+| `SG-AI-Platform-Users` | User (default) | All users who can access the portal |
+| `SG-AI-Platform-Admins` | Portal Administrator | Portal admins (maps to `portal_admin` role) |
+| `SG-AI-Engineering-Team` | User | Maps to Engineering AI Team in LiteLLM |
+| `SG-AI-DataScience-Team` | User | Maps to Data Science Team in LiteLLM |
+
+<Tip>
+  Under **Properties**, set **Assignment required?** → **Yes** to prevent users not assigned to the Enterprise App from signing in. This is recommended for controlled rollout.
+</Tip>
+
+## Environment variables
+
+After setup, add these to your portal environment:
+
+<CodeGroup>
+```bash backend/.env
+AZURE_TENANT_ID=<Directory (tenant) ID>
+AZURE_CLIENT_ID=<Application (client) ID>
+AZURE_CLIENT_SECRET=<Client secret value>
+PORTAL_ADMIN_ROLE=portal_admin
+```
+
+```bash frontend/.env
+VITE_AZURE_CLIENT_ID=<Application (client) ID>
+VITE_AZURE_TENANT_ID=<Directory (tenant) ID>
+```
+</CodeGroup>
+
+## Verify the setup
+
+### Checklist
+
+- [ ] App Registration created with SPA redirect URIs
+- [ ] Client secret generated and stored securely
+- [ ] Delegated permission `User.Read` added with admin consent
+- [ ] Application permission `GroupMember.Read.All` added with admin consent
+- [ ] Public client flows enabled (if CLI is needed)
+- [ ] App Role `portal_admin` created
+- [ ] Enterprise Application: **Assignment required** = Yes
+- [ ] Security groups created for each LiteLLM team
+- [ ] Gate group created (e.g., `SG-AI-Platform-Users`)
+- [ ] All groups assigned to the Enterprise Application
+- [ ] Admin group assigned with Portal Administrator role
+
+### Test the auth flow
+
+<Accordion title="Test user authentication (device-code flow)">
+  ```bash
+  # Request a device code
+  curl -X POST "https://login.microsoftonline.com/<tenant-id>/oauth2/v2.0/devicecode" \
+    -d "client_id=<client-id>" \
+    -d "scope=openid profile email User.Read"
+
+  # Follow the instructions: visit https://microsoft.com/devicelogin and enter the code
+
+  # Poll for the token
+  curl -X POST "https://login.microsoftonline.com/<tenant-id>/oauth2/v2.0/token" \
+    -d "client_id=<client-id>" \
+    -d "grant_type=urn:ietf:params:oauth:grant_type:device_code" \
+    -d "device_code=<device_code_from_above>"
+  ```
+
+  Decode the ID token at [jwt.ms](https://jwt.ms) and verify:
+  - `oid` is present (user Object ID)
+  - `preferred_username` has the email
+  - `roles` contains `portal_admin` (if the user has that role)
+  - `groups` is **not** in the token — this is expected (the portal uses Graph API)
+</Accordion>
+
+<Accordion title="Test Graph API group resolution (client credentials)">
+  ```bash
+  # Get an app-only token
+  curl -X POST "https://login.microsoftonline.com/<tenant-id>/oauth2/v2.0/token" \
+    -d "client_id=<client-id>" \
+    -d "client_secret=<client-secret>" \
+    -d "scope=https://graph.microsoft.com/.default" \
+    -d "grant_type=client_credentials"
+
+  # List group memberships for a user (by their Entra OID)
+  curl -H "Authorization: Bearer <token>" \
+    "https://graph.microsoft.com/v1.0/users/<user-oid>/memberOf/microsoft.graph.group?\$select=id,displayName&\$top=999"
+  ```
+
+  The response should list all groups the user belongs to. Match the group `id` values against the `entra_group_id` entries in your `teams.yaml`.
+
+  <Note>
+    Graph API returns a maximum of 999 results per page. If the response includes `@odata.nextLink`, follow it to get the complete list. The portal backend handles pagination automatically via the `msgraph-sdk-python` page iterator.
+  </Note>
+</Accordion>
+
+## Ongoing maintenance
+
+| Task | Frequency | Details |
+|---|---|---|
+| Rotate client secret | Before expiry (24 months) | Create a new secret → update portal env → delete old secret |
+| Review group memberships | As needed | Add or remove users from security groups. The portal picks up changes on next login or deprovisioning cron run |
+| Audit admin role assignments | Quarterly | Review who has the `Portal Administrator` role in the Enterprise Application |
+| Monitor consent status | After policy changes | Verify admin consent is still granted for `GroupMember.Read.All` after conditional access changes |
+
+## Troubleshooting
+
+| Error | Cause | Fix |
+|---|---|---|
+| `AADSTS65001: The user or admin has not consented` | Admin consent not granted | Go to API permissions → Grant admin consent |
+| `AADSTS700016: Application not found in tenant` | Wrong client or tenant ID | Verify `AZURE_CLIENT_ID` and `AZURE_TENANT_ID` match your App Registration |
+| `AADSTS50105: The signed in user is not assigned to a role` | User not assigned to Enterprise Application | Add the user's group to the Enterprise App |
+| Graph API returns 403 on `/memberOf` | Missing `GroupMember.Read.All` permission | Grant admin consent for the application permission |
+| Graph API returns partial group list | Pagination not followed | Ensure the backend follows all `@odata.nextLink` pages |
+| `roles` claim missing from token | User not assigned an App Role | Check Enterprise App → Users and groups → Role column |
+| Device-code flow fails | Public client flows not enabled | Set **Allow public client flows** → **Yes** in Authentication |
+| `AADSTS9002326: Cross-origin token redemption` | Redirect URI under Web platform, not SPA | Move redirect URI to the Single-page application platform |

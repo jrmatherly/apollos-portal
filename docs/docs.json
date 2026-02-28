@@ -29,6 +29,10 @@
           {
             "group": "CLI",
             "pages": ["cli/overview"]
+          },
+          {
+            "group": "Administration",
+            "pages": ["administration/entra-id-setup"]
           }
         ]
       },
