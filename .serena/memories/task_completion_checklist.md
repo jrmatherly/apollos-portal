@@ -19,3 +19,8 @@ When a task is completed, run these checks before committing:
 - `vite-env.d.ts` must exist or `import.meta.env` TypeScript errors appear
 - CORS must use `get_settings().portal_base_url`, not hardcoded localhost
 - Ruff auto-fix (`--fix`) handles UP037 (unnecessary quotes with future annotations) and I001 (import sort)
+- After adding/changing API endpoints, run `mise run docs:openapi` to regenerate the OpenAPI spec
+- Correlation IDs use `structlog.contextvars.bind_contextvars()` — not a custom ContextVar
+- Logging format configurable via `LOG_JSON` env var (defaults to `True`)
+- Admin endpoint tests: override both `require_admin` and `get_session` dependencies
+- CSV export tests: patch `app.api.v1.endpoints.admin.query_audit_log` (standalone import, not module attribute)

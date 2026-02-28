@@ -11,8 +11,9 @@ All 6 phases (0–5) are **complete** as of Feb 28, 2026:
 - **Phase 3**: Self-service dashboard (keys, usage, models, teams, settings)
 - **Phase 4**: Key lifecycle automation (email notifications, rotation/deprovisioning/reconciliation cron jobs)
 - **Phase 5**: Admin features & hardening (admin dashboard, rate limiting, structured logging, health endpoints, input validation, 90+ tests)
+- **TODO remediation (PR #4)**: 11 deferred code review items — backend fixes (CSV charset, rate limit, logging config, correlation ID simplification), test coverage (422 handler, CSV export), refactoring (DRY audit filters), features (admin keys status filter), frontend UX (confirmation dialogs, Generate New Key modal with key reveal)
 
-Remaining work: deferred TODO items (frontend UX polish, additional test coverage, minor code quality). See `.scratchpad/TODO.md`.
+Remaining work: I4 (provisioning integration tests) is the sole open item. See `.scratchpad/TODO.md`.
 
 ## Architecture
 ```
@@ -25,7 +26,7 @@ apollos-portal/
 │   │   ├── services/          # litellm_client, provisioning, key/rotation/notification/deprovisioning/reconciliation/email/admin services, audit
 │   │   └── templates/email/   # Jinja2 email templates (5 templates)
 │   ├── alembic/       # Database migrations
-│   └── tests/         # 90+ pytest tests (16 test files)
+│   └── tests/         # 109 pytest tests (18 test files)
 ├── frontend/         # React 19 + Vite 7 SPA (Node 24, TypeScript 5.9)
 ├── cli/              # Click CLI with MSAL device-code auth (Python 3.12, uv)
 ├── docs/             # Mintlify documentation site (MDX + docs.json)
