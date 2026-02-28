@@ -67,6 +67,11 @@ export function ApiKeys() {
   } | null>(null);
 
   const [showNewKey, setShowNewKey] = useState(false);
+  const [createdKey, setCreatedKey] = useState<{
+    key: string;
+    key_alias: string;
+    team_alias: string;
+  } | null>(null);
 
   const teams = useMemo(() => {
     if (!keys.data) return [];
@@ -431,12 +436,22 @@ export function ApiKeys() {
         open={showNewKey}
         teams={teams}
         loading={createKey.isPending}
+        createdKey={createdKey}
         onSubmit={(teamId) => {
           createKey.mutate(teamId, {
-            onSuccess: () => setShowNewKey(false),
+            onSuccess: (data) => {
+              setCreatedKey({
+                key: data.key,
+                key_alias: data.key_alias,
+                team_alias: data.team_alias,
+              });
+            },
           });
         }}
-        onCancel={() => setShowNewKey(false)}
+        onCancel={() => {
+          setShowNewKey(false);
+          setCreatedKey(null);
+        }}
       />
 
       <ConfirmDialog

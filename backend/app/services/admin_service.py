@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from typing import Literal
 
 import structlog
 from sqlalchemy import func, select
@@ -65,7 +66,7 @@ async def list_all_keys(
     *,
     page: int = 1,
     page_size: int = 50,
-    status: str = "active",
+    status: Literal["active", "revoked", "expired"] = "active",
 ) -> tuple[list[ProvisionedKey], int]:
     """List all keys across all users with pagination, filtered by status."""
     count_q = select(func.count()).select_from(ProvisionedKey).where(ProvisionedKey.status == status)
