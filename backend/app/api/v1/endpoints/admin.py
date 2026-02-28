@@ -5,6 +5,7 @@ from __future__ import annotations
 import csv
 import io
 from datetime import datetime
+from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request, status
 from fastapi.responses import StreamingResponse
@@ -164,10 +165,11 @@ async def admin_reprovision(
 async def admin_list_keys(
     page: int = Query(1, ge=1),
     page_size: int = Query(50, ge=1, le=100),
+    status: Literal["active", "revoked", "expired"] = Query(default="active"),
     session: AsyncSession = Depends(get_session),
 ):
-    """List all active keys across all users (paginated)."""
-    keys, total = await list_all_keys(session, page=page, page_size=page_size)
+    """List all keys across all users (paginated), filtered by status."""
+    keys, total = await list_all_keys(session, page=page, page_size=page_size, status=status)
     return AdminKeysResponse(
         keys=[
             AdminAllKeysItem(
