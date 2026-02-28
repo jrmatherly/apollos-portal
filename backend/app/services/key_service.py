@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-import logging
 import re
 from datetime import UTC, datetime, timedelta
 
+import structlog
+from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -26,22 +27,24 @@ from app.services.audit import (
 )
 from app.services.litellm_client import LiteLLMClient
 
-logger = logging.getLogger(__name__)
+logger = structlog.stdlib.get_logger(__name__)
 
 
 def _slugify(text: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")
 
 
-def _compute_status(key: ProvisionedKey) -> str:
+def _normalize_expires(key: ProvisionedKey) -> datetime:
+    if key.portal_expires_at.tzinfo is None:
+        return key.portal_expires_at.replace(tzinfo=UTC)
+    return key.portal_expires_at
+
+
+def _compute_status(key: ProvisionedKey, now: datetime) -> str:
     """Derive display status from key state."""
     if key.status in ("revoked", "rotated"):
         return key.status
-    now = datetime.now(UTC)
-    if key.portal_expires_at.tzinfo is None:
-        expires = key.portal_expires_at.replace(tzinfo=UTC)
-    else:
-        expires = key.portal_expires_at
+    expires = _normalize_expires(key)
     if expires < now:
         return "expired"
     days_left = (expires - now).days
@@ -50,37 +53,39 @@ def _compute_status(key: ProvisionedKey) -> str:
     return "active"
 
 
-def _days_until_expiry(key: ProvisionedKey) -> int | None:
+def _days_until_expiry(key: ProvisionedKey, now: datetime) -> int | None:
     if key.status in ("revoked", "rotated"):
         return None
-    now = datetime.now(UTC)
-    if key.portal_expires_at.tzinfo is None:
-        expires = key.portal_expires_at.replace(tzinfo=UTC)
-    else:
-        expires = key.portal_expires_at
+    expires = _normalize_expires(key)
     return max(0, (expires - now).days)
 
 
 def _to_list_item(k: ProvisionedKey) -> KeyListItem:
+    now = datetime.now(UTC)
     return KeyListItem(
         id=k.id,
         litellm_key_alias=k.litellm_key_alias,
         team_id=k.team_id,
         team_alias=k.team_alias,
-        status=_compute_status(k),
+        status=_compute_status(k, now),
         portal_expires_at=k.portal_expires_at,
         created_at=k.created_at,
         last_spend=float(k.last_spend) if k.last_spend is not None else None,
-        days_until_expiry=_days_until_expiry(k),
+        days_until_expiry=_days_until_expiry(k, now),
     )
 
 
 async def _get_db_user(session: AsyncSession, user: CurrentUser) -> ProvisionedUser:
-    """Get the portal DB user or raise 404."""
+    """Get the portal DB user or raise 404. Rejects deprovisioned accounts."""
     result = await session.execute(select(ProvisionedUser).where(ProvisionedUser.entra_oid == user.oid))
     db_user = result.scalar_one_or_none()
     if not db_user:
         raise LookupError("User not provisioned")
+    if not db_user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Account is deprovisioned",
+        )
     return db_user
 
 
@@ -202,9 +207,9 @@ async def rotate_key(
     if old_key.status != "active":
         raise ValueError("Can only rotate active keys")
 
-    # Block old key in LiteLLM
+    # Delete old key in LiteLLM (rotation expires the key)
     if old_key.litellm_key_id:
-        await litellm.block_key(old_key.litellm_key_id)
+        await litellm.delete_key(old_key.litellm_key_id)
 
     # Mark old key as rotated
     old_key.status = "rotated"

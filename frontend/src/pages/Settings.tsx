@@ -1,4 +1,4 @@
-import { Bell, KeyRound, Loader2, Palette } from "lucide-react";
+import { Bell, KeyRound, Loader2 } from "lucide-react";
 import { useSettings, useUpdateSettings } from "../hooks/useSettings";
 
 export function Settings() {
@@ -50,9 +50,11 @@ export function Settings() {
     updateSettings.mutate({ default_key_duration_days: days });
   };
 
-  const handleToggle = (key: "notify_14d" | "notify_7d" | "notify_3d" | "notify_1d") => {
-    if (!settings) return;
-    updateSettings.mutate({ [key]: !settings[key] });
+  const handleToggle = (
+    key: "notify_14d" | "notify_7d" | "notify_3d" | "notify_1d",
+    currentValue: boolean,
+  ) => {
+    updateSettings.mutate({ [key]: !currentValue });
   };
 
   return (
@@ -134,7 +136,10 @@ export function Settings() {
                   </div>
                   <button
                     type="button"
-                    onClick={() => handleToggle(n.key)}
+                    role="switch"
+                    aria-checked={enabled}
+                    aria-label={n.label}
+                    onClick={() => handleToggle(n.key, enabled)}
                     className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
                       enabled ? "bg-primary" : "bg-surface-border"
                     }`}
@@ -148,54 +153,6 @@ export function Settings() {
                 </div>
               );
             })}
-          </div>
-        </section>
-
-        {/* Theme Preference */}
-        <section className="bg-surface border border-surface-border rounded-lg p-6 shadow-sm">
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold flex items-center gap-2 text-text-primary">
-              <Palette className="w-5 h-5 text-primary" />
-              Theme Preference
-            </h3>
-            <p className="text-sm text-text-secondary mt-1">
-              Customize the portal appearance for your session.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="cursor-pointer group">
-              <div className="aspect-video rounded-md bg-white border border-surface-border p-2 mb-2 flex flex-col gap-1 overflow-hidden ring-primary group-hover:ring-2 transition-all">
-                <div className="w-full h-2 bg-gray-100 rounded"></div>
-                <div className="w-2/3 h-2 bg-gray-50 rounded"></div>
-                <div className="mt-auto flex gap-1">
-                  <div className="w-3 h-3 bg-gray-100 rounded"></div>
-                  <div className="w-3 h-3 bg-gray-100 rounded"></div>
-                </div>
-              </div>
-              <p className="text-xs font-medium text-center text-text-primary">Light Mode</p>
-            </div>
-            <div className="cursor-pointer group">
-              <div className="aspect-video rounded-md bg-[#0A0F1E] border border-primary p-2 mb-2 flex flex-col gap-1 overflow-hidden ring-2 ring-primary transition-all shadow-[0_0_15px_-5px_rgba(99,102,241,0.4)]">
-                <div className="w-full h-2 bg-[#111827] rounded"></div>
-                <div className="w-2/3 h-2 bg-[#111827] rounded"></div>
-                <div className="mt-auto flex gap-1">
-                  <div className="w-3 h-3 bg-primary/20 rounded"></div>
-                  <div className="w-3 h-3 bg-[#111827] rounded"></div>
-                </div>
-              </div>
-              <p className="text-xs font-medium text-center text-primary">Dark Mode</p>
-            </div>
-            <div className="cursor-pointer group">
-              <div className="aspect-video rounded-md bg-gradient-to-br from-white to-[#0A0F1E] border border-surface-border p-2 mb-2 flex flex-col gap-1 overflow-hidden group-hover:ring-2 ring-primary transition-all">
-                <div className="w-full h-2 bg-gray-400/20 rounded"></div>
-                <div className="w-2/3 h-2 bg-gray-400/20 rounded"></div>
-                <div className="mt-auto flex gap-1">
-                  <div className="w-3 h-3 bg-gray-400/20 rounded"></div>
-                  <div className="w-3 h-3 bg-gray-400/20 rounded"></div>
-                </div>
-              </div>
-              <p className="text-xs font-medium text-center text-text-primary">System Default</p>
-            </div>
           </div>
         </section>
       </div>

@@ -32,5 +32,5 @@ class ProvisionedKey(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
-    user: Mapped[ProvisionedUser] = relationship(back_populates="keys")
+    user: Mapped[ProvisionedUser] = relationship(back_populates="keys", lazy="raise")
     rotated_from: Mapped[ProvisionedKey | None] = relationship(remote_side="ProvisionedKey.id")

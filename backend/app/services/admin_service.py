@@ -136,22 +136,24 @@ async def admin_deprovision_user(
 
     # Block all active keys (continue on LiteLLM failure; reconciliation job catches drift)
     for key in user.keys:
-        if key.status == "active" and key.litellm_key_id:
+        if key.status != "active":
+            continue
+        if key.litellm_key_id:
             try:
                 await litellm.block_key(key.litellm_key_id)
             except Exception:
                 logger.exception("Failed to block LiteLLM key %s during admin deprovision", key.litellm_key_id)
-            key.status = "revoked"
-            key.revoked_at = datetime.now(UTC)
-            await log_action(
-                session,
-                actor_email=admin.email,
-                actor_entra_oid=admin.oid,
-                action=ACTION_KEY_DEPROVISIONED,
-                target_type="key",
-                target_id=str(key.id),
-                details={"reason": "user_deprovisioned"},
-            )
+        key.status = "revoked"
+        key.revoked_at = datetime.now(UTC)
+        await log_action(
+            session,
+            actor_email=admin.email,
+            actor_entra_oid=admin.oid,
+            action=ACTION_KEY_DEPROVISIONED,
+            target_type="key",
+            target_id=str(key.id),
+            details={"reason": "user_deprovisioned"},
+        )
 
     user.is_active = False
     user.deprovisioned_at = datetime.now(UTC)

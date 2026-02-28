@@ -14,6 +14,21 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
+let msalInitPromise: Promise<void> | null = null;
+function ensureMsalInit(): Promise<void> {
+  if (!msalInitPromise) {
+    msalInitPromise = msalInstance
+      .initialize()
+      .then(() => msalInstance.handleRedirectPromise())
+      .then((response) => {
+        if (response?.account) {
+          msalInstance.setActiveAccount(response.account);
+        }
+      });
+  }
+  return msalInitPromise;
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AccountInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -22,16 +37,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const init = async () => {
       try {
-        // MSAL v5 requires explicit initialization before use
-        await msalInstance.initialize();
+        await ensureMsalInit();
 
-        // Handle redirect response (if returning from login)
-        const response = await msalInstance.handleRedirectPromise();
-        if (response?.account) {
-          msalInstance.setActiveAccount(response.account);
-          setUser(response.account);
+        const active = msalInstance.getActiveAccount();
+        if (active) {
+          setUser(active);
         } else {
-          // Check for existing session
           const accounts = msalInstance.getAllAccounts();
           if (accounts.length > 0) {
             msalInstance.setActiveAccount(accounts[0]);

@@ -35,7 +35,7 @@ function getDateRange(range: string): { startDate?: string; endDate?: string } {
 
 export function Usage() {
   const [dateRange, setDateRange] = useState("30d");
-  const params = getDateRange(dateRange);
+  const params = useMemo(() => getDateRange(dateRange), [dateRange]);
   const { data, isLoading, error } = useUsage(params);
 
   // Pivot data points by date for chart: { date, model1: spend, model2: spend, ... }

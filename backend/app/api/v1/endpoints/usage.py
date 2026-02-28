@@ -1,5 +1,4 @@
-import logging
-
+import structlog
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -10,7 +9,7 @@ from app.models.provisioned_user import ProvisionedUser
 from app.schemas.common import UsageDataPoint, UsageResponse, UsageSummary
 from app.services.litellm_client import LiteLLMClient, get_litellm_client
 
-logger = logging.getLogger(__name__)
+logger = structlog.stdlib.get_logger(__name__)
 
 router = APIRouter()
 
@@ -20,8 +19,8 @@ async def get_usage(
     user: CurrentUser = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
     litellm: LiteLLMClient = Depends(get_litellm_client),
-    start_date: str | None = Query(None),
-    end_date: str | None = Query(None),
+    start_date: str | None = Query(None, max_length=10, pattern=r"^\d{4}-\d{2}-\d{2}$"),
+    end_date: str | None = Query(None, max_length=10, pattern=r"^\d{4}-\d{2}-\d{2}$"),
 ):
     """Get usage/spend data for the current user."""
     result = await session.execute(select(ProvisionedUser).where(ProvisionedUser.entra_oid == user.oid))

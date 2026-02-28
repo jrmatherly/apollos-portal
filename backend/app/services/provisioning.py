@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-import logging
 import re
 from datetime import UTC, datetime, timedelta
 
+import structlog
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -29,7 +29,7 @@ from app.services.audit import (
 )
 from app.services.litellm_client import LiteLLMClient
 
-logger = logging.getLogger(__name__)
+logger = structlog.stdlib.get_logger(__name__)
 
 
 def _slugify(text: str) -> str:

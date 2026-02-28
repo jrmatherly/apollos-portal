@@ -3,6 +3,7 @@
  * All requests go through the Vite dev proxy (/api -> localhost:8000).
  */
 
+import { InteractionRequiredAuthError } from "@azure/msal-browser";
 import { loginRequest, msalInstance } from "./msal";
 
 const API_BASE = "/api/v1";
@@ -27,7 +28,10 @@ async function getToken(): Promise<string | null> {
       account,
     });
     return response.accessToken;
-  } catch {
+  } catch (err) {
+    if (err instanceof InteractionRequiredAuthError) {
+      await msalInstance.acquireTokenRedirect({ ...loginRequest, account });
+    }
     return null;
   }
 }

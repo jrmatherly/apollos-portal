@@ -12,5 +12,7 @@ def init_db(database_url: str):
 
 
 async def get_session():
+    if async_session_factory is None:
+        raise RuntimeError("Database not initialized — call init_db() before using get_session()")
     async with async_session_factory() as session:
         yield session

@@ -7,7 +7,7 @@ import json
 from unittest.mock import patch
 
 import pytest
-from app.core.auth import CurrentUser, _get_token_roles
+from app.core.auth import CurrentUser, _get_token_claims
 
 
 class TestCurrentUser:
@@ -46,17 +46,20 @@ class TestCurrentUser:
             assert user.is_admin is False
 
 
-class TestGetTokenRoles:
+class TestGetTokenClaims:
     @pytest.mark.asyncio(loop_scope="function")
-    async def test_extracts_roles(self):
-        """Build a fake JWT with roles in payload and verify extraction."""
+    async def test_extracts_roles_and_aud(self):
+        """Build a fake JWT with roles and aud in payload and verify extraction."""
         header = base64.urlsafe_b64encode(json.dumps({"alg": "RS256"}).encode()).rstrip(b"=")
-        payload = base64.urlsafe_b64encode(json.dumps({"roles": ["Portal.User", "Portal.Admin"]}).encode()).rstrip(b"=")
+        payload = base64.urlsafe_b64encode(
+            json.dumps({"roles": ["Portal.User", "Portal.Admin"], "aud": "my-client-id"}).encode()
+        ).rstrip(b"=")
         signature = base64.urlsafe_b64encode(b"fakesig").rstrip(b"=")
         token = f"{header.decode()}.{payload.decode()}.{signature.decode()}"
 
-        roles = await _get_token_roles(token)
-        assert roles == ["Portal.User", "Portal.Admin"]
+        claims = await _get_token_claims(token)
+        assert claims["roles"] == ["Portal.User", "Portal.Admin"]
+        assert claims["aud"] == "my-client-id"
 
     @pytest.mark.asyncio(loop_scope="function")
     async def test_no_roles_claim(self):
@@ -66,11 +69,13 @@ class TestGetTokenRoles:
         signature = base64.urlsafe_b64encode(b"fakesig").rstrip(b"=")
         token = f"{header.decode()}.{payload.decode()}.{signature.decode()}"
 
-        roles = await _get_token_roles(token)
-        assert roles == []
+        claims = await _get_token_claims(token)
+        assert claims["roles"] == []
+        assert claims["aud"] == ""
 
     @pytest.mark.asyncio(loop_scope="function")
     async def test_malformed_token(self):
-        """Malformed token returns empty list instead of crashing."""
-        roles = await _get_token_roles("not-a-jwt")
-        assert roles == []
+        """Malformed token returns empty defaults instead of crashing."""
+        claims = await _get_token_claims("not-a-jwt")
+        assert claims["roles"] == []
+        assert claims["aud"] == ""

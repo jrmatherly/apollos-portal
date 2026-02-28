@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-import logging
-
+import structlog
 from sqlalchemy import select
 
 from app.config import Settings
@@ -10,7 +9,7 @@ from app.models.provisioned_key import ProvisionedKey
 from app.services.audit import ACTION_RECONCILIATION_DRIFT, log_action
 from app.services.litellm_client import LiteLLMClient
 
-logger = logging.getLogger(__name__)
+logger = structlog.stdlib.get_logger(__name__)
 
 
 async def run_reconciliation_job(settings: Settings) -> None:

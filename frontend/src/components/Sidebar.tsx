@@ -1,12 +1,7 @@
-import { type ClassValue, clsx } from "clsx";
 import { BarChart3, Cpu, Key, LayoutDashboard, LogOut, Settings, Users, Zap } from "lucide-react";
 import { NavLink } from "react-router-dom";
-import { twMerge } from "tailwind-merge";
 import { useAuth } from "../contexts/AuthContext";
-
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
+import { cn } from "../lib/utils";
 
 const navItems = [
   { name: "Dashboard", path: "/", icon: LayoutDashboard },
@@ -24,6 +19,7 @@ export function Sidebar() {
   const displayEmail = user?.username || "";
   const initials = displayName
     .split(" ")
+    .filter((s) => s.length > 0)
     .map((n) => n[0])
     .join("")
     .toUpperCase()
@@ -66,6 +62,7 @@ export function Sidebar() {
       <div className="mt-auto p-4 border-t border-surface-border">
         <button
           type="button"
+          aria-label="Sign out"
           onClick={() => logout()}
           className="w-full flex items-center gap-3 px-3 py-2 rounded-md hover:bg-surface-border/50 transition-colors cursor-pointer group"
         >

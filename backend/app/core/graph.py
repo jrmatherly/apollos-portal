@@ -1,11 +1,12 @@
-import logging
+import asyncio
 from typing import Any, ClassVar
 
 import msal
+import structlog
 
 from app.config import Settings
 
-logger = logging.getLogger(__name__)
+logger = structlog.stdlib.get_logger(__name__)
 
 
 class GraphClient:
@@ -24,7 +25,10 @@ class GraphClient:
 
     async def _get_app_token(self) -> str:
         """Acquire an app-only token via client credentials flow."""
-        result = self._msal_app.acquire_token_for_client(scopes=self.GRAPH_SCOPE)
+        loop = asyncio.get_running_loop()
+        result = await loop.run_in_executor(
+            None, lambda: self._msal_app.acquire_token_for_client(scopes=self.GRAPH_SCOPE)
+        )
         if "access_token" not in result:
             error = result.get("error_description", "Unknown error")
             logger.error("Failed to acquire Graph API token: %s", error)

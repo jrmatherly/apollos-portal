@@ -1,16 +1,16 @@
 from __future__ import annotations
 
-import logging
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from pathlib import Path
 
 import aiosmtplib
+import structlog
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from app.config import Settings
 
-logger = logging.getLogger(__name__)
+logger = structlog.stdlib.get_logger(__name__)
 
 _TEMPLATE_DIR = Path(__file__).parent.parent / "templates" / "email"
 _jinja_env = Environment(

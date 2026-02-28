@@ -3,13 +3,14 @@
 from __future__ import annotations
 
 import logging
+import re
 import uuid
 
 import structlog
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 
-def setup_logging(*, json_output: bool = True) -> None:
+def setup_logging(*, json_output: bool = True, log_level: str = "INFO") -> None:
     """Configure structlog with JSON rendering and stdlib integration."""
     shared_processors: list = [
         structlog.contextvars.merge_contextvars,
@@ -45,7 +46,7 @@ def setup_logging(*, json_output: bool = True) -> None:
     handler = logging.StreamHandler()
     handler.setFormatter(formatter)
     root.addHandler(handler)
-    root.setLevel(logging.INFO)
+    root.setLevel(getattr(logging, log_level.upper(), logging.INFO))
 
     # Quiet noisy third-party loggers
     logging.getLogger("httpx").setLevel(logging.WARNING)
@@ -70,7 +71,11 @@ class CorrelationIdMiddleware:
 
         # Extract or generate correlation ID from request headers
         headers = dict(scope.get("headers", []))
-        cid = headers.get(b"x-request-id", b"").decode() or str(uuid.uuid4())
+        raw_cid = headers.get(b"x-request-id", b"").decode()
+        # Sanitize: allow only alphanumeric, hyphens, underscores; max 64 chars
+        cid = re.sub(r"[^a-zA-Z0-9\-_]", "", raw_cid)[:64]
+        if not cid:
+            cid = str(uuid.uuid4())
         structlog.contextvars.bind_contextvars(correlation_id=cid)
 
         async def send_with_cid(message: Message) -> None:

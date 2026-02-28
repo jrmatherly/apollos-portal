@@ -1,5 +1,7 @@
 from functools import lru_cache
+from typing import Self
 
+from pydantic import model_validator
 from pydantic_settings import BaseSettings
 
 
@@ -41,10 +43,31 @@ class Settings(BaseSettings):
     # --- Teams Config ---
     teams_config_path: str = "teams.yaml"
 
-    # Logging
+    # --- Logging ---
     log_json: bool = True
+    log_level: str = "INFO"
+
+    # --- CORS ---
+    cors_origins: str = ""
 
     model_config = {"env_file": ".env", "extra": "ignore"}
+
+    @model_validator(mode="after")
+    def _check_required_secrets(self) -> Self:
+        missing = [
+            name
+            for name in (
+                "azure_tenant_id",
+                "azure_client_id",
+                "azure_client_secret",
+                "litellm_base_url",
+                "litellm_master_key",
+            )
+            if not getattr(self, name)
+        ]
+        if missing:
+            raise ValueError(f"Required secrets not set: {', '.join(missing)}")
+        return self
 
 
 @lru_cache
