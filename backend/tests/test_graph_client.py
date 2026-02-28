@@ -45,9 +45,7 @@ class TestGetAppToken:
     async def test_successful_token_acquisition(self):
         """Token is returned when MSAL succeeds."""
         client = _make_client()
-        client._msal_app.acquire_token_for_client.return_value = {
-            "access_token": "test-token-123"
-        }
+        client._msal_app.acquire_token_for_client.return_value = {"access_token": "test-token-123"}
 
         token = await client._get_app_token()
         assert token == "test-token-123"  # noqa: S105
@@ -141,9 +139,7 @@ class TestGetUserGroups:
         """Empty group list returns empty."""
         client = _make_client()
 
-        transport = httpx.MockTransport(
-            lambda request: httpx.Response(200, json={"value": []})
-        )
+        transport = httpx.MockTransport(lambda request: httpx.Response(200, json={"value": []}))
 
         with (
             patch.object(client, "_get_app_token", return_value="mock-token"),
@@ -165,9 +161,7 @@ class TestGraphClientErrors:
         """HTTP error from Graph API raises httpx.HTTPStatusError."""
         client = _make_client()
 
-        transport = httpx.MockTransport(
-            lambda request: httpx.Response(500, text="Internal Server Error")
-        )
+        transport = httpx.MockTransport(lambda request: httpx.Response(500, text="Internal Server Error"))
 
         with (
             patch.object(client, "_get_app_token", return_value="mock-token"),
@@ -188,9 +182,7 @@ class TestGraphClientErrors:
             "userPrincipalName": "alice@example.com",
         }
 
-        transport = httpx.MockTransport(
-            lambda request: httpx.Response(200, json=profile_data)
-        )
+        transport = httpx.MockTransport(lambda request: httpx.Response(200, json=profile_data))
 
         with (
             patch.object(client, "_get_app_token", return_value="mock-token"),

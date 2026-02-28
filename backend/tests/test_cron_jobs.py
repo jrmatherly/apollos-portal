@@ -94,9 +94,7 @@ class TestRunRotationJob:
 
         mock_litellm = AsyncMock()
         mock_litellm.delete_key = AsyncMock()
-        mock_litellm.generate_key = AsyncMock(
-            return_value={"key": "sk-new", "token": "tok-new"}
-        )
+        mock_litellm.generate_key = AsyncMock(return_value={"key": "sk-new", "token": "tok-new"})
         mock_litellm.close = AsyncMock()
 
         with (
@@ -158,9 +156,7 @@ class TestRunRotationJob:
 
         mock_litellm = AsyncMock()
         mock_litellm.delete_key = AsyncMock()
-        mock_litellm.generate_key = AsyncMock(
-            return_value={"key": "sk-new", "token": "tok-new"}
-        )
+        mock_litellm.generate_key = AsyncMock(return_value={"key": "sk-new", "token": "tok-new"})
         mock_litellm.close = AsyncMock()
 
         with (

@@ -34,9 +34,7 @@ async def test_422_validation_error_shape():
     app.dependency_overrides[get_session] = _mock_session
 
     try:
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.get("/api/v1/admin/users?page=not_a_number")
         assert response.status_code == 422
         body = response.json()
@@ -80,9 +78,7 @@ async def test_ready_endpoint_response_shape():
 async def test_unauthenticated_error_shape():
     """Missing Bearer token on a protected endpoint triggers HTTPException handler."""
     app.dependency_overrides.clear()
-    async with AsyncClient(
-        transport=ASGITransport(app=app), base_url="http://test"
-    ) as client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         response = await client.get("/api/v1/keys")
     assert response.status_code in (401, 403)
     body = response.json()
@@ -94,9 +90,7 @@ async def test_403_non_admin_error_shape():
     """Non-admin hitting admin endpoint returns 403 with structured response."""
 
     def _mock_user():
-        return CurrentUser(
-            oid="user-oid", email="user@test.com", name="User", roles=["Portal.User"]
-        )
+        return CurrentUser(oid="user-oid", email="user@test.com", name="User", roles=["Portal.User"])
 
     async def _sess():
         yield AsyncMock()
@@ -105,9 +99,7 @@ async def test_403_non_admin_error_shape():
     app.dependency_overrides[get_session] = _sess
 
     try:
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.get("/api/v1/admin/users")
         assert response.status_code == 403
         body = response.json()
@@ -138,9 +130,7 @@ async def test_422_validation_error_on_keys_endpoint():
     app.dependency_overrides[get_litellm_client] = lambda: AsyncMock()
 
     try:
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             # POST with missing required field triggers validation
             response = await client.post("/api/v1/keys/new", json={})
         assert response.status_code == 422
@@ -173,9 +163,7 @@ async def test_422_validation_error_on_admin_keys_status():
     app.dependency_overrides[get_session] = _sess
 
     try:
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as client:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.get("/api/v1/admin/keys?status=invalid_status")
         assert response.status_code == 422
         body = response.json()
