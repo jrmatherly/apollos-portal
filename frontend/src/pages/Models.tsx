@@ -46,15 +46,21 @@ export function Models() {
         <div className="flex flex-col items-center justify-center py-20 text-text-secondary">
           <Box className="w-12 h-12 mb-4 opacity-50" />
           <p className="text-lg font-medium">No models available</p>
-          <p className="text-sm mt-1">Models are assigned based on your team access.</p>
+          <p className="text-sm mt-1">
+            Models are assigned based on your team access.
+          </p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {models.map((model) => {
             const info = model.model_info ?? {};
             const maxTokens = info.max_tokens as number | undefined;
-            const inputCostPerToken = info.input_cost_per_token as number | undefined;
-            const outputCostPerToken = info.output_cost_per_token as number | undefined;
+            const inputCostPerToken = info.input_cost_per_token as
+              | number
+              | undefined;
+            const outputCostPerToken = info.output_cost_per_token as
+              | number
+              | undefined;
 
             return (
               <div

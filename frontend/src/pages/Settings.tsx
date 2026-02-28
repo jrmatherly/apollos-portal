@@ -25,7 +25,12 @@ export function Settings() {
   }
 
   const durations = [
-    { value: 30, label: "30 Days", desc: "Strict enterprise compliance", badge: "Most Secure" },
+    {
+      value: 30,
+      label: "30 Days",
+      desc: "Strict enterprise compliance",
+      badge: "Most Secure",
+    },
     { value: 60, label: "60 Days", desc: "Standard rotation period" },
     { value: 90, label: "90 Days", desc: "Quarterly rotation" },
     { value: 180, label: "180 Days", desc: "Maximum allowed duration" },
@@ -37,8 +42,16 @@ export function Settings() {
       label: "14-day warning",
       desc: "Early notice for key replacement",
     },
-    { key: "notify_7d" as const, label: "7-day warning", desc: "Standard rotation reminder" },
-    { key: "notify_3d" as const, label: "3-day warning", desc: "Urgent notice for expiring keys" },
+    {
+      key: "notify_7d" as const,
+      label: "7-day warning",
+      desc: "Standard rotation reminder",
+    },
+    {
+      key: "notify_3d" as const,
+      label: "3-day warning",
+      desc: "Urgent notice for expiring keys",
+    },
     {
       key: "notify_1d" as const,
       label: "1-day final warning",
@@ -60,7 +73,9 @@ export function Settings() {
   return (
     <div className="p-8 max-w-4xl mx-auto w-full">
       <header className="mb-10">
-        <h2 className="text-3xl font-bold tracking-tight text-text-primary">Settings</h2>
+        <h2 className="text-3xl font-bold tracking-tight text-text-primary">
+          Settings
+        </h2>
         <p className="text-text-secondary mt-2">
           Manage your security preferences and notification configurations.
         </p>
@@ -80,7 +95,8 @@ export function Settings() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {durations.map((d) => {
-              const isSelected = settings?.default_key_duration_days === d.value;
+              const isSelected =
+                settings?.default_key_duration_days === d.value;
               return (
                 <label
                   key={d.value}
@@ -99,7 +115,9 @@ export function Settings() {
                   />
                   <div className="ml-4 flex-1">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-semibold text-text-primary">{d.label}</span>
+                      <span className="text-sm font-semibold text-text-primary">
+                        {d.label}
+                      </span>
                       {d.badge && (
                         <span className="px-2 py-0.5 rounded-full bg-secondary/10 text-secondary text-[10px] font-bold uppercase tracking-wider">
                           {d.badge}
@@ -129,9 +147,14 @@ export function Settings() {
             {notifications.map((n) => {
               const enabled = settings?.[n.key] ?? false;
               return (
-                <div key={n.key} className="flex items-center justify-between py-4">
+                <div
+                  key={n.key}
+                  className="flex items-center justify-between py-4"
+                >
                   <div>
-                    <p className="text-sm font-medium text-text-primary">{n.label}</p>
+                    <p className="text-sm font-medium text-text-primary">
+                      {n.label}
+                    </p>
                     <p className="text-xs text-text-secondary">{n.desc}</p>
                   </div>
                   <button
@@ -140,7 +163,7 @@ export function Settings() {
                     aria-checked={enabled}
                     aria-label={n.label}
                     onClick={() => handleToggle(n.key, enabled)}
-                    className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
                       enabled ? "bg-primary" : "bg-surface-border"
                     }`}
                   >

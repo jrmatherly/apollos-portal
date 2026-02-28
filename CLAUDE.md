@@ -37,6 +37,7 @@
 - SQLAlchemy models use `from __future__ import annotations` + `TYPE_CHECKING` for forward refs
 - Frontend env vars use `VITE_` prefix, accessed via `import.meta.env`
 - `frontend/src/vite-env.d.ts` must exist for `import.meta.env` TypeScript support
+- React 19 does NOT bundle type definitions — `@types/react` and `@types/react-dom` are required devDependencies
 - All Python packages pinned to latest verified versions (use `uv lock --upgrade`)
 - `.scratchpad/` is gitignored — never stage or commit these files
 - `backend/teams.yaml` is gitignored — use `teams.yaml.example` as template

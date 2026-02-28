@@ -17,7 +17,8 @@ export function useKeys() {
 export function useCreateKey() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (teamId: string) => api.post<KeyCreateResponse>("/keys/new", { team_id: teamId }),
+    mutationFn: (teamId: string) =>
+      api.post<KeyCreateResponse>("/keys/new", { team_id: teamId }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["keys"] });
     },
@@ -27,7 +28,8 @@ export function useCreateKey() {
 export function useRotateKey() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (keyId: string) => api.post<KeyRotateResponse>(`/keys/${keyId}/rotate`),
+    mutationFn: (keyId: string) =>
+      api.post<KeyRotateResponse>(`/keys/${keyId}/rotate`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["keys"] });
     },
@@ -37,7 +39,8 @@ export function useRotateKey() {
 export function useRevokeKey() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (keyId: string) => api.post<KeyRevokeResponse>(`/keys/${keyId}/revoke`),
+    mutationFn: (keyId: string) =>
+      api.post<KeyRevokeResponse>(`/keys/${keyId}/revoke`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["keys"] });
     },

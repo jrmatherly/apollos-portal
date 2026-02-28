@@ -1,16 +1,32 @@
-{% extends "base.html" %}
-{% block title %}API Key Expires in {{ days_until_expiry }} Day{% if days_until_expiry != 1 %}s{% endif %}{% endblock %}
-{% block preheader %}Action required: rotate your key before it expires.{% endblock %}
-{% block content %}
+{% extends "base.html" %} {% block title %}API Key Expires in {{
+days_until_expiry }} Day{% if days_until_expiry != 1 %}s{% endif %}{% endblock
+%} {% block preheader %}Action required: rotate your key before it expires.{%
+endblock %} {% block content %}
 <p>Hi {{ user_name }},</p>
-<p>Your API key <strong>{{ key_alias }}</strong> for team <strong>{{ team_alias }}</strong>
-   will expire in <strong>{{ days_until_expiry }} day{% if days_until_expiry != 1 %}s{% endif %}</strong>.</p>
-<p>To avoid service interruption, please rotate your key now:</p>
-<p style="text-align:center;margin:24px 0;">
-  <a href="{{ portal_url }}/keys" style="background:#1e3a5f;color:#fff;padding:12px 24px;
-     text-decoration:none;border-radius:4px;display:inline-block;">Rotate Key</a>
+<p>
+  Your API key <strong>{{ key_alias }}</strong> for team
+  <strong>{{ team_alias }}</strong> will expire in
+  <strong
+    >{{ days_until_expiry }} day{% if days_until_expiry != 1 %}s{% endif
+    %}</strong
+  >.
 </p>
-<p style="color:#888;font-size:13px;">
+<p>To avoid service interruption, please rotate your key now:</p>
+<p style="text-align: center; margin: 24px 0">
+  <a
+    href="{{ portal_url }}/keys"
+    style="
+      background: #1e3a5f;
+      color: #fff;
+      padding: 12px 24px;
+      text-decoration: none;
+      border-radius: 4px;
+      display: inline-block;
+    "
+    >Rotate Key</a
+  >
+</p>
+<p style="color: #888; font-size: 13px">
   If you take no action, this key will be automatically rotated when it expires.
   You will receive an email with instructions to retrieve your new key.
 </p>

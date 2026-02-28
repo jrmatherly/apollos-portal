@@ -17,6 +17,7 @@
 - **Styling**: Tailwind CSS 4 with custom design tokens (bg-primary, text-text-primary, etc.)
 - **Env vars**: Must use `VITE_` prefix, accessed via `import.meta.env`
 - **Type declarations**: `frontend/src/vite-env.d.ts` must exist (Vite client types)
+- **React types**: React 19 does NOT bundle `.d.ts` files — `@types/react` + `@types/react-dom` required as devDependencies
 - **Auth**: MSAL browser v5, PKCE redirect flow, `useAuth()` hook from `AuthContext`
 - **Routing**: React Router v7 with `ProtectedRoute` wrapper
 - **Lint/Format**: Biome 2.4.4 (`npx biome check .` for lint, `npx biome format --write .` for format) + `tsc --noEmit` for type checking
