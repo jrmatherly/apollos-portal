@@ -41,6 +41,9 @@ class Settings(BaseSettings):
     # --- Teams Config ---
     teams_config_path: str = "teams.yaml"
 
+    # Logging
+    log_json: bool = True
+
     model_config = {"env_file": ".env", "extra": "ignore"}
 
 

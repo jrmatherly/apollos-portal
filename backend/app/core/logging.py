@@ -4,22 +4,9 @@ from __future__ import annotations
 
 import logging
 import uuid
-from contextvars import ContextVar
-from typing import Any
 
 import structlog
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
-
-# Context variable for per-request correlation ID
-correlation_id_var: ContextVar[str] = ContextVar("correlation_id", default="")
-
-
-def add_correlation_id(logger: Any, method_name: str, event_dict: dict) -> dict:
-    """Structlog processor that injects the correlation ID."""
-    cid = correlation_id_var.get()
-    if cid:
-        event_dict["correlation_id"] = cid
-    return event_dict
 
 
 def setup_logging(*, json_output: bool = True) -> None:
@@ -28,7 +15,6 @@ def setup_logging(*, json_output: bool = True) -> None:
         structlog.contextvars.merge_contextvars,
         structlog.stdlib.add_log_level,
         structlog.stdlib.add_logger_name,
-        add_correlation_id,
         structlog.processors.TimeStamper(fmt="iso"),
         structlog.processors.StackInfoRenderer(),
         structlog.processors.format_exc_info,
@@ -85,7 +71,7 @@ class CorrelationIdMiddleware:
         # Extract or generate correlation ID from request headers
         headers = dict(scope.get("headers", []))
         cid = headers.get(b"x-request-id", b"").decode() or str(uuid.uuid4())
-        correlation_id_var.set(cid)
+        structlog.contextvars.bind_contextvars(correlation_id=cid)
 
         async def send_with_cid(message: Message) -> None:
             if message["type"] == "http.response.start":
@@ -95,3 +81,4 @@ class CorrelationIdMiddleware:
             await send(message)
 
         await self.app(scope, receive, send_with_cid)
+        structlog.contextvars.unbind_contextvars("correlation_id")
