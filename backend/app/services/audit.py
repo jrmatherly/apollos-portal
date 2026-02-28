@@ -15,6 +15,13 @@ ACTION_KEY_ROTATED = "key.rotated"
 ACTION_KEY_REVOKED = "key.revoked"
 ACTION_SETTINGS_UPDATED = "settings.updated"
 
+# Phase 4: Key lifecycle & notifications
+ACTION_KEY_NOTIFIED = "key.notified"
+ACTION_KEY_AUTO_ROTATED = "key.auto_rotated"
+ACTION_USER_DEPROVISIONED = "user.deprovisioned"
+ACTION_KEY_DEPROVISIONED = "key.deprovisioned"
+ACTION_RECONCILIATION_DRIFT = "key.reconciliation_drift"
+
 
 async def log_action(
     session: AsyncSession,

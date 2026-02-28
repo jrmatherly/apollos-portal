@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Your Apollos AI Access Has Been Removed{% endblock %}
+{% block preheader %}Your portal access and API keys have been deprovisioned.{% endblock %}
+{% block content %}
+<p>Hi {{ user_name }},</p>
+<p>Your access to the Apollos AI Portal has been removed because your Entra ID group
+   membership no longer qualifies you for access.</p>
+<p>All associated API keys have been revoked. If you believe this is an error,
+   please contact your manager or the platform team.</p>
+{% endblock %}

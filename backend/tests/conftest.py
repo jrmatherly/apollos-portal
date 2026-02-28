@@ -66,6 +66,11 @@ class FakeProvisionedUser:
     litellm_user_id: str | None = "litellm-user-1"
     is_active: bool = True
     default_key_duration_days: int = 90
+    notify_14d: bool = True
+    notify_7d: bool = True
+    notify_3d: bool = True
+    notify_1d: bool = True
+    deprovisioned_at: datetime | None = None
     created_at: datetime = field(default_factory=lambda: datetime.now(UTC))
     keys: list = field(default_factory=list)
     team_memberships: list = field(default_factory=list)

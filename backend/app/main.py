@@ -32,10 +32,18 @@ async def lifespan(app: FastAPI):
     # Initialize Graph API client
     app.state.graph = GraphClient(settings)
 
+    # Initialize and start background scheduler
+    from app.core.scheduler import setup_scheduler
+
+    scheduler = setup_scheduler(settings)
+    scheduler.start()
+    app.state.scheduler = scheduler
+
     logger.info("Apollos AI Portal started")
     yield
 
     # Cleanup
+    scheduler.shutdown(wait=False)
     await app.state.litellm.close()
     if database.engine:
         await database.engine.dispose()

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}API Key Rotated: {{ new_key_alias }}{% endblock %}
+{% block preheader %}Your key has been automatically rotated. Retrieve your new key from the portal.{% endblock %}
+{% block content %}
+<p>Hi {{ user_name }},</p>
+<p>Your API key <strong>{{ old_key_alias }}</strong> for team <strong>{{ team_alias }}</strong>
+   has been automatically rotated because it expired.</p>
+<p>Your new key alias is <strong>{{ new_key_alias }}</strong> and expires on
+   <strong>{{ expires_at }}</strong>.</p>
+<p style="background:#fff8e1;border-left:4px solid #ffc107;padding:12px 16px;font-size:13px;">
+  For security, new key values are only displayed once in the portal.
+  Please log in to retrieve your new key.
+</p>
+<p style="text-align:center;margin:24px 0;">
+  <a href="{{ portal_url }}/keys" style="background:#1e3a5f;color:#fff;padding:12px 24px;
+     text-decoration:none;border-radius:4px;display:inline-block;">View New Key</a>
+</p>
+{% endblock %}
