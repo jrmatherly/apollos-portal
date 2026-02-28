@@ -47,15 +47,6 @@ async def update_settings(
     if not changes:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No fields to update")
 
-    # Validate key duration
-    if "default_key_duration_days" in changes:
-        allowed = (30, 60, 90, 180)
-        if changes["default_key_duration_days"] not in allowed:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Key duration must be one of {allowed}",
-            )
-
     for field, value in changes.items():
         setattr(db_user, field, value)
 

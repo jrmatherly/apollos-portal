@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Path, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.auth import CurrentUser, get_current_user
 from app.core.database import get_session
+from app.core.rate_limit import limiter
 from app.schemas.keys import KeyCreateRequest, KeyCreateResponse, KeyListResponse, KeyRevokeResponse, KeyRotateResponse
 from app.services.key_service import create_key, list_user_keys, revoke_key, rotate_key
 from app.services.litellm_client import LiteLLMClient, get_litellm_client
@@ -23,7 +24,9 @@ async def get_keys(
 
 
 @router.post("/keys/new", response_model=KeyCreateResponse)
+@limiter.limit("10/minute")
 async def generate_new_key(
+    request: Request,
     body: KeyCreateRequest,
     user: CurrentUser = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
@@ -37,8 +40,10 @@ async def generate_new_key(
 
 
 @router.post("/keys/{key_id}/rotate", response_model=KeyRotateResponse)
+@limiter.limit("5/minute")
 async def rotate_existing_key(
-    key_id: str,
+    request: Request,
+    key_id: str = Path(max_length=36),
     user: CurrentUser = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
     litellm: LiteLLMClient = Depends(get_litellm_client),
@@ -53,8 +58,10 @@ async def rotate_existing_key(
 
 
 @router.post("/keys/{key_id}/revoke", response_model=KeyRevokeResponse)
+@limiter.limit("5/minute")
 async def revoke_existing_key(
-    key_id: str,
+    request: Request,
+    key_id: str = Path(max_length=36),
     user: CurrentUser = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
     litellm: LiteLLMClient = Depends(get_litellm_client),

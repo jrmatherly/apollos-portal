@@ -1,0 +1,97 @@
+"""Structured JSON logging with correlation IDs via structlog."""
+
+from __future__ import annotations
+
+import logging
+import uuid
+from contextvars import ContextVar
+from typing import Any
+
+import structlog
+from starlette.types import ASGIApp, Message, Receive, Scope, Send
+
+# Context variable for per-request correlation ID
+correlation_id_var: ContextVar[str] = ContextVar("correlation_id", default="")
+
+
+def add_correlation_id(logger: Any, method_name: str, event_dict: dict) -> dict:
+    """Structlog processor that injects the correlation ID."""
+    cid = correlation_id_var.get()
+    if cid:
+        event_dict["correlation_id"] = cid
+    return event_dict
+
+
+def setup_logging(*, json_output: bool = True) -> None:
+    """Configure structlog with JSON rendering and stdlib integration."""
+    shared_processors: list = [
+        structlog.contextvars.merge_contextvars,
+        structlog.stdlib.add_log_level,
+        structlog.stdlib.add_logger_name,
+        add_correlation_id,
+        structlog.processors.TimeStamper(fmt="iso"),
+        structlog.processors.StackInfoRenderer(),
+        structlog.processors.format_exc_info,
+    ]
+
+    renderer = structlog.processors.JSONRenderer() if json_output else structlog.dev.ConsoleRenderer()
+
+    structlog.configure(
+        processors=[
+            *shared_processors,
+            structlog.stdlib.ProcessorFormatter.wrap_for_formatter,
+        ],
+        wrapper_class=structlog.stdlib.BoundLogger,
+        context_class=dict,
+        logger_factory=structlog.stdlib.LoggerFactory(),
+        cache_logger_on_first_use=True,
+    )
+
+    formatter = structlog.stdlib.ProcessorFormatter(
+        processors=[
+            structlog.stdlib.ProcessorFormatter.remove_processors_meta,
+            renderer,
+        ],
+    )
+
+    root = logging.getLogger()
+    root.handlers.clear()
+    handler = logging.StreamHandler()
+    handler.setFormatter(formatter)
+    root.addHandler(handler)
+    root.setLevel(logging.INFO)
+
+    # Quiet noisy third-party loggers
+    logging.getLogger("httpx").setLevel(logging.WARNING)
+    logging.getLogger("httpcore").setLevel(logging.WARNING)
+    logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
+
+
+class CorrelationIdMiddleware:
+    """Pure ASGI middleware that sets a correlation ID for every request.
+
+    Uses raw ASGI protocol instead of BaseHTTPMiddleware to avoid
+    response body materialization issues with streaming responses.
+    """
+
+    def __init__(self, app: ASGIApp) -> None:
+        self.app = app
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] not in ("http", "websocket"):
+            await self.app(scope, receive, send)
+            return
+
+        # Extract or generate correlation ID from request headers
+        headers = dict(scope.get("headers", []))
+        cid = headers.get(b"x-request-id", b"").decode() or str(uuid.uuid4())
+        correlation_id_var.set(cid)
+
+        async def send_with_cid(message: Message) -> None:
+            if message["type"] == "http.response.start":
+                response_headers = list(message.get("headers", []))
+                response_headers.append((b"x-request-id", cid.encode()))
+                message["headers"] = response_headers
+            await send(message)
+
+        await self.app(scope, receive, send_with_cid)

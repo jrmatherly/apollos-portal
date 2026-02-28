@@ -1,17 +1,23 @@
-import logging
 from contextlib import asynccontextmanager
 
+import structlog
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import text
 
 from app.api.v1.router import router as v1_router
 from app.config import get_settings
 from app.core import database
 from app.core.database import init_db
+from app.core.exceptions import register_exception_handlers
 from app.core.graph import GraphClient
+from app.core.logging import CorrelationIdMiddleware, setup_logging
+from app.core.rate_limit import RateLimitUserMiddleware, limiter, rate_limit_exceeded_handler
 from app.core.teams import load_teams_config
+from app.services.litellm_client import LiteLLMClient
 
-logger = logging.getLogger(__name__)
+setup_logging()
+logger = structlog.stdlib.get_logger(__name__)
 
 
 @asynccontextmanager
@@ -21,9 +27,7 @@ async def lifespan(app: FastAPI):
     # Initialize database
     init_db(settings.database_url)
 
-    # Initialize LiteLLM client (import here to avoid circular at module level)
-    from app.services.litellm_client import LiteLLMClient
-
+    # Initialize LiteLLM client
     app.state.litellm = LiteLLMClient(settings)
 
     # Load teams configuration
@@ -68,6 +72,17 @@ app.add_middleware(
     allow_headers=["Authorization", "Content-Type"],
 )
 
+# Correlation ID middleware (adds X-Request-ID to every request/response)
+app.add_middleware(CorrelationIdMiddleware)
+
+# Rate limiting (user OID extraction must run before slowapi evaluates the key function)
+app.add_middleware(RateLimitUserMiddleware)
+app.state.limiter = limiter
+app.add_exception_handler(429, rate_limit_exceeded_handler)
+
+# Global exception handlers
+register_exception_handlers(app)
+
 # Include API routers
 app.include_router(v1_router)
 
@@ -79,5 +94,28 @@ async def health():
 
 @app.get("/ready")
 async def ready():
-    # TODO: Check DB + LiteLLM connectivity
-    return {"status": "healthy"}
+    checks: dict[str, str] = {}
+
+    # Check database connectivity
+    if database.async_session_factory is None:
+        checks["database"] = "unavailable"
+    else:
+        try:
+            async with database.async_session_factory() as session:
+                await session.execute(text("SELECT 1"))
+            checks["database"] = "ok"
+        except Exception:
+            checks["database"] = "unavailable"
+
+    # Check LiteLLM connectivity
+    try:
+        litellm_client: LiteLLMClient = app.state.litellm
+        checks["litellm"] = "ok" if await litellm_client.check_health() else "degraded"
+    except Exception:
+        checks["litellm"] = "unavailable"
+
+    all_ok = all(v == "ok" for v in checks.values())
+    return {
+        "status": "healthy" if all_ok else "degraded",
+        "checks": checks,
+    }

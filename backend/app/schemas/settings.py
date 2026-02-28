@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Literal
+
 from pydantic import BaseModel
 
 
@@ -12,7 +14,7 @@ class UserSettingsResponse(BaseModel):
 
 
 class UserSettingsUpdate(BaseModel):
-    default_key_duration_days: int | None = None
+    default_key_duration_days: Literal[30, 60, 90, 180] | None = None
     notify_14d: bool | None = None
     notify_7d: bool | None = None
     notify_3d: bool | None = None
