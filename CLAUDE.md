@@ -6,6 +6,7 @@
 - `cli/` — Click CLI with MSAL device-code auth (Python 3.12, managed by uv)
 - `docs/` — Mintlify documentation site (MDX + docs.json)
 - `docker/` — Dockerfiles (backend.Dockerfile, frontend.Dockerfile, docs.Dockerfile)
+- `scripts/` — Build scripts (generate_llms.py)
 - `.scratchpad/` — Planning docs, NOT tracked in git
 
 ## Commands
@@ -26,6 +27,7 @@
 - Upgrade Python deps: `uv lock --upgrade`
 - Check outdated Node deps: `cd frontend && npm outdated`
 - Regenerate OpenAPI spec: `mise run docs:openapi` (run after any endpoint change)
+- Regenerate llms.txt files: `mise run docs:llms` (run after adding/modifying docs pages)
 
 ## Conventions
 - Branding: "Apollos AI" — not "NEXUS AI", "LiteLLM Portal", or Stitch artifacts
@@ -56,6 +58,8 @@
 - `docs/docs.json` controls navigation — every page listed must have a matching `.mdx` file
 - Verify API endpoints and CLI commands against actual source before documenting
 - OpenAPI spec wired into docs.json via tab-level `openapi` field — endpoint pages auto-generated from spec
+- Mintlify `openapi` field goes on the tab object, NOT at docs.json top level — top-level causes validation errors
+- `mint validate` and `mint broken-links` must run from `docs/` directory (requires `docs.json` in CWD)
 - `llms.txt`, `llms-full.txt`, `skill.md` are manually maintained (self-hosted via `mint dev`, not Mintlify cloud)
 - Docker: `docker/docs.Dockerfile` runs `mint dev` on port 3000 (mapped to 3001 in compose)
 
