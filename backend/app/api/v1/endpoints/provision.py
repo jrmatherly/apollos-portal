@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import get_settings
 from app.core.auth import CurrentUser, get_current_user
 from app.core.database import get_session
 from app.core.graph import GraphClient
+from app.core.rate_limit import limiter
 from app.core.teams import TeamsConfig
 from app.schemas.provision import ProvisionResponse, ProvisionStatusResponse
 from app.services.litellm_client import LiteLLMClient, get_graph_client, get_litellm_client, get_teams_config
@@ -23,7 +24,9 @@ async def check_status(
 
 
 @router.post("/provision", response_model=ProvisionResponse)
+@limiter.limit("5/minute")
 async def provision(
+    request: Request,
     user: CurrentUser = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
     litellm: LiteLLMClient = Depends(get_litellm_client),

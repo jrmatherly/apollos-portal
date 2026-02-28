@@ -22,6 +22,11 @@ ACTION_USER_DEPROVISIONED = "user.deprovisioned"
 ACTION_KEY_DEPROVISIONED = "key.deprovisioned"
 ACTION_RECONCILIATION_DRIFT = "key.reconciliation_drift"
 
+# Phase 5: Admin actions
+ACTION_ADMIN_KEY_REVOKED = "admin.key_revoked"
+ACTION_ADMIN_USER_DEPROVISIONED = "admin.user_deprovisioned"
+ACTION_ADMIN_USER_REPROVISIONED = "admin.user_reprovisioned"
+
 
 async def log_action(
     session: AsyncSession,

@@ -32,6 +32,11 @@ class LiteLLMClient:
     async def close(self):
         await self._client.aclose()
 
+    async def check_health(self, *, timeout: float = 5.0) -> bool:
+        """Check if LiteLLM proxy is reachable and healthy."""
+        resp = await self._client.get("/health", timeout=timeout)
+        return resp.status_code == 200
+
     # --- Teams ---
 
     async def get_team(self, team_id: str) -> dict[str, Any] | None:

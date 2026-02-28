@@ -3,7 +3,7 @@ from __future__ import annotations
 import uuid
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class KeyListItem(BaseModel):
@@ -24,7 +24,7 @@ class KeyListResponse(BaseModel):
 
 
 class KeyCreateRequest(BaseModel):
-    team_id: str
+    team_id: str = Field(max_length=128)
 
 
 class KeyCreateResponse(BaseModel):
