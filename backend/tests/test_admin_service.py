@@ -90,6 +90,23 @@ class TestAdminRevokeKey:
         litellm.block_key.assert_not_called()
         assert key.status == "revoked"
 
+    @pytest.mark.asyncio(loop_scope="function")
+    async def test_handles_litellm_block_failure(self):
+        """Key is still revoked locally even if LiteLLM block fails."""
+        key = FakeProvisionedKey(litellm_key_id="tok-fail", status="active")
+        session = _mock_session_returning(key)
+        litellm = AsyncMock()
+        litellm.block_key = AsyncMock(side_effect=Exception("LiteLLM unreachable"))
+        admin = _mock_admin()
+
+        with patch("app.services.admin_service.log_action", new_callable=AsyncMock):
+            from app.services.admin_service import admin_revoke_key
+
+            await admin_revoke_key(session, litellm, admin, str(key.id))
+
+        assert key.status == "revoked"
+        session.commit.assert_called_once()
+
 
 class TestAdminDeprovisionUser:
     @pytest.mark.asyncio(loop_scope="function")
@@ -141,6 +158,25 @@ class TestAdminDeprovisionUser:
 
             with pytest.raises(ValueError, match="already deprovisioned"):
                 await admin_deprovision_user(session, litellm, admin, str(user.id))
+
+    @pytest.mark.asyncio(loop_scope="function")
+    async def test_handles_litellm_block_failure(self):
+        """User is still deprovisioned locally even if LiteLLM block fails."""
+        key = FakeProvisionedKey(litellm_key_id="tok-fail", status="active")
+        user = FakeProvisionedUser(is_active=True, keys=[key])
+        session = _mock_session_returning(user)
+        litellm = AsyncMock()
+        litellm.block_key = AsyncMock(side_effect=Exception("LiteLLM unreachable"))
+        admin = _mock_admin()
+
+        with patch("app.services.admin_service.log_action", new_callable=AsyncMock):
+            from app.services.admin_service import admin_deprovision_user
+
+            await admin_deprovision_user(session, litellm, admin, str(user.id))
+
+        assert key.status == "revoked"
+        assert user.is_active is False
+        session.commit.assert_called_once()
 
 
 class TestAdminReprovisionUser:

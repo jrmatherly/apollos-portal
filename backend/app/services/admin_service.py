@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 
+import structlog
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -20,6 +21,8 @@ from app.services.audit import (
     log_action,
 )
 from app.services.litellm_client import LiteLLMClient
+
+logger = structlog.stdlib.get_logger(__name__)
 
 
 async def list_users(
@@ -95,7 +98,10 @@ async def admin_revoke_key(
         raise ValueError(f"Key {key_id} is already {key.status}")
 
     if key.litellm_key_id:
-        await litellm.block_key(key.litellm_key_id)
+        try:
+            await litellm.block_key(key.litellm_key_id)
+        except Exception:
+            logger.exception("Failed to block LiteLLM key %s during admin revoke", key.litellm_key_id)
 
     key.status = "revoked"
     key.revoked_at = datetime.now(UTC)
@@ -126,10 +132,13 @@ async def admin_deprovision_user(
     if not user.is_active:
         raise ValueError(f"User {user.email} is already deprovisioned")
 
-    # Block all active keys
+    # Block all active keys (continue on LiteLLM failure; reconciliation job catches drift)
     for key in user.keys:
         if key.status == "active" and key.litellm_key_id:
-            await litellm.block_key(key.litellm_key_id)
+            try:
+                await litellm.block_key(key.litellm_key_id)
+            except Exception:
+                logger.exception("Failed to block LiteLLM key %s during admin deprovision", key.litellm_key_id)
             key.status = "revoked"
             key.revoked_at = datetime.now(UTC)
             await log_action(
