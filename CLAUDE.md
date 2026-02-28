@@ -25,6 +25,7 @@
 - DB migrations: `cd backend && uv run alembic upgrade head`
 - Upgrade Python deps: `uv lock --upgrade`
 - Check outdated Node deps: `cd frontend && npm outdated`
+- Regenerate OpenAPI spec: `mise run docs:openapi` (run after any endpoint change)
 
 ## Conventions
 - Branding: "Apollos AI" — not "NEXUS AI", "LiteLLM Portal", or Stitch artifacts
@@ -43,6 +44,8 @@
 - APScheduler 3.x (`AsyncIOScheduler`) — 4.x is not released on PyPI (only alpha)
 - slowapi rate limiting: key function runs before endpoint body — use `RateLimitUserMiddleware` (pure ASGI) for per-user OID extraction from JWT
 - structlog logging: use `structlog.stdlib.get_logger(__name__)` at module level, after all imports (avoids ruff E402)
+- structlog correlation IDs: use `structlog.contextvars.bind_contextvars(correlation_id=cid)` — never custom ContextVar
+- slowapi rate limiting: register handler by `RateLimitExceeded` exception class, not status code 429
 - External API error handling pattern: wrap calls (e.g. `litellm.block_key()`) in try/except, log with structlog, continue — reconciliation jobs resolve drift
 - Entra ID group resolution: NEVER use JWT `groups` claim (200-group overage limit silently breaks) — always use Graph API `/users/{oid}/memberOf` with client credentials
 - Token validation: v1 validates by calling Graph `/me` with user's bearer token (not local JWKS) — see `backend/app/core/auth.py`
@@ -66,6 +69,8 @@
 - Use `Literal[30, 60, 90, 180]` (not `ge/le` range) when business logic restricts to specific values
 - Starlette 404s from unmatched routes bypass custom `HTTPException` handlers — test against real endpoints
 - Admin endpoints: `Path(max_length=36)` on ID params, `Query(max_length=...)` on string filters
+- Admin endpoint tests: must override both `require_admin` and `get_session` dependencies
+- CSV export tests: mock target is `app.api.v1.endpoints.admin.query_audit_log` (standalone import, not module attr)
 
 ## Tech Stack (Feb 2026)
 - Mintlify (docs platform, CLI v4.2+)
@@ -83,6 +88,7 @@
 - Editing `.claude/settings.json` with the Edit tool fails on long escaped commands — use Write instead
 - Before creating PRs, verify `origin/main` is up to date (`git push origin main`) — unpushed main commits pollute the PR diff
 - Squash & merge is preferred for feature branches — keeps main history clean with one commit per phase
+- Cross-session memory: use `.serena/memories/` only — do not create Claude Code auto-memory directories
 
 ## Serena MCP
 - Project name: `apollos-portal` (config: `.serena/project.yml`)
