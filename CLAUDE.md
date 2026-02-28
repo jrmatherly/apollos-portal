@@ -42,10 +42,9 @@
 - Deprovisioning uses `block_key` (preserves spend history); rotation uses `delete_key` (key is expired)
 - Email templates live in `backend/app/templates/email/` using Jinja2 inheritance from `base.html`
 - APScheduler 3.x (`AsyncIOScheduler`) — 4.x is not released on PyPI (only alpha)
-- slowapi rate limiting: key function runs before endpoint body — use `RateLimitUserMiddleware` (pure ASGI) for per-user OID extraction from JWT
+- slowapi rate limiting: key function runs before endpoint body — use `RateLimitUserMiddleware` (pure ASGI) for per-user OID extraction from JWT; register handler by `RateLimitExceeded` exception class, not status code 429
 - structlog logging: use `structlog.stdlib.get_logger(__name__)` at module level, after all imports (avoids ruff E402)
 - structlog correlation IDs: use `structlog.contextvars.bind_contextvars(correlation_id=cid)` — never custom ContextVar
-- slowapi rate limiting: register handler by `RateLimitExceeded` exception class, not status code 429
 - External API error handling pattern: wrap calls (e.g. `litellm.block_key()`) in try/except, log with structlog, continue — reconciliation jobs resolve drift
 - Entra ID group resolution: NEVER use JWT `groups` claim (200-group overage limit silently breaks) — always use Graph API `/users/{oid}/memberOf` with client credentials
 - Token validation: v1 validates by calling Graph `/me` with user's bearer token (not local JWKS) — see `backend/app/core/auth.py`
@@ -56,7 +55,7 @@
 - `docs/AGENTS.md` defines terminology, style, and content boundaries for AI-assisted docs work
 - `docs/docs.json` controls navigation — every page listed must have a matching `.mdx` file
 - Verify API endpoints and CLI commands against actual source before documenting
-- `essentials/` pages are hidden (not in navigation) — Mintlify tutorial leftovers kept for reference
+- OpenAPI spec at `docs/api-reference/openapi.json` is NOT wired into docs.json — API ref pages are manual
 - Docker: `docker/docs.Dockerfile` runs `mint dev` on port 3000 (mapped to 3001 in compose)
 
 ## Testing
