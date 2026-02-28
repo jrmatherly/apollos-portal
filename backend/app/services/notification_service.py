@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-import logging
 from datetime import UTC, datetime
 
+import structlog
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -16,7 +16,7 @@ from app.models.provisioned_user import ProvisionedUser
 from app.services.audit import ACTION_KEY_NOTIFIED, log_action
 from app.services.email_service import render_template, send_email
 
-logger = logging.getLogger(__name__)
+logger = structlog.stdlib.get_logger(__name__)
 
 # (threshold_days, notification_type stored in DB, user preference attribute)
 NOTIFICATION_THRESHOLDS: list[tuple[int, str, str]] = [
@@ -43,16 +43,17 @@ async def _send_expiry_notification(
 
     Returns True if notification was sent, False if already sent.
     """
-    async with session.begin_nested():
-        notification = KeyNotification(
-            key_id=key.id,
-            notification_type=notification_type,
-        )
-        session.add(notification)
-        try:
+    try:
+        async with session.begin_nested():
+            notification = KeyNotification(
+                key_id=key.id,
+                notification_type=notification_type,
+            )
+            session.add(notification)
             await session.flush()
-        except IntegrityError:
-            return False
+    except IntegrityError:
+        logger.info("duplicate_notification_skipped", key_id=str(key.id), notification_type=notification_type)
+        return False
 
     html = render_template(
         "expiry_warning.html",

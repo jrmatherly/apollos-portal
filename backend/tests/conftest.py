@@ -2,6 +2,15 @@
 
 from __future__ import annotations
 
+import os
+
+# Set required secrets before any app imports trigger Settings validation
+os.environ.setdefault("AZURE_TENANT_ID", "test-tenant-id")
+os.environ.setdefault("AZURE_CLIENT_ID", "test-client-id")
+os.environ.setdefault("AZURE_CLIENT_SECRET", "test-client-secret")
+os.environ.setdefault("LITELLM_BASE_URL", "http://localhost:4000")
+os.environ.setdefault("LITELLM_MASTER_KEY", "sk-test-master-key")
+
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock
@@ -98,20 +107,36 @@ class FakeTeamMembership:
 
 @pytest.fixture
 def mock_litellm_client() -> AsyncMock:
-    """Mock LiteLLMClient with default return values."""
+    """Mock LiteLLMClient with default return values.
+
+    Covers every method on LiteLLMClient so tests can use the fixture
+    without needing to set up individual return values.
+    """
     client = AsyncMock()
+    # Teams
     client.get_team.return_value = None
     client.create_team.return_value = {"team_id": "team-1"}
+    client.list_teams.return_value = []
+    # Users
     client.get_user.return_value = None
     client.create_user.return_value = {"user_id": "litellm-user-1"}
+    # Membership
     client.add_team_member.return_value = {"team_id": "team-1"}
+    # Keys
     client.generate_key.return_value = {
         "key": "sk-test-123456",
         "token": "tok-test-123",
         "key_name": "test-key",
     }
+    client.get_key_info.return_value = None
+    client.list_keys.return_value = []
     client.block_key.return_value = {"blocked": True}
+    client.delete_key.return_value = {"deleted": True}
+    # Models
     client.list_models.return_value = []
+    # Spend
     client.get_spend_logs.return_value = []
-    client.list_teams.return_value = []
+    # Health / lifecycle
+    client.check_health.return_value = True
+    client.close = AsyncMock()
     return client

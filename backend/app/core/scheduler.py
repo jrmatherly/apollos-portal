@@ -1,13 +1,12 @@
 from __future__ import annotations
 
-import logging
-
+import structlog
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 
 from app.config import Settings
 
-logger = logging.getLogger(__name__)
+logger = structlog.stdlib.get_logger(__name__)
 
 
 def setup_scheduler(settings: Settings) -> AsyncIOScheduler:

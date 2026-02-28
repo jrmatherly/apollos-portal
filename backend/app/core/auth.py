@@ -1,14 +1,14 @@
-import logging
 from typing import Any
 
 import httpx
 import msal
+import structlog
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from app.config import Settings, get_settings
 
-logger = logging.getLogger(__name__)
+logger = structlog.stdlib.get_logger(__name__)
 
 security = HTTPBearer()
 
@@ -59,7 +59,14 @@ async def _validate_token(token: str, settings: Settings) -> dict[str, Any]:
                 detail="Invalid or expired token",
                 headers={"WWW-Authenticate": "Bearer"},
             )
-        resp.raise_for_status()
+        try:
+            resp.raise_for_status()
+        except httpx.HTTPStatusError as exc:
+            logger.error("graph_api_error", status_code=exc.response.status_code)
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Identity provider temporarily unavailable",
+            ) from exc
         profile = resp.json()
 
     return {
@@ -69,11 +76,11 @@ async def _validate_token(token: str, settings: Settings) -> dict[str, Any]:
     }
 
 
-async def _get_token_roles(token: str) -> list[str]:
-    """Extract app roles from the token by decoding JWT claims (without full validation).
+async def _get_token_claims(token: str) -> dict[str, Any]:
+    """Extract claims from the token by decoding JWT payload (without full validation).
 
     The token has already been validated by Graph API call.
-    We just need to read the 'roles' claim for admin role checks.
+    We read the 'roles' claim for admin role checks and 'aud' for audience verification.
     """
     import base64
     import json
@@ -84,9 +91,9 @@ async def _get_token_roles(token: str) -> list[str]:
         # Add padding
         payload += "=" * (4 - len(payload) % 4)
         claims = json.loads(base64.urlsafe_b64decode(payload))
-        return claims.get("roles", [])
+        return {"roles": claims.get("roles", []), "aud": claims.get("aud", "")}
     except Exception:
-        return []
+        return {"roles": [], "aud": ""}
 
 
 class CurrentUser:
@@ -115,14 +122,23 @@ async def get_current_user(
     # Validate token via Graph API /me call
     claims = await _validate_token(token, settings)
 
-    # Extract roles from JWT (already validated)
-    roles = await _get_token_roles(token)
+    # Extract roles and audience from JWT (already validated)
+    token_claims = await _get_token_claims(token)
+
+    # Verify audience claim matches our application
+    aud = token_claims["aud"]
+    if aud != settings.azure_client_id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token not intended for this application",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
     return CurrentUser(
         oid=claims["oid"],
         email=claims["email"],
         name=claims["name"],
-        roles=roles,
+        roles=token_claims["roles"],
     )
 
 

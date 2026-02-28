@@ -1,6 +1,16 @@
 name: Docker
 
 on:
+  pull_request:
+    branches: [main]
+    paths-ignore:
+      - "**/*.md"
+      - "**/*.txt"
+      - ".github/**"
+      - ".scratchpad/**"
+      - "cli/**"
+      - ".claude/**"
+      - ".serena/**"
   push:
     branches: [main]
     paths-ignore:

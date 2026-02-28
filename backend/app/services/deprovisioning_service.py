@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-import logging
 from datetime import UTC, datetime
 
+import structlog
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -16,7 +16,7 @@ from app.services.audit import ACTION_KEY_DEPROVISIONED, ACTION_USER_DEPROVISION
 from app.services.email_service import render_template, send_email
 from app.services.litellm_client import LiteLLMClient
 
-logger = logging.getLogger(__name__)
+logger = structlog.stdlib.get_logger(__name__)
 
 
 async def _deprovision_user(

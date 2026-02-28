@@ -1,10 +1,10 @@
-import logging
 from dataclasses import dataclass, field
 from pathlib import Path
 
+import structlog
 import yaml
 
-logger = logging.getLogger(__name__)
+logger = structlog.stdlib.get_logger(__name__)
 
 
 @dataclass

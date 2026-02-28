@@ -1,14 +1,14 @@
 from __future__ import annotations
 
-import logging
 from typing import Any
 
 import httpx
+import structlog
 from fastapi import Request
 
 from app.config import Settings
 
-logger = logging.getLogger(__name__)
+logger = structlog.stdlib.get_logger(__name__)
 
 
 class LiteLLMClient:

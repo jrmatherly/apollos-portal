@@ -1,8 +1,8 @@
-import logging
-
+import structlog
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.core.auth import CurrentUser, get_current_user
 from app.core.database import get_session
@@ -11,7 +11,7 @@ from app.models.provisioned_user import ProvisionedUser
 from app.schemas.common import TeamsResponse, TeamSummary
 from app.services.litellm_client import LiteLLMClient, get_litellm_client, get_teams_config
 
-logger = logging.getLogger(__name__)
+logger = structlog.stdlib.get_logger(__name__)
 
 router = APIRouter()
 
@@ -24,10 +24,16 @@ async def get_teams(
     teams_config: TeamsConfig = Depends(get_teams_config),
 ):
     """List the current user's team memberships with spend data."""
-    result = await session.execute(select(ProvisionedUser).where(ProvisionedUser.entra_oid == user.oid))
+    result = await session.execute(
+        select(ProvisionedUser)
+        .where(ProvisionedUser.entra_oid == user.oid)
+        .options(selectinload(ProvisionedUser.team_memberships))
+    )
     db_user = result.scalar_one_or_none()
     if not db_user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not provisioned")
+    if not db_user.is_active:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Account is deprovisioned")
 
     summaries = []
     for membership in db_user.team_memberships:

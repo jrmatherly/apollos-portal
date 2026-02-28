@@ -7,6 +7,7 @@ import type { KeyListItem } from "../types/api";
 
 function formatDate(dateString: string) {
   const date = new Date(dateString);
+  if (Number.isNaN(date.getTime())) return "\u2014";
   return new Intl.DateTimeFormat("en-US", {
     month: "short",
     day: "2-digit",
@@ -53,6 +54,40 @@ function statusLabel(status: KeyListItem["status"]): string {
 
 type SortColumn = "alias" | "team" | "status" | "created" | "expires" | "spend";
 
+function SortableHeader({
+  column,
+  label,
+  align = "left",
+  sortConfig,
+  onSort,
+}: {
+  column: SortColumn;
+  label: string;
+  align?: "left" | "right";
+  sortConfig: { key: SortColumn; direction: "asc" | "desc" };
+  onSort: (column: SortColumn) => void;
+}) {
+  return (
+    <th
+      className={`group/th px-6 py-3 text-[11px] font-bold text-text-secondary uppercase tracking-widest whitespace-nowrap cursor-pointer hover:bg-surface-border/20 transition-colors select-none ${align === "right" ? "text-right" : "text-left"}`}
+      onClick={() => onSort(column)}
+    >
+      <div className={`flex items-center gap-1 ${align === "right" ? "justify-end" : ""}`}>
+        {label}
+        {sortConfig.key === column ? (
+          sortConfig.direction === "asc" ? (
+            <ArrowUp className="w-3 h-3 text-primary" />
+          ) : (
+            <ArrowDown className="w-3 h-3 text-primary" />
+          )
+        ) : (
+          <ArrowDown className="w-3 h-3 opacity-0 group-hover/th:opacity-30 transition-opacity" />
+        )}
+      </div>
+    </th>
+  );
+}
+
 export function ApiKeys() {
   const keys = useKeys();
   const { data, isLoading, error } = keys;
@@ -60,6 +95,7 @@ export function ApiKeys() {
   const revokeKey = useRevokeKey();
   const createKey = useCreateKey();
 
+  const [pendingKeyId, setPendingKeyId] = useState<string | null>(null);
   const [confirmAction, setConfirmAction] = useState<{
     type: "rotate" | "revoke";
     keyId: string;
@@ -189,34 +225,6 @@ export function ApiKeys() {
     return 0;
   });
 
-  const SortableHeader = ({
-    column,
-    label,
-    align = "left",
-  }: {
-    column: SortColumn;
-    label: string;
-    align?: "left" | "right";
-  }) => (
-    <th
-      className={`group/th px-6 py-3 text-[11px] font-bold text-text-secondary uppercase tracking-widest whitespace-nowrap cursor-pointer hover:bg-surface-border/20 transition-colors select-none ${align === "right" ? "text-right" : "text-left"}`}
-      onClick={() => handleSort(column)}
-    >
-      <div className={`flex items-center gap-1 ${align === "right" ? "justify-end" : ""}`}>
-        {label}
-        {sortConfig.key === column ? (
-          sortConfig.direction === "asc" ? (
-            <ArrowUp className="w-3 h-3 text-primary" />
-          ) : (
-            <ArrowDown className="w-3 h-3 text-primary" />
-          )
-        ) : (
-          <ArrowDown className="w-3 h-3 opacity-0 group-hover/th:opacity-30 transition-opacity" />
-        )}
-      </div>
-    </th>
-  );
-
   return (
     <div className="p-8 max-w-7xl mx-auto w-full">
       <header className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-10">
@@ -237,6 +245,8 @@ export function ApiKeys() {
           <div className="relative" ref={dropdownRef}>
             <button
               type="button"
+              aria-expanded={showColumnDropdown}
+              aria-haspopup="listbox"
               onClick={() => setShowColumnDropdown(!showColumnDropdown)}
               className="bg-surface border border-surface-border hover:bg-surface-border/20 text-text-primary px-4 py-2.5 rounded-md font-medium transition-all flex items-center justify-center gap-2 w-full sm:w-auto"
             >
@@ -275,13 +285,54 @@ export function ApiKeys() {
               <table className="w-full text-left border-collapse">
                 <thead className="bg-surface-border/10 border-b border-surface-border">
                   <tr>
-                    {visibleColumns.alias && <SortableHeader column="alias" label="Key Alias" />}
-                    {visibleColumns.team && <SortableHeader column="team" label="Team" />}
-                    {visibleColumns.status && <SortableHeader column="status" label="Status" />}
-                    {visibleColumns.created && <SortableHeader column="created" label="Created" />}
-                    {visibleColumns.expires && <SortableHeader column="expires" label="Expires" />}
+                    {visibleColumns.alias && (
+                      <SortableHeader
+                        column="alias"
+                        label="Key Alias"
+                        sortConfig={sortConfig}
+                        onSort={handleSort}
+                      />
+                    )}
+                    {visibleColumns.team && (
+                      <SortableHeader
+                        column="team"
+                        label="Team"
+                        sortConfig={sortConfig}
+                        onSort={handleSort}
+                      />
+                    )}
+                    {visibleColumns.status && (
+                      <SortableHeader
+                        column="status"
+                        label="Status"
+                        sortConfig={sortConfig}
+                        onSort={handleSort}
+                      />
+                    )}
+                    {visibleColumns.created && (
+                      <SortableHeader
+                        column="created"
+                        label="Created"
+                        sortConfig={sortConfig}
+                        onSort={handleSort}
+                      />
+                    )}
+                    {visibleColumns.expires && (
+                      <SortableHeader
+                        column="expires"
+                        label="Expires"
+                        sortConfig={sortConfig}
+                        onSort={handleSort}
+                      />
+                    )}
                     {visibleColumns.spend && (
-                      <SortableHeader column="spend" label="Spend" align="right" />
+                      <SortableHeader
+                        column="spend"
+                        label="Spend"
+                        align="right"
+                        sortConfig={sortConfig}
+                        onSort={handleSort}
+                      />
                     )}
                     {visibleColumns.actions && (
                       <th className="px-6 py-3 text-[11px] font-bold text-text-secondary uppercase tracking-widest text-right whitespace-nowrap">
@@ -347,7 +398,7 @@ export function ApiKeys() {
                                 keyAlias: item.litellm_key_alias,
                               })
                             }
-                            disabled={rotateKey.isPending}
+                            disabled={pendingKeyId === item.id}
                             className="text-xs text-text-secondary hover:text-primary font-medium transition-colors disabled:opacity-50"
                           >
                             Rotate
@@ -361,7 +412,7 @@ export function ApiKeys() {
                                 keyAlias: item.litellm_key_alias,
                               })
                             }
-                            disabled={revokeKey.isPending}
+                            disabled={pendingKeyId === item.id}
                             className="text-xs text-text-secondary hover:text-destructive font-medium transition-colors disabled:opacity-50"
                           >
                             Revoke
@@ -467,10 +518,15 @@ export function ApiKeys() {
         loading={rotateKey.isPending || revokeKey.isPending}
         onConfirm={() => {
           if (!confirmAction) return;
+          setPendingKeyId(confirmAction.keyId);
+          const onSettled = () => {
+            setPendingKeyId(null);
+            setConfirmAction(null);
+          };
           if (confirmAction.type === "revoke") {
-            revokeKey.mutate(confirmAction.keyId, { onSettled: () => setConfirmAction(null) });
+            revokeKey.mutate(confirmAction.keyId, { onSettled });
           } else {
-            rotateKey.mutate(confirmAction.keyId, { onSettled: () => setConfirmAction(null) });
+            rotateKey.mutate(confirmAction.keyId, { onSettled });
           }
         }}
         onCancel={() => setConfirmAction(null)}

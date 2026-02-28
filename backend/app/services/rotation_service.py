@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-import logging
 import re
 import time
 from datetime import UTC, datetime, timedelta
 
+import structlog
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -17,7 +17,7 @@ from app.services.audit import ACTION_KEY_AUTO_ROTATED, log_action
 from app.services.email_service import render_template, send_email
 from app.services.litellm_client import LiteLLMClient
 
-logger = logging.getLogger(__name__)
+logger = structlog.stdlib.get_logger(__name__)
 
 
 def _slugify(text: str) -> str:

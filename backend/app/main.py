@@ -17,7 +17,7 @@ from app.core.rate_limit import RateLimitUserMiddleware, limiter, rate_limit_exc
 from app.core.teams import load_teams_config
 from app.services.litellm_client import LiteLLMClient
 
-setup_logging(json_output=get_settings().log_json)
+setup_logging(json_output=get_settings().log_json, log_level=get_settings().log_level)
 logger = structlog.stdlib.get_logger(__name__)
 
 
@@ -66,9 +66,15 @@ app = FastAPI(
 
 # Middleware execution order (Starlette LIFO — last added = outermost):
 #   Request → RateLimitUserMiddleware → CorrelationIdMiddleware → CORSMiddleware → app
+_settings = get_settings()
+_cors_origins = (
+    [o.strip() for o in _settings.cors_origins.split(",") if o.strip()]
+    if _settings.cors_origins
+    else [_settings.portal_base_url]
+)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[get_settings().portal_base_url],
+    allow_origins=_cors_origins,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type"],

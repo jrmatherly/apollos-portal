@@ -1,8 +1,8 @@
-import logging
-
+import structlog
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.core.auth import CurrentUser, get_current_user
 from app.core.database import get_session
@@ -11,7 +11,7 @@ from app.models.provisioned_user import ProvisionedUser
 from app.schemas.common import ModelInfo, ModelsResponse
 from app.services.litellm_client import LiteLLMClient, get_litellm_client, get_teams_config
 
-logger = logging.getLogger(__name__)
+logger = structlog.stdlib.get_logger(__name__)
 
 router = APIRouter()
 
@@ -24,10 +24,16 @@ async def get_models(
     teams_config: TeamsConfig = Depends(get_teams_config),
 ):
     """List available models filtered by user's team access."""
-    result = await session.execute(select(ProvisionedUser).where(ProvisionedUser.entra_oid == user.oid))
+    result = await session.execute(
+        select(ProvisionedUser)
+        .where(ProvisionedUser.entra_oid == user.oid)
+        .options(selectinload(ProvisionedUser.team_memberships))
+    )
     db_user = result.scalar_one_or_none()
     if not db_user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not provisioned")
+    if not db_user.is_active:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Account is deprovisioned")
 
     # Collect all models the user has access to via their teams
     allowed_models: set[str] = set()
