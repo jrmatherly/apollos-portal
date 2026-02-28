@@ -1,6 +1,8 @@
 import { ArrowDown, ArrowUp, Check, ChevronDown, Columns, Key, Loader2 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
-import { useKeys, useRevokeKey, useRotateKey } from "../hooks/useKeys";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { ConfirmDialog } from "../components/ConfirmDialog";
+import { NewKeyDialog } from "../components/NewKeyDialog";
+import { useCreateKey, useKeys, useRevokeKey, useRotateKey } from "../hooks/useKeys";
 import type { KeyListItem } from "../types/api";
 
 function formatDate(dateString: string) {
@@ -52,9 +54,36 @@ function statusLabel(status: KeyListItem["status"]): string {
 type SortColumn = "alias" | "team" | "status" | "created" | "expires" | "spend";
 
 export function ApiKeys() {
-  const { data, isLoading, error } = useKeys();
+  const keys = useKeys();
+  const { data, isLoading, error } = keys;
   const rotateKey = useRotateKey();
   const revokeKey = useRevokeKey();
+  const createKey = useCreateKey();
+
+  const [confirmAction, setConfirmAction] = useState<{
+    type: "rotate" | "revoke";
+    keyId: string;
+    keyAlias: string;
+  } | null>(null);
+
+  const [showNewKey, setShowNewKey] = useState(false);
+  const [createdKey, setCreatedKey] = useState<{
+    key: string;
+    key_alias: string;
+    team_alias: string;
+  } | null>(null);
+
+  const teams = useMemo(() => {
+    if (!keys.data) return [];
+    const seen = new Set<string>();
+    return [...keys.data.active, ...keys.data.revoked]
+      .filter((k) => {
+        if (seen.has(k.team_id)) return false;
+        seen.add(k.team_id);
+        return true;
+      })
+      .map((k) => ({ team_id: k.team_id, team_alias: k.team_alias }));
+  }, [keys.data]);
 
   const [sortConfig, setSortConfig] = useState<{
     key: SortColumn;
@@ -198,6 +227,13 @@ export function ApiKeys() {
           </p>
         </div>
         <div className="flex items-center gap-3 w-full sm:w-auto">
+          <button
+            type="button"
+            onClick={() => setShowNewKey(true)}
+            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90 transition-colors"
+          >
+            Generate New Key
+          </button>
           <div className="relative" ref={dropdownRef}>
             <button
               type="button"
@@ -230,7 +266,7 @@ export function ApiKeys() {
         <div className="flex flex-col items-center justify-center py-20 text-text-secondary">
           <Key className="w-12 h-12 mb-4 opacity-50" />
           <p className="text-lg font-medium">No active keys</p>
-          <p className="text-sm mt-1">Keys are generated during provisioning.</p>
+          <p className="text-sm mt-1">No API keys found. Generate a new key to get started.</p>
         </div>
       ) : (
         <section className="mb-10">
@@ -304,7 +340,13 @@ export function ApiKeys() {
                         <td className="px-6 py-4 text-right space-x-4 whitespace-nowrap">
                           <button
                             type="button"
-                            onClick={() => rotateKey.mutate(item.id)}
+                            onClick={() =>
+                              setConfirmAction({
+                                type: "rotate",
+                                keyId: item.id,
+                                keyAlias: item.litellm_key_alias,
+                              })
+                            }
                             disabled={rotateKey.isPending}
                             className="text-xs text-text-secondary hover:text-primary font-medium transition-colors disabled:opacity-50"
                           >
@@ -312,7 +354,13 @@ export function ApiKeys() {
                           </button>
                           <button
                             type="button"
-                            onClick={() => revokeKey.mutate(item.id)}
+                            onClick={() =>
+                              setConfirmAction({
+                                type: "revoke",
+                                keyId: item.id,
+                                keyAlias: item.litellm_key_alias,
+                              })
+                            }
                             disabled={revokeKey.isPending}
                             className="text-xs text-text-secondary hover:text-destructive font-medium transition-colors disabled:opacity-50"
                           >
@@ -384,6 +432,49 @@ export function ApiKeys() {
           </details>
         </section>
       )}
+      <NewKeyDialog
+        open={showNewKey}
+        teams={teams}
+        loading={createKey.isPending}
+        createdKey={createdKey}
+        onSubmit={(teamId) => {
+          createKey.mutate(teamId, {
+            onSuccess: (data) => {
+              setCreatedKey({
+                key: data.key,
+                key_alias: data.key_alias,
+                team_alias: data.team_alias,
+              });
+            },
+          });
+        }}
+        onCancel={() => {
+          setShowNewKey(false);
+          setCreatedKey(null);
+        }}
+      />
+
+      <ConfirmDialog
+        open={confirmAction !== null}
+        title={confirmAction?.type === "revoke" ? "Revoke API Key" : "Rotate API Key"}
+        description={
+          confirmAction?.type === "revoke"
+            ? `This will permanently disable key "${confirmAction.keyAlias}". This cannot be undone.`
+            : `This will generate a new key to replace "${confirmAction?.keyAlias}". The old key will stop working immediately.`
+        }
+        confirmLabel={confirmAction?.type === "revoke" ? "Revoke" : "Rotate"}
+        confirmVariant={confirmAction?.type === "revoke" ? "danger" : "primary"}
+        loading={rotateKey.isPending || revokeKey.isPending}
+        onConfirm={() => {
+          if (!confirmAction) return;
+          if (confirmAction.type === "revoke") {
+            revokeKey.mutate(confirmAction.keyId, { onSettled: () => setConfirmAction(null) });
+          } else {
+            rotateKey.mutate(confirmAction.keyId, { onSettled: () => setConfirmAction(null) });
+          }
+        }}
+        onCancel={() => setConfirmAction(null)}
+      />
     </div>
   );
 }

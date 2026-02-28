@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 import structlog
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from slowapi.errors import RateLimitExceeded
 from sqlalchemy import text
 
 from app.api.v1.router import router as v1_router
@@ -16,7 +17,7 @@ from app.core.rate_limit import RateLimitUserMiddleware, limiter, rate_limit_exc
 from app.core.teams import load_teams_config
 from app.services.litellm_client import LiteLLMClient
 
-setup_logging()
+setup_logging(json_output=get_settings().log_json)
 logger = structlog.stdlib.get_logger(__name__)
 
 
@@ -63,7 +64,8 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS middleware
+# Middleware execution order (Starlette LIFO — last added = outermost):
+#   Request → RateLimitUserMiddleware → CorrelationIdMiddleware → CORSMiddleware → app
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[get_settings().portal_base_url],
@@ -78,7 +80,7 @@ app.add_middleware(CorrelationIdMiddleware)
 # Rate limiting (user OID extraction must run before slowapi evaluates the key function)
 app.add_middleware(RateLimitUserMiddleware)
 app.state.limiter = limiter
-app.add_exception_handler(429, rate_limit_exceeded_handler)
+app.add_exception_handler(RateLimitExceeded, rate_limit_exceeded_handler)
 
 # Global exception handlers
 register_exception_handlers(app)
