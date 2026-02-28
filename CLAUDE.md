@@ -36,6 +36,11 @@
 - All Python packages pinned to latest verified versions (use `uv lock --upgrade`)
 - `.scratchpad/` is gitignored — never stage or commit these files
 - `backend/teams.yaml` is gitignored — use `teams.yaml.example` as template
+- SQLAlchemy async: always use `selectinload()` for relationship access — lazy loading causes silent `MissingGreenlet` crashes
+- Background/cron jobs use `async_session_factory()` directly (not FastAPI's `Depends(get_session)`) with fresh clients per run
+- Deprovisioning uses `block_key` (preserves spend history); rotation uses `delete_key` (key is expired)
+- Email templates live in `backend/app/templates/email/` using Jinja2 inheritance from `base.html`
+- APScheduler 3.x (`AsyncIOScheduler`) — 4.x is not released on PyPI (only alpha)
 
 ## Documentation (docs/)
 - Built with Mintlify — no `mint build` command exists; `mint dev` is the only serve option
@@ -47,6 +52,8 @@
 
 ## Testing
 - Backend: pytest with pytest-asyncio (strict mode), httpx ASGITransport for endpoint tests
+- Mock `session.begin_nested()`: use `MagicMock(return_value=async_cm)` — `AsyncMock` returns a coroutine, not an async context manager
+- Test fakes in `conftest.py`: `FakeProvisionedKey`, `FakeProvisionedUser`, `FakeTeamMembership` — keep fields in sync with ORM models
 - Frontend: `tsc --noEmit` + `biome ci .` (no test runner yet)
 - Run before committing: `mise run qa` (runs all checks + tests)
 
