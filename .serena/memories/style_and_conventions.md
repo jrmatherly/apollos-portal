@@ -18,7 +18,7 @@
 - **Type declarations**: `frontend/src/vite-env.d.ts` must exist (Vite client types)
 - **Auth**: MSAL browser v5, PKCE redirect flow, `useAuth()` hook from `AuthContext`
 - **Routing**: React Router v7 with `ProtectedRoute` wrapper
-- **Lint**: `tsc --noEmit` (no ESLint configured yet)
+- **Lint/Format**: Biome 2.4.4 (`npx biome check .` for lint, `npx biome format --write .` for format) + `tsc --noEmit` for type checking
 
 ## Git
 - `.scratchpad/` is gitignored — never stage or commit

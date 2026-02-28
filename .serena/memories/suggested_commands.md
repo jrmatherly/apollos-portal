@@ -12,7 +12,9 @@
 - `uv lock --upgrade` — upgrade all deps to latest
 
 ## Frontend (in frontend/)
-- `npx tsc --noEmit` — TypeScript type check (lint step)
+- `npx biome check .` — lint TypeScript/TSX/JSX code
+- `npx biome format --write .` — format TypeScript/TSX/JSX code
+- `npx tsc --noEmit` — TypeScript type check
 - `npm run dev` — start Vite dev server on port 3000
 - `npm run build` — production build
 - `npm install` — install dependencies
@@ -39,7 +41,16 @@
 - `mise run migrate` — alembic upgrade head
 - `mise run docker:reset` — reset Docker services and volumes
 
+## Docs (in docs/)
+- `mint dev` — preview docs locally at localhost:3000
+- `mint validate` — validate documentation builds
+- `mint broken-links` — check for broken internal links
+
 ## Pre-commit Checklist
 ```bash
-cd backend && uv run pytest -v && uv run ruff check . && cd ../frontend && npx tsc --noEmit
+mise run qa
+```
+Or manually:
+```bash
+cd backend && uv run pytest -v && uv run ruff check . && cd ../frontend && npx biome check . && npx tsc --noEmit
 ```

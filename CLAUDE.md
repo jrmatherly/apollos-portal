@@ -41,6 +41,9 @@
 - Deprovisioning uses `block_key` (preserves spend history); rotation uses `delete_key` (key is expired)
 - Email templates live in `backend/app/templates/email/` using Jinja2 inheritance from `base.html`
 - APScheduler 3.x (`AsyncIOScheduler`) — 4.x is not released on PyPI (only alpha)
+- slowapi rate limiting: key function runs before endpoint body — use `RateLimitUserMiddleware` (pure ASGI) for per-user OID extraction from JWT
+- structlog logging: use `structlog.stdlib.get_logger(__name__)` at module level, after all imports (avoids ruff E402)
+- External API error handling pattern: wrap calls (e.g. `litellm.block_key()`) in try/except, log with structlog, continue — reconciliation jobs resolve drift
 
 ## Documentation (docs/)
 - Built with Mintlify — no `mint build` command exists; `mint dev` is the only serve option
@@ -56,6 +59,10 @@
 - Test fakes in `conftest.py`: `FakeProvisionedKey`, `FakeProvisionedUser`, `FakeTeamMembership` — keep fields in sync with ORM models
 - Frontend: `tsc --noEmit` + `biome ci .` (no test runner yet)
 - Run before committing: `mise run qa` (runs all checks + tests)
+- Pydantic `string_too_long` is the error type for `Field(max_length=...)` — not `max_length`
+- Use `Literal[30, 60, 90, 180]` (not `ge/le` range) when business logic restricts to specific values
+- Starlette 404s from unmatched routes bypass custom `HTTPException` handlers — test against real endpoints
+- Admin endpoints: `Path(max_length=36)` on ID params, `Query(max_length=...)` on string filters
 
 ## Tech Stack (Feb 2026)
 - Mintlify (docs platform, CLI v4.2+)
@@ -71,6 +78,8 @@
 - Agents: `security-reviewer` (OWASP review), `docs-reviewer` (cross-ref docs vs code)
 - Hooks auto-format Python (ruff) and TS/MDX (biome) on edit; block `.env`, `teams.yaml`, and lock files
 - Editing `.claude/settings.json` with the Edit tool fails on long escaped commands — use Write instead
+- Before creating PRs, verify `origin/main` is up to date (`git push origin main`) — unpushed main commits pollute the PR diff
+- Squash & merge is preferred for feature branches — keeps main history clean with one commit per phase
 
 ## Serena MCP
 - Project name: `apollos-portal` (config: `.serena/project.yml`)

@@ -33,7 +33,9 @@ When documenting features, keep these architecture details in mind:
 - **CLI**: Click with MSAL device-code auth flow, httpx for API calls
 - **Database**: PostgreSQL 18 for key metadata and audit records
 - **Auth flow**: Users authenticate via Microsoft Entra ID, backend validates tokens and maps security group memberships to LiteLLM teams
-- **API endpoints**: `/api/v1/me`, `/api/v1/status`, `/api/v1/provision`, `/api/v1/keys`, `/api/v1/keys/new`, `/api/v1/keys/{id}/rotate`, `/api/v1/keys/{id}/revoke`, `/api/v1/teams`, `/api/v1/usage`, `/api/v1/models`, `/api/v1/settings`
+- **User endpoints**: `/api/v1/me`, `/api/v1/status`, `/api/v1/provision`, `/api/v1/keys`, `/api/v1/keys/new`, `/api/v1/keys/{id}/rotate`, `/api/v1/keys/{id}/revoke`, `/api/v1/teams`, `/api/v1/usage`, `/api/v1/models`, `/api/v1/settings` (GET + PATCH)
+- **Admin endpoints** (require `portal_admin` role): `/api/v1/admin/users`, `/api/v1/admin/users/{id}`, `/api/v1/admin/users/{id}/deprovision`, `/api/v1/admin/users/{id}/reprovision`, `/api/v1/admin/keys`, `/api/v1/admin/keys/{id}/revoke`, `/api/v1/admin/audit`, `/api/v1/admin/audit/export`, `/api/v1/admin/health`
+- **Health endpoints** (unauthenticated): `/health`, `/ready`
 
 ## Style preferences
 

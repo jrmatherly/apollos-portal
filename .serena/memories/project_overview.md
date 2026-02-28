@@ -9,7 +9,8 @@ apollos-portal/
 ├── backend/          # FastAPI API server (Python 3.12, uv)
 ├── frontend/         # React 19 + Vite 7 SPA (Node 24, TypeScript 5.9)
 ├── cli/              # Click CLI with MSAL device-code auth (Python 3.12, uv)
-├── docker/           # Dockerfiles (backend.Dockerfile, frontend.Dockerfile)
+├── docs/             # Mintlify documentation site (MDX + docs.json)
+├── docker/           # Dockerfiles (backend.Dockerfile, frontend.Dockerfile, docs.Dockerfile)
 ├── docker-compose.yml # PostgreSQL 18 + backend + frontend
 ├── mise.toml         # Task runner (dev, test, lint, format, migrate, docker)
 ├── CLAUDE.md         # Project conventions and commands

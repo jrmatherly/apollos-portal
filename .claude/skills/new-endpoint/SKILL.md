@@ -26,13 +26,13 @@ from __future__ import annotations
 
 from fastapi import APIRouter, Depends, Request
 
-from app.api.v1.endpoints.auth import get_current_user
+from app.core.auth import CurrentUser, get_current_user
 
 router = APIRouter()
 
 
 @router.get("/{path}", response_model={ResponseModel})
-async def {function_name}(request: Request, user: dict = Depends(get_current_user)):
+async def {function_name}(request: Request, user: CurrentUser = Depends(get_current_user)):
     """Description."""
     litellm = request.app.state.litellm
     # Implementation
