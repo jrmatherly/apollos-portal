@@ -30,9 +30,7 @@ async def run_reconciliation_job(settings: Settings) -> None:
     try:
         # Fetch portal DB active keys — extract scalar fields before closing session
         async with async_session_factory() as session:
-            result = await session.execute(
-                select(ProvisionedKey).where(ProvisionedKey.status == "active")
-            )
+            result = await session.execute(select(ProvisionedKey).where(ProvisionedKey.status == "active"))
             portal_keys = result.scalars().all()
             portal_key_map: dict[str, dict] = {}
             for k in portal_keys:

@@ -32,10 +32,12 @@ class TestAutoRotateKey:
 
         litellm = AsyncMock()
         litellm.delete_key = AsyncMock()
-        litellm.generate_key = AsyncMock(return_value={
-            "key": "sk-new-123",
-            "token": "tok-new-123",
-        })
+        litellm.generate_key = AsyncMock(
+            return_value={
+                "key": "sk-new-123",
+                "token": "tok-new-123",
+            }
+        )
 
         key_id = uuid4()
         key = FakeProvisionedKey(
@@ -90,10 +92,12 @@ class TestAutoRotateKey:
 
         litellm = AsyncMock()
         litellm.delete_key = AsyncMock(side_effect=Exception("LiteLLM unreachable"))
-        litellm.generate_key = AsyncMock(return_value={
-            "key": "sk-new-456",
-            "token": "tok-new-456",
-        })
+        litellm.generate_key = AsyncMock(
+            return_value={
+                "key": "sk-new-456",
+                "token": "tok-new-456",
+            }
+        )
 
         key = FakeProvisionedKey(
             litellm_key_id="tok-failing",

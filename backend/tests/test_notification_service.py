@@ -77,9 +77,7 @@ class TestSendExpiryNotification:
             patch("app.services.notification_service.send_email", new_callable=AsyncMock) as mock_send,
             patch("app.services.notification_service.log_action", new_callable=AsyncMock),
         ):
-            result = await _send_expiry_notification(
-                session, settings, key, user, 7, "expiry_7d"
-            )
+            result = await _send_expiry_notification(session, settings, key, user, 7, "expiry_7d")
 
         assert result is True
         session.flush.assert_called_once()
@@ -102,9 +100,7 @@ class TestSendExpiryNotification:
         settings = MagicMock()
 
         with patch("app.services.notification_service.send_email", new_callable=AsyncMock) as mock_send:
-            result = await _send_expiry_notification(
-                session, settings, key, user, 7, "expiry_7d"
-            )
+            result = await _send_expiry_notification(session, settings, key, user, 7, "expiry_7d")
 
         assert result is False
         mock_send.assert_not_called()

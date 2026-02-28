@@ -64,10 +64,7 @@ async def _send_expiry_notification(
             "portal_url": settings.portal_base_url,
         },
     )
-    subject = (
-        f"[Apollos AI] API Key Expires in {days_left} "
-        f"Day{'s' if days_left != 1 else ''}: {key.litellm_key_alias}"
-    )
+    subject = f"[Apollos AI] API Key Expires in {days_left} Day{'s' if days_left != 1 else ''}: {key.litellm_key_alias}"
 
     await send_email(
         settings=settings,
@@ -116,9 +113,7 @@ async def run_notification_job(settings: Settings) -> None:
     for key_id in key_ids:
         async with async_session_factory() as session:
             result = await session.execute(
-                select(ProvisionedKey)
-                .options(selectinload(ProvisionedKey.user))
-                .where(ProvisionedKey.id == key_id)
+                select(ProvisionedKey).options(selectinload(ProvisionedKey.user)).where(ProvisionedKey.id == key_id)
             )
             key = result.scalar_one_or_none()
             if not key or key.status != "active":
@@ -144,7 +139,12 @@ async def run_notification_job(settings: Settings) -> None:
                     skipped += 1
                     continue
                 was_sent = await _send_expiry_notification(
-                    session, settings, key, user, days_left, notification_type,
+                    session,
+                    settings,
+                    key,
+                    user,
+                    days_left,
+                    notification_type,
                 )
                 if was_sent:
                     sent += 1
