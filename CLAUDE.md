@@ -14,6 +14,7 @@
 - Backend tests: `uv run --package apollos-portal-backend pytest -v` (from backend/)
 - Backend lint: `uv run --package apollos-portal-backend ruff check backend/`
 - Backend lint fix: `uv run --package apollos-portal-backend ruff check --fix backend/`
+- Backend format check: `uv run --package apollos-portal-backend ruff format --check backend/`
 - CLI lint: `uv run --package apollos-cli ruff check cli/`
 - Frontend lint: `cd frontend && npx biome check .`
 - Frontend format: `cd frontend && npx biome format --write .`
@@ -50,6 +51,12 @@
 - External API error handling pattern: wrap calls (e.g. `litellm.block_key()`) in try/except, log with structlog, continue — reconciliation jobs resolve drift
 - Entra ID group resolution: NEVER use JWT `groups` claim (200-group overage limit silently breaks) — always use Graph API `/users/{oid}/memberOf` with client credentials
 - Token validation: v1 validates by calling Graph `/me` with user's bearer token (not local JWKS) — see `backend/app/core/auth.py`
+- `_get_token_claims()` in auth.py returns both `roles` and `aud` from JWT payload — JWT `aud` verified against `azure_client_id` for defense-in-depth
+- `is_active` check required on ALL user-facing endpoints that query `ProvisionedUser` — not just key_service
+- `asyncio.get_running_loop()` in async functions — never `get_event_loop()` (deprecated, warns in 3.12+)
+- Docker security: frontend nginx adds X-Frame-Options DENY, X-Content-Type-Options, Referrer-Policy, Permissions-Policy; backend runs as non-root `appuser`
+- React ErrorBoundary requires class component (React 19 has no hooks equivalent)
+- MSAL browser init: module-level singleton promise pattern prevents double-init in React Strict Mode
 - Graph API pagination: always follow `@odata.nextLink` pages; use `$top=999` to minimize round trips — see `backend/app/core/graph.py`
 
 ## Documentation (docs/)
@@ -78,6 +85,7 @@
 - Admin endpoints: `Path(max_length=36)` on ID params, `Query(max_length=...)` on string filters
 - Admin endpoint tests: must override both `require_admin` and `get_session` dependencies
 - CSV export tests: mock target is `app.api.v1.endpoints.admin.query_audit_log` (standalone import, not module attr)
+- `ruff format --check` and `ruff check` are independent — CI runs both, local hooks only run `ruff check`; run `ruff format` before pushing
 
 ## Tech Stack (Feb 2026)
 - Mintlify (docs platform, CLI v4.2+)

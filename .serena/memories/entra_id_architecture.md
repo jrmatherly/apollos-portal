@@ -11,8 +11,10 @@ The project uses **one** App Registration for the portal (auth + Graph API). A s
 ## Token Validation Strategy (v1)
 The backend validates user tokens by calling Microsoft Graph `/me` with the bearer token. If Graph returns 200, the token is valid and we get the user profile in one call. This avoids local JWKS key rotation complexity. The `roles` claim is then extracted from the JWT payload directly (token already validated by Graph).
 
+JWT `aud` claim is verified against `azure_client_id` in `_get_token_claims()` as defense-in-depth — ensures tokens are intended for this application even though Graph `/me` already validates the token.
+
 Key files:
-- `backend/app/core/auth.py` — `_validate_token()` calls Graph `/me`, `_get_token_roles()` decodes JWT
+- `backend/app/core/auth.py` — `_validate_token()` calls Graph `/me`, `_get_token_claims()` decodes JWT for `roles` + `aud`
 - `backend/app/core/graph.py` — `GraphClient` uses client credentials for app-only Graph API calls
 
 ## Graph API Patterns

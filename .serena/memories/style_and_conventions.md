@@ -3,6 +3,7 @@
 ## Python (Backend + CLI)
 - **Package manager**: uv (not pip)
 - **Linter**: ruff (line-length=120, target=py312, select=E,F,I,N,W,UP,S)
+- **Formatter**: ruff format (separate from lint — CI checks both independently)
 - **Type hints**: Use throughout, `from __future__ import annotations` in model files
 - **SQLAlchemy models**: Use `TYPE_CHECKING` imports for forward references to avoid ruff F821
 - **Config**: All values via `app.config.Settings` (Pydantic BaseSettings), never hardcode URLs/secrets
@@ -30,3 +31,5 @@
 - Backend context: `./backend`, Frontend context: `./frontend`
 - `.dockerignore` files in both `backend/` and `frontend/`
 - PostgreSQL 18 with explicit PGDATA, SCRAM-SHA-256 auth
+- Frontend: nginx 1.28 with security headers (X-Frame-Options DENY, X-Content-Type-Options nosniff, Referrer-Policy, Permissions-Policy)
+- Backend: runs as non-root `appuser` via `useradd` + `USER appuser`

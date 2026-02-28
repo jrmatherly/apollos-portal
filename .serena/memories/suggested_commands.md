@@ -4,6 +4,7 @@
 - `uv run pytest -v` — run tests (pytest + pytest-asyncio strict mode)
 - `uv run ruff check .` — lint Python code
 - `uv run ruff check . --fix` — auto-fix lint issues
+- `uv run ruff format --check .` — verify formatting (CI runs this separately from lint)
 - `uv run ruff format .` — format Python code
 - `uv run uvicorn app.main:app --reload --port 8000` — run dev server
 - `uv run alembic upgrade head` — run database migrations
@@ -53,5 +54,5 @@ mise run qa
 ```
 Or manually:
 ```bash
-cd backend && uv run pytest -v && uv run ruff check . && cd ../frontend && npx biome check . && npx tsc --noEmit
+cd backend && uv run pytest -v && uv run ruff check . && uv run ruff format --check . && cd ../frontend && npx biome check . && npx tsc --noEmit
 ```

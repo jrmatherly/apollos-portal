@@ -39,45 +39,189 @@
     }
   },
   "api_endpoints": [
-    { "method": "GET", "path": "/me", "file": "backend/app/api/v1/endpoints/auth.py", "auth": "user" },
-    { "method": "GET", "path": "/status", "file": "backend/app/api/v1/endpoints/provision.py", "auth": "user" },
-    { "method": "POST", "path": "/provision", "file": "backend/app/api/v1/endpoints/provision.py", "auth": "user" },
-    { "method": "GET", "path": "/keys", "file": "backend/app/api/v1/endpoints/keys.py", "auth": "user" },
-    { "method": "POST", "path": "/keys/new", "file": "backend/app/api/v1/endpoints/keys.py", "auth": "user" },
-    { "method": "POST", "path": "/keys/{id}/rotate", "file": "backend/app/api/v1/endpoints/keys.py", "auth": "user" },
-    { "method": "POST", "path": "/keys/{id}/revoke", "file": "backend/app/api/v1/endpoints/keys.py", "auth": "user" },
-    { "method": "GET", "path": "/usage", "file": "backend/app/api/v1/endpoints/usage.py", "auth": "user" },
-    { "method": "GET", "path": "/teams", "file": "backend/app/api/v1/endpoints/teams.py", "auth": "user" },
-    { "method": "GET", "path": "/models", "file": "backend/app/api/v1/endpoints/models.py", "auth": "user" },
-    { "method": "GET", "path": "/settings", "file": "backend/app/api/v1/endpoints/settings.py", "auth": "user" },
-    { "method": "PUT", "path": "/settings", "file": "backend/app/api/v1/endpoints/settings.py", "auth": "user" },
-    { "method": "GET", "path": "/admin/users", "file": "backend/app/api/v1/endpoints/admin.py", "auth": "admin" },
-    { "method": "GET", "path": "/admin/users/{id}", "file": "backend/app/api/v1/endpoints/admin.py", "auth": "admin" },
-    { "method": "POST", "path": "/admin/users/{id}/deprovision", "file": "backend/app/api/v1/endpoints/admin.py", "auth": "admin" },
-    { "method": "POST", "path": "/admin/users/{id}/reprovision", "file": "backend/app/api/v1/endpoints/admin.py", "auth": "admin" },
-    { "method": "POST", "path": "/admin/keys/{id}/revoke", "file": "backend/app/api/v1/endpoints/admin.py", "auth": "admin" },
-    { "method": "GET", "path": "/admin/keys", "file": "backend/app/api/v1/endpoints/admin.py", "auth": "admin" },
-    { "method": "GET", "path": "/admin/audit", "file": "backend/app/api/v1/endpoints/admin.py", "auth": "admin" },
-    { "method": "GET", "path": "/admin/audit/export", "file": "backend/app/api/v1/endpoints/admin.py", "auth": "admin" },
-    { "method": "GET", "path": "/admin/health", "file": "backend/app/api/v1/endpoints/admin.py", "auth": "admin" }
+    {
+      "method": "GET",
+      "path": "/me",
+      "file": "backend/app/api/v1/endpoints/auth.py",
+      "auth": "user"
+    },
+    {
+      "method": "GET",
+      "path": "/status",
+      "file": "backend/app/api/v1/endpoints/provision.py",
+      "auth": "user"
+    },
+    {
+      "method": "POST",
+      "path": "/provision",
+      "file": "backend/app/api/v1/endpoints/provision.py",
+      "auth": "user"
+    },
+    {
+      "method": "GET",
+      "path": "/keys",
+      "file": "backend/app/api/v1/endpoints/keys.py",
+      "auth": "user"
+    },
+    {
+      "method": "POST",
+      "path": "/keys/new",
+      "file": "backend/app/api/v1/endpoints/keys.py",
+      "auth": "user"
+    },
+    {
+      "method": "POST",
+      "path": "/keys/{id}/rotate",
+      "file": "backend/app/api/v1/endpoints/keys.py",
+      "auth": "user"
+    },
+    {
+      "method": "POST",
+      "path": "/keys/{id}/revoke",
+      "file": "backend/app/api/v1/endpoints/keys.py",
+      "auth": "user"
+    },
+    {
+      "method": "GET",
+      "path": "/usage",
+      "file": "backend/app/api/v1/endpoints/usage.py",
+      "auth": "user"
+    },
+    {
+      "method": "GET",
+      "path": "/teams",
+      "file": "backend/app/api/v1/endpoints/teams.py",
+      "auth": "user"
+    },
+    {
+      "method": "GET",
+      "path": "/models",
+      "file": "backend/app/api/v1/endpoints/models.py",
+      "auth": "user"
+    },
+    {
+      "method": "GET",
+      "path": "/settings",
+      "file": "backend/app/api/v1/endpoints/settings.py",
+      "auth": "user"
+    },
+    {
+      "method": "PUT",
+      "path": "/settings",
+      "file": "backend/app/api/v1/endpoints/settings.py",
+      "auth": "user"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/users",
+      "file": "backend/app/api/v1/endpoints/admin.py",
+      "auth": "admin"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/users/{id}",
+      "file": "backend/app/api/v1/endpoints/admin.py",
+      "auth": "admin"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/users/{id}/deprovision",
+      "file": "backend/app/api/v1/endpoints/admin.py",
+      "auth": "admin"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/users/{id}/reprovision",
+      "file": "backend/app/api/v1/endpoints/admin.py",
+      "auth": "admin"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/keys/{id}/revoke",
+      "file": "backend/app/api/v1/endpoints/admin.py",
+      "auth": "admin"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/keys",
+      "file": "backend/app/api/v1/endpoints/admin.py",
+      "auth": "admin"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/audit",
+      "file": "backend/app/api/v1/endpoints/admin.py",
+      "auth": "admin"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/audit/export",
+      "file": "backend/app/api/v1/endpoints/admin.py",
+      "auth": "admin"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/health",
+      "file": "backend/app/api/v1/endpoints/admin.py",
+      "auth": "admin"
+    }
   ],
   "services": {
-    "provisioning": { "file": "backend/app/services/provisioning.py", "purpose": "8-step idempotent user onboarding" },
-    "key_service": { "file": "backend/app/services/key_service.py", "purpose": "Key CRUD, rotate, revoke" },
-    "admin_service": { "file": "backend/app/services/admin_service.py", "purpose": "Admin user/key management" },
-    "litellm_client": { "file": "backend/app/services/litellm_client.py", "purpose": "LiteLLM proxy API wrapper" },
-    "rotation_service": { "file": "backend/app/services/rotation_service.py", "purpose": "Scheduled key rotation" },
-    "reconciliation_service": { "file": "backend/app/services/reconciliation_service.py", "purpose": "Drift detection" },
-    "notification_service": { "file": "backend/app/services/notification_service.py", "purpose": "Key expiry notifications" },
-    "email_service": { "file": "backend/app/services/email_service.py", "purpose": "SMTP email delivery" },
-    "deprovisioning_service": { "file": "backend/app/services/deprovisioning_service.py", "purpose": "User deprovisioning" }
+    "provisioning": {
+      "file": "backend/app/services/provisioning.py",
+      "purpose": "8-step idempotent user onboarding"
+    },
+    "key_service": {
+      "file": "backend/app/services/key_service.py",
+      "purpose": "Key CRUD, rotate, revoke"
+    },
+    "admin_service": {
+      "file": "backend/app/services/admin_service.py",
+      "purpose": "Admin user/key management"
+    },
+    "litellm_client": {
+      "file": "backend/app/services/litellm_client.py",
+      "purpose": "LiteLLM proxy API wrapper"
+    },
+    "rotation_service": {
+      "file": "backend/app/services/rotation_service.py",
+      "purpose": "Scheduled key rotation"
+    },
+    "reconciliation_service": {
+      "file": "backend/app/services/reconciliation_service.py",
+      "purpose": "Drift detection"
+    },
+    "notification_service": {
+      "file": "backend/app/services/notification_service.py",
+      "purpose": "Key expiry notifications"
+    },
+    "email_service": {
+      "file": "backend/app/services/email_service.py",
+      "purpose": "SMTP email delivery"
+    },
+    "deprovisioning_service": {
+      "file": "backend/app/services/deprovisioning_service.py",
+      "purpose": "User deprovisioning"
+    }
   },
   "models": [
-    { "name": "ProvisionedUser", "file": "backend/app/models/provisioned_user.py" },
-    { "name": "ProvisionedKey", "file": "backend/app/models/provisioned_key.py" },
-    { "name": "UserTeamMembership", "file": "backend/app/models/user_team_membership.py" },
+    {
+      "name": "ProvisionedUser",
+      "file": "backend/app/models/provisioned_user.py"
+    },
+    {
+      "name": "ProvisionedKey",
+      "file": "backend/app/models/provisioned_key.py"
+    },
+    {
+      "name": "UserTeamMembership",
+      "file": "backend/app/models/user_team_membership.py"
+    },
     { "name": "AuditLog", "file": "backend/app/models/audit_log.py" },
-    { "name": "KeyNotification", "file": "backend/app/models/key_notification.py" }
+    {
+      "name": "KeyNotification",
+      "file": "backend/app/models/key_notification.py"
+    }
   ],
   "commands": {
     "dev": "docker compose up",

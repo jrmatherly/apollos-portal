@@ -44,6 +44,7 @@ litellm-portal/
 ## Core Modules
 
 ### API Endpoints (`backend/app/api/v1/endpoints/`)
+
 | File | Routes | Purpose |
 |------|--------|---------|
 | `auth.py` | `GET /me` | User identity (OID, email, roles) |
@@ -56,6 +57,7 @@ litellm-portal/
 | `admin.py` | 9 admin endpoints | User mgmt, audit, health, CSV export |
 
 ### Services (`backend/app/services/`)
+
 | File | Purpose |
 |------|---------|
 | `provisioning.py` | 8-step idempotent user onboarding orchestrator |
@@ -69,6 +71,7 @@ litellm-portal/
 | `deprovisioning_service.py` | User deprovisioning workflow |
 
 ### Frontend Pages (`frontend/src/pages/`)
+
 | File | Route | Purpose |
 |------|-------|---------|
 | `Login.tsx` | `/login` | MSAL login |

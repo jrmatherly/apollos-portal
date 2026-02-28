@@ -13,6 +13,7 @@ All 6 phases (0–5) are **complete** as of Feb 28, 2026. All TODO items resolve
 - **Phase 4**: Key lifecycle automation (email notifications, rotation/deprovisioning/reconciliation cron jobs)
 - **Phase 5**: Admin features & hardening (admin dashboard, rate limiting, structured logging, health endpoints, input validation)
 - **TODO remediation (PR #4)**: 11 code review items, test coverage expansion (109→149 tests), frontend UX improvements
+- **Codebase review (PR #5)**: Security hardening (JWT aud verification, nginx headers, non-root Docker), async fixes, `is_active` enforcement, test expansion (149→169 tests)
 
 No remaining open items. See `.scratchpad/TODO.md` for full history.
 
@@ -27,7 +28,7 @@ apollos-portal/
 │   │   ├── services/          # 9 services (provisioning, key, admin, rotation, reconciliation, notification, email, deprovisioning, litellm_client) + audit
 │   │   └── templates/email/   # Jinja2 email templates (5 templates)
 │   ├── alembic/       # Database migrations
-│   └── tests/         # 149 pytest tests (18 test files, ~0.6s)
+│   └── tests/         # 169 pytest tests (20 test files, ~0.6s)
 ├── frontend/         # React 19 + Vite 7 SPA (Node 24, TypeScript 5.9)
 ├── cli/              # Click CLI with MSAL device-code auth (Python 3.12, uv)
 ├── docs/             # Mintlify documentation site (15 MDX pages)
