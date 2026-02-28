@@ -668,7 +668,7 @@
           "admin"
         ],
         "summary": "Admin List Keys",
-        "description": "List all active keys across all users (paginated).",
+        "description": "List all keys across all users (paginated), filtered by status.",
         "operationId": "admin_list_keys_api_v1_admin_keys_get",
         "security": [
           {
@@ -697,6 +697,21 @@
               "minimum": 1,
               "default": 50,
               "title": "Page Size"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "active",
+                "revoked",
+                "expired"
+              ],
+              "type": "string",
+              "default": "active",
+              "title": "Status"
             }
           }
         ],

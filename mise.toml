@@ -108,6 +108,11 @@ run = "docker compose down -v && docker compose up -d"
 description = "Start docs container"
 run = "docker compose up -d docs"
 
+[tasks."docs:openapi"]
+description = "Regenerate OpenAPI spec from FastAPI app"
+dir = "backend"
+run = 'uv run python -c "import json; from app.main import app; json.dump(app.openapi(), open(\"../docs/api-reference/openapi.json\", \"w\"), indent=2)"'
+
 [tasks."db:shell"]
 description = "Open psql shell"
 run = "docker compose exec db psql -U portal -d apollos_portal"
