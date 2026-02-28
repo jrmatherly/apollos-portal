@@ -1,0 +1,1164 @@
+# Apollos AI
+
+> Self-service portal for managing LLM API access through Microsoft Entra ID. Users authenticate with their organizational identity, get provisioned into teams based on security group memberships, and manage API keys for LiteLLM proxy access.
+
+---
+
+## Introduction
+
+Apollos AI is a self-service portal for managing access to LLM APIs through a [LiteLLM](https://docs.litellm.ai/) proxy. Users authenticate with Microsoft Entra ID, get provisioned into teams based on security group memberships, and manage their own API keys, usage, and settings.
+
+## How it works
+
+**Authenticate**
+
+Sign in with your Microsoft Entra ID account. The portal uses PKCE redirect flow for secure browser-based authentication.
+
+**Get provisioned**
+
+On first login, the portal maps your Entra ID security group memberships to LiteLLM teams. Each team has its own model access, rate limits, and budgets.
+
+**Create API keys**
+
+Generate API keys scoped to your teams. Use these keys to make LLM requests through the proxy endpoint.
+
+**Monitor usage**
+
+Track your token consumption, request counts, and costs per model and team from the portal dashboard.
+
+## Explore
+
+
+  
+  
+  
+## Architecture
+
+The portal consists of three components:
+
+| Component | Technology | Purpose |
+|---|---|---|
+| **Portal** (frontend) | React 19, Vite 7, TypeScript | Web UI for key management, usage, and settings |
+| **API** (backend) | FastAPI, SQLAlchemy, PostgreSQL | REST API, auth validation, LiteLLM proxy integration |
+| **CLI** | Click, MSAL, httpx | Command-line interface with device-code auth |
+
+All three components authenticate against Microsoft Entra ID and interact with a LiteLLM proxy instance for LLM routing and budget management.
+
+---
+
+## Quickstart
+
+## Prerequisites
+
+**Info:** You need a Microsoft Entra ID account with membership in at least one security group that maps to a LiteLLM team. Contact your administrator if you don't have access.
+
+
+## Get started
+
+**Sign in to the portal**
+
+Navigate to the Apollos AI portal and click **Sign in with Microsoft**. You'll be redirected to Microsoft's login page for authentication.
+
+  After signing in, the portal automatically provisions your account by mapping your Entra ID security group memberships to LiteLLM teams.
+
+**Create an API key**
+
+1. Go to **API Keys** in the sidebar
+  2. Click **Create key**
+  3. Give your key a name (e.g., "development")
+  4. Select the team to associate the key with
+  5. Copy the key — it won't be shown again
+
+  **Warning:** Store your API key securely. You cannot retrieve it after creation — only create a new one.
+  
+
+**Make your first request**
+
+Use your API key to send a request through the LiteLLM proxy:
+
+  ```bash
+  curl -X POST https://your-litellm-proxy/chat/completions \
+    -H "Authorization: Bearer sk-your-api-key" \
+    -H "Content-Type: application/json" \
+    -d '{
+      "model": "gpt-4o",
+      "messages": [
+        {"role": "user", "content": "Hello, world!"}
+      ]
+    }'
+  ```
+
+  The proxy routes your request to the appropriate LLM provider based on your team's model access configuration.
+
+**Monitor usage**
+
+Go to **Usage** in the sidebar to track your token consumption, request counts, and costs broken down by model and team.
+
+## Using the CLI
+
+You can also authenticate and check your profile from the command line:
+
+```bash
+# Set up the CLI
+cd cli && uv sync
+
+# Configure your tenant and portal URL
+uv run apollos configure
+
+# Authenticate with device code flow
+uv run apollos login
+
+# Check your portal profile
+uv run apollos me
+```
+
+See the [CLI overview](/cli/overview) for the full command reference.
+
+## Next steps
+
+---
+
+## Development
+
+**Info:** **Prerequisites**:
+  - Python 3.12+ and [uv](https://docs.astral.sh/uv/)
+  - Node.js 24+ and npm
+  - Docker and Docker Compose
+  - A Microsoft Entra ID app registration (for authentication)
+
+
+## Quick start with Docker
+
+The fastest way to run the full stack locally:
+
+```bash
+git clone https://github.com/jrmatherly/apollos-portal.git
+cd apollos-portal
+docker compose up
+```
+
+This starts PostgreSQL, the backend API, and the frontend. The portal is available at `http://localhost:5173`.
+
+## Running services individually
+
+### Backend
+
+```bash
+cd backend
+uv sync
+uv run alembic upgrade head   # Run database migrations
+uv run uvicorn app.main:app --reload --port 8000
+```
+
+The API is available at `http://localhost:8000`. Swagger UI is at `/docs` and ReDoc at `/redoc`.
+
+### Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+The frontend dev server starts at `http://localhost:5173` with hot module replacement.
+
+### CLI
+
+```bash
+cd cli
+uv sync
+uv run apollos --help
+```
+
+## Environment variables
+
+### Backend
+
+Backend configuration is managed through the `app.config.Settings` class (Pydantic BaseSettings). Create a `.env` file in the `backend/` directory:
+
+```bash
+DATABASE_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/apollos
+LITELLM_BASE_URL=http://localhost:4000
+LITELLM_MASTER_KEY=sk-your-litellm-master-key
+AZURE_TENANT_ID=your-tenant-id
+AZURE_CLIENT_ID=your-client-id
+AZURE_CLIENT_SECRET=your-client-secret
+PORTAL_BASE_URL=http://localhost:5173
+```
+
+### Frontend
+
+Frontend environment variables use the `VITE_` prefix. Create a `.env` file in the `frontend/` directory:
+
+```bash
+VITE_API_BASE_URL=http://localhost:8000
+VITE_AZURE_CLIENT_ID=your-client-id
+VITE_AZURE_TENANT_ID=your-tenant-id
+```
+
+## Running tests
+
+```bash
+# Backend tests (from project root)
+uv run --package apollos-portal-backend pytest -v
+
+# Backend linting
+uv run --package apollos-portal-backend ruff check backend/
+
+# Frontend type checking
+cd frontend && npx tsc --noEmit
+
+# Frontend linting
+cd frontend && npx biome check .
+
+# Run all checks at once
+mise run qa
+```
+
+## Database migrations
+
+The backend uses Alembic for database migrations:
+
+```bash
+cd backend
+
+# Apply all migrations
+uv run alembic upgrade head
+
+# Create a new migration
+uv run alembic revision --autogenerate -m "description of change"
+
+# Roll back one migration
+uv run alembic downgrade -1
+```
+
+## Project structure
+
+```
+apollos-portal/
+├── backend/           # FastAPI API server
+│   ├── app/
+│   │   ├── api/v1/endpoints/  # auth, keys, teams, usage, models, settings, provision, admin
+│   │   ├── core/              # auth, database, graph client, teams config, logging, exceptions, rate limiting, scheduler
+│   │   ├── models/            # SQLAlchemy models (users, keys, teams, audit, notifications)
+│   │   ├── services/          # LiteLLM client, provisioning, key lifecycle, email, admin, audit
+│   │   └── templates/email/   # Jinja2 email templates (expiry warnings, rotation, deprovisioning)
+│   ├── alembic/       # Database migrations
+│   └── tests/         # pytest test suite
+├── frontend/          # React SPA
+│   └── src/
+│       ├── components/ # Shared components (Sidebar, ProtectedRoute)
+│       ├── contexts/   # React contexts (AuthContext)
+│       ├── hooks/      # Custom hooks (useKeys, useUsage, etc.)
+│       ├── pages/      # Route pages (Dashboard, ApiKeys, Teams, etc.)
+│       └── lib/        # API client, MSAL config
+├── cli/               # Click CLI
+├── docker/            # Dockerfiles
+├── docs/              # This documentation site (Mintlify)
+└── docker-compose.yml
+```
+
+---
+
+## Authentication
+
+Apollos AI uses Microsoft Entra ID for authentication across all three components (portal, API, CLI). Each component uses a different OAuth 2.0 flow optimized for its context.
+
+## Authentication flows
+
+**Portal (frontend):**
+
+The portal uses **PKCE authorization code flow** via `@azure/msal-browser` v5.
+
+  1. User clicks **Sign in with Microsoft**
+  2. Browser redirects to Microsoft's authorization endpoint
+  3. User authenticates and consents
+  4. Browser receives an authorization code
+  5. MSAL exchanges the code for access and ID tokens
+  6. The portal sends the access token to the backend API with each request
+
+**API (backend):**
+
+The backend uses **client credentials flow** for service-to-service calls (Microsoft Graph, LiteLLM) and validates user access tokens from the frontend.
+
+  - User tokens are validated against the Entra ID JWKS endpoint
+  - The `oid` (object ID) claim identifies the user
+  - Security group memberships are resolved via Microsoft Graph
+
+**CLI:**
+
+The CLI uses **device code flow** via the MSAL Python library.
+
+  1. User runs `apollos login`
+  2. CLI displays a URL and a code
+  3. User opens the URL in a browser and enters the code
+  4. After authentication, the CLI receives tokens
+  5. Tokens are cached locally for subsequent commands
+
+## Team provisioning
+
+When a user first authenticates, the backend provisions them by:
+
+1. Validating their Entra ID access token
+2. Querying Microsoft Graph for their security group memberships
+3. Matching group IDs against the `teams.yaml` configuration
+4. Creating or updating the user's LiteLLM team memberships
+5. Returning the user's profile and team list
+
+This happens automatically on the `/api/v1/provision` endpoint, called after the first successful login.
+
+## Token validation
+
+The backend validates every request by:
+
+- Checking the `Authorization: Bearer <token>` header
+- Verifying the token signature against Entra ID's JWKS keys
+- Validating the audience, issuer, and expiration claims
+- Extracting the user's `oid` for identity resolution
+
+**Note:** The backend uses the `HTTPBearer` security scheme. Missing or invalid tokens return a `401 Unauthorized` response.
+
+
+## Entra ID setup
+
+The portal requires an App Registration in Microsoft Entra ID with specific permissions and security group configuration. See the [Entra ID setup guide](/administration/entra-id-setup) for step-by-step instructions.
+
+---
+
+## Teams
+
+Teams are the core organizational unit in Apollos AI. Each team maps to both a Microsoft Entra ID security group and a LiteLLM team, connecting identity management with LLM access controls.
+
+## How teams work
+
+A team defines:
+
+- **Model access** — which LLM models team members can use (e.g., `gpt-4o`, `claude-sonnet-4-20250514`)
+- **Budget limits** — maximum spend per team over a billing period
+- **Rate limits** — requests per minute and tokens per minute caps
+- **Member list** — users whose Entra ID security group memberships include this team
+
+## Team configuration
+
+Teams are defined in `teams.yaml` (gitignored, use `teams.yaml.example` as a template). Each entry maps an Entra ID security group to a LiteLLM team:
+
+```yaml
+teams:
+  - name: "engineering"
+    entra_group_id: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+    litellm_team_id: "engineering-team"
+    models:
+      - "gpt-4o"
+      - "gpt-4o-mini"
+      - "claude-sonnet-4-20250514"
+    max_budget: 500.00
+```
+
+**Warning:** `teams.yaml` contains Entra ID group IDs and is gitignored. Never commit this file. Use `teams.yaml.example` as a starting template.
+
+
+## Provisioning flow
+
+When a user signs in, the provisioning endpoint:
+
+1. Resolves the user's Entra ID security group memberships via Microsoft Graph
+2. Matches those groups against the `teams.yaml` configuration
+3. Creates or updates LiteLLM team memberships for matched groups
+4. Returns the user's teams with their model access and budget information
+
+Users are automatically added to or removed from teams based on their current security group memberships. Changes in Entra ID are reflected the next time the user signs in.
+
+## Viewing teams
+
+In the portal, go to **Teams** in the sidebar to see:
+
+- Teams you belong to
+- Available models per team
+- Current budget usage and limits
+
+---
+
+## API keys
+
+API keys authenticate your requests to the LiteLLM proxy. Each key is scoped to a specific team and inherits that team's model access, rate limits, and budget.
+
+## Creating keys
+
+**Open API Keys**
+
+In the portal, go to **API Keys** in the sidebar.
+
+**Create a new key**
+
+Click **Create key**, provide a name, and select the team to associate it with.
+
+**Copy the key**
+
+Copy the generated key immediately. It is displayed only once and cannot be retrieved later.
+
+You can also create keys via the API:
+
+```bash
+curl -X POST /api/v1/keys/new \
+  -H "Authorization: Bearer <access-token>" \
+  -H "Content-Type: application/json" \
+  -d '{"team_id": "engineering"}'
+```
+
+## Using keys
+
+Include your API key in the `Authorization` header when making requests to the LiteLLM proxy:
+
+```bash
+curl -X POST https://your-litellm-proxy/chat/completions \
+  -H "Authorization: Bearer sk-your-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [{"role": "user", "content": "Hello"}]
+  }'
+```
+
+The proxy validates the key, checks team permissions for the requested model, and routes the request to the appropriate LLM provider.
+
+## Managing keys
+
+From the **API Keys** page you can:
+
+- **View** all your active keys with their creation date and associated team
+- **Rotate** a key to generate a new secret while keeping the same key ID
+- **Revoke** keys that are no longer needed
+
+**Note:** Revoking a key is immediate and irreversible. Any application using that key will stop working.
+
+
+## Key scoping
+
+Each key is scoped to exactly one team. If you belong to multiple teams, create separate keys for each. This lets you:
+
+- Track usage per team independently
+- Rotate keys for one team without affecting others
+- Match keys to specific applications or environments
+
+---
+
+## Usage tracking
+
+Apollos AI tracks usage across all LLM requests routed through the LiteLLM proxy. The usage data helps you monitor consumption, manage budgets, and understand which models your team relies on.
+
+## What's tracked
+
+For each request through the proxy, the following is recorded:
+
+- **Tokens** — prompt tokens and completion tokens
+- **Cost** — estimated cost based on model pricing
+- **Model** — which LLM model handled the request
+- **Team** — which team the API key belongs to
+- **Timestamp** — when the request was made
+
+## Viewing usage
+
+### Portal
+
+Go to **Usage** in the sidebar to see:
+
+- Total token consumption over a selected time range
+- Cost breakdown by model
+- Request volume trends
+- Per-team usage if you belong to multiple teams
+
+### API
+
+```bash
+curl /api/v1/usage \
+  -H "Authorization: Bearer <access-token>"
+```
+
+## Budget limits
+
+Each team has a configured maximum budget. When a team approaches or reaches its budget limit:
+
+- Requests may be throttled or rejected by the LiteLLM proxy
+- The portal displays a warning on the team's usage page
+- Team administrators can request a budget increase
+
+**Note:** Budget limits are configured in `teams.yaml` by the portal administrator. Individual users cannot change team budgets.
+
+---
+
+## CLI overview
+
+The Apollos AI CLI (`apollos`) provides command-line access to authentication and profile lookups. It uses Microsoft Entra ID device code flow for authentication and caches tokens locally.
+
+## Installation
+
+From the repository:
+
+```bash
+cd cli
+uv sync
+```
+
+## Setup
+
+Before using the CLI, configure it with your Entra ID and portal settings:
+
+```bash
+uv run apollos configure
+```
+
+You'll be prompted for:
+- **Azure Tenant ID** — your Entra ID tenant
+- **Azure Client ID** — the app registration client ID
+- **Portal API URL** — the backend API base URL (default: `http://localhost:8000`)
+
+Configuration is saved to `~/.apollos/config.json`.
+
+## Authentication
+
+```bash
+# Sign in with device code flow
+uv run apollos login
+
+# Check who you're signed in as
+uv run apollos whoami
+
+# Sign out and clear cached tokens
+uv run apollos logout
+```
+
+The `login` command displays a URL and code. Open the URL in your browser, enter the code, and authenticate with your Entra ID credentials. Tokens are cached locally for subsequent commands.
+
+## Commands
+
+| Command | Description |
+|---|---|
+| `apollos configure` | Set up Azure tenant, client ID, and portal URL |
+| `apollos login` | Authenticate with device code flow |
+| `apollos logout` | Clear cached authentication tokens |
+| `apollos whoami` | Show the currently authenticated user |
+| `apollos me` | Fetch your profile from the portal backend |
+
+### Profile lookup
+
+```bash
+# Fetch your portal profile (teams, roles, admin status)
+uv run apollos me
+```
+
+This calls the `/api/v1/me` endpoint and displays your OID, name, email, admin status, and roles.
+
+**Note:** The CLI is under active development. Additional commands for key management and usage tracking are planned.
+
+---
+
+## Entra ID setup
+
+**Info:** You need **Global Administrator** or **Application Administrator** role in Microsoft Entra ID to complete this setup.
+
+
+The portal requires a single App Registration in Entra ID that handles user authentication (browser and CLI) and backend service calls to Microsoft Graph for group membership resolution.
+
+You also need:
+- Security groups that map to LiteLLM teams
+- An App Role for portal administrators
+- Application-level permissions for Microsoft Graph
+
+## Create the app registration
+
+**Register the application**
+
+Navigate to [Azure Portal](https://portal.azure.com) → **Microsoft Entra ID** → **App registrations** → **New registration**.
+
+  | Field | Value |
+  |---|---|
+  | **Name** | `Apollos AI Self-Service Portal` |
+  | **Supported account types** | `Accounts in this organizational directory only` (single tenant) |
+  | **Redirect URI** | Select **Single-page application (SPA)** → `http://localhost:5173/auth/callback` |
+
+  **Warning:** The redirect URI must be under the **Single-page application** platform, not **Web**. MSAL.js uses auth code + PKCE for token redemption, which Entra ID only permits for the SPA platform. Using the Web platform causes `AADSTS9002326: Cross-origin token redemption is permitted only for the 'Single-Page Application' client-type`.
+  
+
+**Note the application identifiers**
+
+After registration, copy these values for the portal `.env` files:
+
+  | Value | Environment variable |
+  |---|---|
+  | **Application (client) ID** | `AZURE_CLIENT_ID` / `VITE_AZURE_CLIENT_ID` |
+  | **Directory (tenant) ID** | `AZURE_TENANT_ID` / `VITE_AZURE_TENANT_ID` |
+
+**Create a client secret**
+
+Go to **Certificates & secrets** → **Client secrets** → **New client secret**.
+
+  | Field | Value |
+  |---|---|
+  | **Description** | `apollos-portal-backend` |
+  | **Expires** | `24 months` |
+
+  Copy the secret value immediately — it is only shown once. Store it as `AZURE_CLIENT_SECRET` in the backend `.env` (or a secrets manager).
+
+  **Note:** Set a calendar reminder to rotate this secret before it expires.
+  
+
+## Configure API permissions
+
+The backend reads user profiles and group memberships via Microsoft Graph. The portal uses Graph API calls exclusively for group resolution — the JWT `groups` claim has a 200-group limit and silently drops groups for users in many security groups.
+
+**Add delegated permission**
+
+Go to **API permissions** → **Add a permission** → **Microsoft Graph** → **Delegated permissions**.
+
+  Add `User.Read` — this lets the backend read the signed-in user's profile (name, email, OID).
+
+**Add application permission**
+
+Go to **Add a permission** → **Microsoft Graph** → **Application permissions**.
+
+  Add `GroupMember.Read.All` — this lets the backend read group memberships for any user via client credentials flow.
+
+  **Why application permission instead of delegated?**
+
+Delegated `GroupMember.Read.All` requires the on-behalf-of (OBO) flow, which adds complexity and depends on the user's token having the correct scope. Application permission lets the backend call Graph API directly using its own credentials (client credentials flow), which is simpler, more reliable, and works even when the user's token has expired.
+  
+**Grant admin consent**
+
+Click **Grant admin consent for [your tenant]**. Verify the status column shows **Granted** for all permissions.
+
+  | Permission | Type | Admin consent | Purpose |
+  |---|---|---|---|
+  | `User.Read` | Delegated | Not required | User profile (name, email) |
+  | `GroupMember.Read.All` | Application | Required | Group memberships for team mapping |
+
+**Why not the JWT groups claim?**
+
+Enterprise users are commonly members of 200+ security groups (nested groups, distribution lists, dynamic groups). When the group count exceeds 200, Entra ID replaces the `groups` array with a `_claim_sources` overage indicator — the claim silently stops working. Rather than building two code paths (claim + Graph API fallback), the portal uses Graph API exclusively. This is the only reliable approach at scale.
+
+## Configure authentication settings
+
+Go to **Authentication** in your App Registration.
+
+**Set redirect URIs**
+
+Under **Single-page application** → **Redirect URIs**, add:
+
+  ```
+  http://localhost:5173/auth/callback          (development)
+  https://ai-portal.company.com/auth/callback  (production)
+  ```
+
+**Disable implicit grant**
+
+Under **Implicit grant and hybrid flows**, leave both unchecked:
+  - Access tokens — unchecked
+  - ID tokens — unchecked
+
+  The portal uses auth code + PKCE, not implicit flow.
+
+**Enable public client flows (for CLI)**
+
+Under **Advanced settings**, set **Allow public client flows** → **Yes**.
+
+  This is required for the CLI's MSAL device-code flow. If you don't plan to use the CLI, leave this as **No**.
+
+## Create app roles
+
+App Roles control who is a portal administrator versus a regular user.
+
+Go to **App roles** → **Create app role**:
+
+| Field | Value |
+|---|---|
+| **Display name** | `Portal Administrator` |
+| **Allowed member types** | `Users/Groups` |
+| **Value** | `portal_admin` |
+| **Description** | `Full administrative access to the Apollos AI provisioning portal` |
+| **Enable this app role** | Checked |
+
+**Note:** Regular portal users don't need an explicit role — security group membership is sufficient for access. The `portal_admin` role grants access to the admin dashboard, audit logs, and user management.
+
+
+## Set up security groups
+
+### Create team groups
+
+Create a security group for each LiteLLM team. Go to **Microsoft Entra ID** → **Groups** → **New group**:
+
+| Field | Value |
+|---|---|
+| **Group type** | Security |
+| **Group name** | `SG-AI-Engineering-Team` (your naming convention) |
+| **Group description** | `Members provisioned into the Engineering AI Team on LiteLLM` |
+| **Membership type** | Assigned (or Dynamic for attribute-based membership) |
+
+Note the **Object ID** of each group — these go into the portal's `teams.yaml`:
+
+```yaml
+teams:
+  - entra_group_id: "<Object ID from Azure>"
+    team_alias: "Engineering AI Team"
+    models: ["gpt-4o", "gpt-4o-mini"]
+    max_budget: 500
+    budget_duration: "30d"
+```
+
+### Create a gate group (recommended)
+
+Create a separate "gate" security group that controls who can access the portal, independent of team assignment:
+
+| Group | Purpose |
+|---|---|
+| `SG-AI-Platform-Users` | Must be a member to access the portal |
+| `SG-AI-Engineering-Team` | Determines which LiteLLM team the user joins |
+
+A user must be in the gate group **and** at least one team group. This lets you:
+- Add someone to `SG-AI-Platform-Users` without immediately assigning a team
+- Remove someone from `SG-AI-Platform-Users` to block all portal access without touching team groups
+
+Configure in `teams.yaml`:
+
+```yaml
+required_groups:
+  - "<Object ID of SG-AI-Platform-Users>"
+```
+
+## Assign groups to the enterprise application
+
+The App Registration creates a corresponding Enterprise Application. Go to **Microsoft Entra ID** → **Enterprise applications** → find your portal app → **Users and groups** → **Add user/group**.
+
+| Group | Role | Purpose |
+|---|---|---|
+| `SG-AI-Platform-Users` | User (default) | All users who can access the portal |
+| `SG-AI-Platform-Admins` | Portal Administrator | Portal admins (maps to `portal_admin` role) |
+| `SG-AI-Engineering-Team` | User | Maps to Engineering AI Team in LiteLLM |
+| `SG-AI-DataScience-Team` | User | Maps to Data Science Team in LiteLLM |
+
+**Tip:** Under **Properties**, set **Assignment required?** → **Yes** to prevent users not assigned to the Enterprise App from signing in. This is recommended for controlled rollout.
+
+
+## Environment variables
+
+After setup, add these to your portal environment:
+
+```bash backend/.env
+AZURE_TENANT_ID=<Directory (tenant) ID>
+AZURE_CLIENT_ID=<Application (client) ID>
+AZURE_CLIENT_SECRET=<Client secret value>
+PORTAL_ADMIN_ROLE=portal_admin
+```
+
+```bash frontend/.env
+VITE_AZURE_CLIENT_ID=<Application (client) ID>
+VITE_AZURE_TENANT_ID=<Directory (tenant) ID>
+```
+## Verify the setup
+
+### Checklist
+
+- [ ] App Registration created with SPA redirect URIs
+- [ ] Client secret generated and stored securely
+- [ ] Delegated permission `User.Read` added with admin consent
+- [ ] Application permission `GroupMember.Read.All` added with admin consent
+- [ ] Public client flows enabled (if CLI is needed)
+- [ ] App Role `portal_admin` created
+- [ ] Enterprise Application: **Assignment required** = Yes
+- [ ] Security groups created for each LiteLLM team
+- [ ] Gate group created (e.g., `SG-AI-Platform-Users`)
+- [ ] All groups assigned to the Enterprise Application
+- [ ] Admin group assigned with Portal Administrator role
+
+### Test the auth flow
+
+**Test user authentication (device-code flow)**
+
+```bash
+  # Request a device code
+  curl -X POST "https://login.microsoftonline.com/<tenant-id>/oauth2/v2.0/devicecode" \
+    -d "client_id=<client-id>" \
+    -d "scope=openid profile email User.Read"
+
+  # Follow the instructions: visit https://microsoft.com/devicelogin and enter the code
+
+  # Poll for the token
+  curl -X POST "https://login.microsoftonline.com/<tenant-id>/oauth2/v2.0/token" \
+    -d "client_id=<client-id>" \
+    -d "grant_type=urn:ietf:params:oauth:grant_type:device_code" \
+    -d "device_code=<device_code_from_above>"
+  ```
+
+  Decode the ID token at [jwt.ms](https://jwt.ms) and verify:
+  - `oid` is present (user Object ID)
+  - `preferred_username` has the email
+  - `roles` contains `portal_admin` (if the user has that role)
+  - `groups` is **not** in the token — this is expected (the portal uses Graph API)
+
+**Test Graph API group resolution (client credentials)**
+
+```bash
+  # Get an app-only token
+  curl -X POST "https://login.microsoftonline.com/<tenant-id>/oauth2/v2.0/token" \
+    -d "client_id=<client-id>" \
+    -d "client_secret=<client-secret>" \
+    -d "scope=https://graph.microsoft.com/.default" \
+    -d "grant_type=client_credentials"
+
+  # List group memberships for a user (by their Entra OID)
+  curl -H "Authorization: Bearer <token>" \
+    "https://graph.microsoft.com/v1.0/users/<user-oid>/memberOf/microsoft.graph.group?\$select=id,displayName&\$top=999"
+  ```
+
+  The response should list all groups the user belongs to. Match the group `id` values against the `entra_group_id` entries in your `teams.yaml`.
+
+  **Note:** Graph API returns a maximum of 999 results per page. If the response includes `@odata.nextLink`, follow it to get the complete list. The portal backend handles pagination automatically via the `msgraph-sdk-python` page iterator.
+  
+
+
+## Ongoing maintenance
+
+| Task | Frequency | Details |
+|---|---|---|
+| Rotate client secret | Before expiry (24 months) | Create a new secret → update portal env → delete old secret |
+| Review group memberships | As needed | Add or remove users from security groups. The portal picks up changes on next login or deprovisioning cron run |
+| Audit admin role assignments | Quarterly | Review who has the `Portal Administrator` role in the Enterprise Application |
+| Monitor consent status | After policy changes | Verify admin consent is still granted for `GroupMember.Read.All` after conditional access changes |
+
+## Troubleshooting
+
+| Error | Cause | Fix |
+|---|---|---|
+| `AADSTS65001: The user or admin has not consented` | Admin consent not granted | Go to API permissions → Grant admin consent |
+| `AADSTS700016: Application not found in tenant` | Wrong client or tenant ID | Verify `AZURE_CLIENT_ID` and `AZURE_TENANT_ID` match your App Registration |
+| `AADSTS50105: The signed in user is not assigned to a role` | User not assigned to Enterprise Application | Add the user's group to the Enterprise App |
+| Graph API returns 403 on `/memberOf` | Missing `GroupMember.Read.All` permission | Grant admin consent for the application permission |
+| Graph API returns partial group list | Pagination not followed | Ensure the backend follows all `@odata.nextLink` pages |
+| `roles` claim missing from token | User not assigned an App Role | Check Enterprise App → Users and groups → Role column |
+| Device-code flow fails | Public client flows not enabled | Set **Allow public client flows** → **Yes** in Authentication |
+| `AADSTS9002326: Cross-origin token redemption` | Redirect URI under Web platform, not SPA | Move redirect URI to the Single-page application platform |
+
+---
+
+## API reference
+
+The Apollos AI backend exposes a REST API at `/api/v1/` for managing authentication, provisioning, API keys, teams, usage, models, and settings.
+
+## Base URL
+
+```
+http://localhost:8000/api/v1
+```
+
+In production, replace with your deployed backend URL.
+
+## Authentication
+
+All endpoints (except `/health` and `/ready`) require a valid Microsoft Entra ID access token in the `Authorization` header:
+
+```bash
+curl -H "Authorization: Bearer <access-token>" \
+  https://your-backend/api/v1/me
+```
+
+## Endpoints
+
+### User endpoints
+
+| Endpoint | Method | Description |
+|---|---|---|
+| `/api/v1/me` | GET | Get the current user's profile (OID, email, name, roles, admin status) |
+| `/api/v1/status` | GET | Check provisioning status |
+| `/api/v1/provision` | POST | Provision the current user (map Entra ID groups to LiteLLM teams) |
+| `/api/v1/keys` | GET | List the current user's API keys |
+| `/api/v1/keys/new` | POST | Create a new API key |
+| `/api/v1/keys/{key_id}/rotate` | POST | Rotate an API key |
+| `/api/v1/keys/{key_id}/revoke` | POST | Revoke an API key |
+| `/api/v1/teams` | GET | List the current user's teams |
+| `/api/v1/usage` | GET | Get usage statistics |
+| `/api/v1/models` | GET | List available models for the user's teams |
+| `/api/v1/settings` | GET | Get user settings |
+| `/api/v1/settings` | PATCH | Update user settings |
+
+### Admin endpoints
+
+Admin endpoints require the `portal_admin` role in Entra ID app roles.
+
+| Endpoint | Method | Description |
+|---|---|---|
+| `/api/v1/admin/users` | GET | List all provisioned users (paginated) |
+| `/api/v1/admin/users/{user_id}` | GET | Get detailed user info with keys, teams, and audit history |
+| `/api/v1/admin/users/{user_id}/deprovision` | POST | Deprovision a user (block keys, mark inactive) |
+| `/api/v1/admin/users/{user_id}/reprovision` | POST | Re-activate a deprovisioned user |
+| `/api/v1/admin/keys` | GET | List all active keys across users (paginated) |
+| `/api/v1/admin/keys/{key_id}/revoke` | POST | Admin-revoke any key by ID |
+| `/api/v1/admin/audit` | GET | Query audit log with filters and pagination |
+| `/api/v1/admin/audit/export` | GET | Export audit log as CSV (max 10,000 rows) |
+| `/api/v1/admin/health` | GET | Get scheduler status and background job info |
+
+### Health checks
+
+Two unauthenticated health endpoints are available at the root:
+
+| Endpoint | Description |
+|---|---|
+| `/health` | Basic liveness check |
+| `/ready` | Readiness check (database and LiteLLM connectivity) |
+
+## OpenAPI spec
+
+The backend auto-generates an OpenAPI specification. When running locally:
+
+- **Swagger UI**: `http://localhost:8000/docs`
+- **ReDoc**: `http://localhost:8000/redoc`
+- **Raw spec**: `http://localhost:8000/openapi.json`
+
+---
+
+## Contributing
+
+Contributions to Apollos AI are welcome. This guide covers how to submit changes to both the codebase and documentation.
+
+## Code contributions
+
+### Getting started
+
+1. Fork and clone the repository
+2. Follow the [development setup](/development) to get your local environment running
+3. Create a branch for your changes
+4. Make changes and run the test suite
+5. Submit a pull request
+
+### Pre-commit checks
+
+Run all checks before submitting a pull request:
+
+```bash
+mise run qa
+```
+
+This runs backend tests, linting (ruff), frontend type checking (tsc), and frontend linting (biome).
+
+### Code style
+
+- **Python**: Ruff handles linting and formatting. Run `uv run --package apollos-portal-backend ruff check --fix backend/` to auto-fix
+- **TypeScript**: Biome handles linting and formatting. Run `cd frontend && npx biome check --write .` to auto-fix
+- **Commits**: Use conventional commit messages (`feat:`, `fix:`, `chore:`, `docs:`)
+
+## Documentation contributions
+
+### Option 1: edit on GitHub
+
+Navigate to the page you want to edit in the `docs/` directory and click the pencil icon to edit directly on GitHub.
+
+### Option 2: local development
+
+1. Install the Mintlify CLI: `npm i -g mint`
+2. Navigate to the `docs/` directory
+3. Run `mint dev` to preview at `http://localhost:3000`
+4. Make your changes — the preview updates automatically
+5. Run `mint broken-links` to check for broken links
+6. Submit a pull request
+
+### Writing guidelines
+
+- Use active voice and second person ("you")
+- Keep sentences concise — one idea per sentence
+- Use sentence case for headings
+- Bold for UI elements: Click **Settings**
+- Code formatting for file names, commands, and code references
+- See `docs/AGENTS.md` for full terminology and style conventions
+
+---
+
+## Development setup
+
+This guide covers the full development setup for contributing to the Apollos AI codebase. For a quicker overview, see the [development page](/development).
+
+## Prerequisites
+
+| Tool | Version | Purpose |
+|---|---|---|
+| Python | 3.12+ | Backend and CLI |
+| uv | Latest | Python package management |
+| Node.js | 24+ | Frontend |
+| Docker | Latest | PostgreSQL and full-stack dev |
+| mise | Latest | Task runner (optional) |
+
+## Repository structure
+
+The project uses a uv workspace with three packages:
+
+- `backend/` — `apollos-portal-backend` package
+- `cli/` — `apollos-cli` package
+- Root `pyproject.toml` — workspace configuration
+
+## Running tests
+
+### Backend
+
+```bash
+# Run all tests
+cd backend && uv run pytest -v
+
+# Run a specific test file
+uv run pytest tests/test_auth.py -v
+
+# Run with coverage
+uv run pytest --cov=app -v
+```
+
+### Frontend
+
+```bash
+# Type checking
+cd frontend && npx tsc --noEmit
+
+# Linting
+cd frontend && npx biome check .
+
+# Auto-fix lint issues
+cd frontend && npx biome check --write .
+```
+
+### All checks
+
+```bash
+# Run the full QA suite
+mise run qa
+```
+
+## Database
+
+PostgreSQL 18 runs via Docker Compose. The backend uses SQLAlchemy 2.0 with async support (asyncpg driver) and Alembic for migrations.
+
+```bash
+# Start just the database
+docker compose up db
+
+# Run migrations
+cd backend && uv run alembic upgrade head
+
+# Create a new migration after model changes
+cd backend && uv run alembic revision --autogenerate -m "description"
+```
+
+## Entra ID app registration
+
+To test authentication locally, you need a Microsoft Entra ID app registration with:
+
+- **Redirect URI**: `http://localhost:5173` (SPA type)
+- **API permissions**: `User.Read`, `GroupMember.Read.All`
+- **Client secret** for backend service-to-service calls
+
+Set the corresponding environment variables in `backend/.env` and `frontend/.env` as described in the [development guide](/development).
+
+---
+
+## Claude Code setup
+
+Set up Claude Code to help you write and maintain your Mintlify documentation.
+
+## Prerequisites
+
+- Active Claude subscription (Pro, Max, or API access)
+
+## Setup
+
+**Install Claude Code**
+
+```bash
+  npm install -g @anthropic-ai/claude-code
+  ```
+
+**Install the Mintlify skill**
+
+In your docs directory, run:
+
+  ```bash
+  npx skills add https://mintlify.com/docs
+  ```
+
+  This gives Claude Code Mintlify's component reference, writing standards,
+  and workflow guidance.
+
+**Customize project instructions**
+
+Edit `AGENTS.md` in your project root to add project-specific terminology,
+  style preferences, and content boundaries.
+
+**Start writing with Claude Code**
+
+```bash
+  claude
+  ```
+
+---
+
+## Cursor setup
+
+Set up Cursor to help you write and maintain your Mintlify documentation.
+
+## Prerequisites
+
+- Cursor editor installed
+
+## Setup
+
+**Open your docs directory in Cursor**
+
+Open the root of your documentation repository where `docs.json` is located.
+
+**Install the Mintlify skill**
+
+In the integrated terminal, run:
+
+  ```bash
+  npx skills add https://mintlify.com/docs
+  ```
+
+  This gives Cursor Mintlify's component reference, writing standards,
+  and workflow guidance.
+
+**Customize project instructions**
+
+Edit `AGENTS.md` in your project root to add project-specific terminology,
+  style preferences, and content boundaries.
+
+**Start writing with Cursor**
+
+Open a file and use Cursor's AI features to draft and edit documentation.
+
+---
+
+## Windsurf setup
+
+Set up Windsurf's Cascade AI assistant to help you write and maintain your Mintlify documentation.
+
+## Prerequisites
+
+- Windsurf editor installed
+
+## Setup
+
+**Open your docs directory in Windsurf**
+
+Open the root of your documentation repository where `docs.json` is located.
+
+**Install the Mintlify skill**
+
+In the integrated terminal, run:
+
+  ```bash
+  npx skills add https://mintlify.com/docs
+  ```
+
+  This gives Windsurf Mintlify's component reference, writing standards,
+  and workflow guidance.
+
+**Customize project instructions**
+
+Edit `AGENTS.md` in your project root to add project-specific terminology,
+  style preferences, and content boundaries.
+
+**Start writing with Cascade**
+
+Open a file and use Cascade to draft and edit documentation.

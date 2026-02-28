@@ -1,0 +1,43 @@
+# Apollos AI
+
+> Self-service portal for managing LLM API access through Microsoft Entra ID. Users authenticate with their organizational identity, get provisioned into teams based on security group memberships, and manage API keys for LiteLLM proxy access.
+
+## Getting started
+
+- [Introduction](/index): Self-service portal for managing LLM API access through Microsoft Entra ID
+- [Quickstart](/quickstart): Get your first API key and make an LLM request in minutes
+- [Development](/development): Set up the Apollos AI portal for local development
+
+## Concepts
+
+- [Authentication](/concepts/authentication): How Entra ID authentication and team provisioning work in Apollos AI
+- [Teams](/concepts/teams): How teams map Entra ID security groups to LiteLLM access controls
+- [API keys](/concepts/api-keys): Create, manage, and use API keys for LLM proxy access
+- [Usage tracking](/concepts/usage): Monitor token consumption, costs, and request activity
+
+## CLI
+
+- [CLI overview](/cli/overview): Manage Apollos AI from the command line
+
+## Administration
+
+- [Entra ID setup](/administration/entra-id-setup): Configure Microsoft Entra ID app registration, permissions, and security groups for the portal
+
+## Overview
+
+- [API reference](/api-reference/introduction): Apollos AI backend REST API endpoints
+
+## Contributing
+
+- [Contributing](/contributing/overview): How to contribute to the Apollos AI portal and documentation
+- [Development setup](/contributing/development): Detailed development environment setup for contributors
+
+## AI tools
+
+- [Claude Code setup](/ai-tools/claude-code): Configure Claude Code for your documentation workflow
+- [Cursor setup](/ai-tools/cursor): Configure Cursor for your documentation workflow
+- [Windsurf setup](/ai-tools/windsurf): Configure Windsurf for your documentation workflow
+
+## API specifications
+
+- [OpenAPI spec](/api-reference/openapi.json)

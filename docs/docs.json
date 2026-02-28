@@ -38,10 +38,49 @@
       },
       {
         "tab": "API reference",
+        "openapi": "api-reference/openapi.json",
         "groups": [
           {
-            "group": "API documentation",
+            "group": "Overview",
             "pages": ["api-reference/introduction"]
+          },
+          {
+            "group": "User endpoints",
+            "pages": [
+              "GET /api/v1/me",
+              "GET /api/v1/status",
+              "POST /api/v1/provision",
+              "GET /api/v1/keys",
+              "POST /api/v1/keys/new",
+              "POST /api/v1/keys/{key_id}/rotate",
+              "POST /api/v1/keys/{key_id}/revoke",
+              "GET /api/v1/teams",
+              "GET /api/v1/usage",
+              "GET /api/v1/models",
+              "GET /api/v1/settings",
+              "PATCH /api/v1/settings"
+            ]
+          },
+          {
+            "group": "Admin endpoints",
+            "pages": [
+              "GET /api/v1/admin/users",
+              "GET /api/v1/admin/users/{user_id}",
+              "POST /api/v1/admin/users/{user_id}/deprovision",
+              "POST /api/v1/admin/users/{user_id}/reprovision",
+              "GET /api/v1/admin/keys",
+              "POST /api/v1/admin/keys/{key_id}/revoke",
+              "GET /api/v1/admin/audit",
+              "GET /api/v1/admin/audit/export",
+              "GET /api/v1/admin/health"
+            ]
+          },
+          {
+            "group": "Health checks",
+            "pages": [
+              "GET /health",
+              "GET /ready"
+            ]
           }
         ]
       },

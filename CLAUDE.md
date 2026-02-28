@@ -55,7 +55,8 @@
 - `docs/AGENTS.md` defines terminology, style, and content boundaries for AI-assisted docs work
 - `docs/docs.json` controls navigation — every page listed must have a matching `.mdx` file
 - Verify API endpoints and CLI commands against actual source before documenting
-- OpenAPI spec at `docs/api-reference/openapi.json` is NOT wired into docs.json — API ref pages are manual
+- OpenAPI spec wired into docs.json via tab-level `openapi` field — endpoint pages auto-generated from spec
+- `llms.txt`, `llms-full.txt`, `skill.md` are manually maintained (self-hosted via `mint dev`, not Mintlify cloud)
 - Docker: `docker/docs.Dockerfile` runs `mint dev` on port 3000 (mapped to 3001 in compose)
 
 ## Testing

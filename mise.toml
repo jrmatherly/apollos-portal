@@ -113,6 +113,10 @@ description = "Regenerate OpenAPI spec from FastAPI app"
 dir = "backend"
 run = 'uv run python -c "import json; from app.main import app; json.dump(app.openapi(), open(\"../docs/api-reference/openapi.json\", \"w\"), indent=2)"'
 
+[tasks."docs:llms"]
+description = "Regenerate llms.txt and llms-full.txt from docs"
+run = "python3 scripts/generate_llms.py"
+
 [tasks."db:shell"]
 description = "Open psql shell"
 run = "docker compose exec db psql -U portal -d apollos_portal"
