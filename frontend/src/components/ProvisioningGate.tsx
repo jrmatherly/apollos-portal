@@ -110,8 +110,8 @@ export function ProvisioningGate({ children }: { children: ReactNode }) {
     );
   }
 
-  // --- Already provisioned or done ---
-  if (phase === "done" || data?.is_provisioned) {
+  // --- Already provisioned (and never triggered provisioning this session) or done ---
+  if (phase === "done" || (data?.is_provisioned && !provisionTriggered.current)) {
     return <>{children}</>;
   }
 
