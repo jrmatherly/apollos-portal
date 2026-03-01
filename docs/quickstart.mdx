@@ -12,22 +12,24 @@ description: "Get your first API key and make an LLM request in minutes"
 ## Get started
 
 <Steps>
-<Step title="Sign in to the portal">
+<Step title="Sign in and get provisioned">
   Navigate to the Apollos AI portal and click **Sign in with Microsoft**. You'll be redirected to Microsoft's login page for authentication.
 
-  After signing in, the portal automatically provisions your account by mapping your Entra ID security group memberships to LiteLLM teams.
+  On first login, the portal automatically provisions your account:
+
+  1. Validates your Entra ID credentials
+  2. Resolves your security group memberships
+  3. Creates your LiteLLM team memberships
+  4. Generates an initial API key for each team
+
+  A progress dialog shows each step as it completes.
 </Step>
 
-<Step title="Create an API key">
-  1. Go to **API Keys** in the sidebar
-  2. Click **Create key**
-  3. Select the team to associate the key with
-  4. Copy the key — it won't be shown again
-
-  The key name is auto-generated from your email and team name (e.g., `jsmith-engineering-ai-team`).
+<Step title="Copy your API key">
+  After provisioning completes, the portal displays your generated API key(s) with a **Copy** button. Copy each key before clicking **Continue to Portal** — they are shown only once.
 
   <Warning>
-    Store your API key securely. You cannot retrieve it after creation — only create a new one.
+    Store your API key securely. You cannot retrieve it after this screen. If you lose it, go to **API Keys** and create a new one or rotate the existing key.
   </Warning>
 </Step>
 
@@ -35,7 +37,7 @@ description: "Get your first API key and make an LLM request in minutes"
   Use your API key to send a request through the LiteLLM proxy:
 
   ```bash
-  curl -X POST https://your-litellm-proxy/chat/completions \
+  curl -X POST https://your-litellm-proxy/v1/chat/completions \
     -H "Authorization: Bearer sk-your-api-key" \
     -H "Content-Type: application/json" \
     -d '{
@@ -47,6 +49,10 @@ description: "Get your first API key and make an LLM request in minutes"
   ```
 
   The proxy routes your request to the appropriate LLM provider based on your team's model access configuration.
+
+  <Tip>
+    Go to **Models** in the sidebar and click any model card to see ready-to-use code examples in Python, curl, and TypeScript — tailored to that model's type (chat, embedding, responses, etc.).
+  </Tip>
 </Step>
 
 <Step title="Monitor usage">

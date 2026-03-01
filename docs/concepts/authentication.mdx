@@ -42,15 +42,16 @@ Apollos AI uses Microsoft Entra ID for authentication across all three component
 
 ## Team provisioning
 
-When a user first authenticates, the backend provisions them by:
+When a user first authenticates, the portal auto-triggers provisioning. The backend:
 
-1. Validating their Entra ID access token
-2. Querying Microsoft Graph for their security group memberships
-3. Matching group IDs against the `teams.yaml` configuration
-4. Creating or updating the user's LiteLLM team memberships
-5. Returning the user's profile and team list
+1. Validates their Entra ID access token
+2. Queries Microsoft Graph for their security group memberships
+3. Matches group IDs against the `teams.yaml` configuration
+4. Creates or updates the user's LiteLLM team memberships
+5. Generates an initial API key for each provisioned team
+6. Returns the user's profile, team list, and generated keys
 
-This happens automatically on the `/api/v1/provision` endpoint, called after the first successful login.
+The portal shows a progress dialog during this process, then displays the generated API key(s) with copy functionality before entering the main application. This happens automatically on the `/api/v1/provision` endpoint — no manual action is required from the user.
 
 ## Token validation
 

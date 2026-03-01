@@ -85,13 +85,14 @@ If `required_groups` is set, a user must be a member of at least one listed grou
 
 ## Provisioning flow
 
-When a user signs in, the provisioning endpoint:
+When a user signs in for the first time, provisioning auto-triggers and the portal shows a progress dialog. The backend:
 
 1. Resolves the user's Entra ID security group memberships via Microsoft Graph
 2. Matches those groups against the `teams.yaml` configuration
 3. Filters out default teams if the user qualifies for any non-default team
 4. Creates or updates LiteLLM team memberships for the remaining matched groups
-5. Returns the user's teams with their model access and budget information
+5. Generates an initial API key for each provisioned team
+6. Returns the user's teams, model access, budget information, and generated keys
 
 Users are automatically added to or removed from teams based on their current security group memberships. Changes in Entra ID are reflected the next time the user signs in.
 

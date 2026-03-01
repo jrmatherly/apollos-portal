@@ -12,10 +12,10 @@ Apollos AI is a self-service portal for managing access to LLM APIs through a [L
   Sign in with your Microsoft Entra ID account. The portal uses PKCE redirect flow for secure browser-based authentication.
 </Step>
 <Step title="Get provisioned">
-  On first login, the portal maps your Entra ID security group memberships to LiteLLM teams. Each team has its own model access, rate limits, and budgets.
+  On first login, the portal automatically maps your Entra ID security group memberships to LiteLLM teams and generates an initial API key for each team. A progress dialog walks you through the setup and displays your keys with copy functionality.
 </Step>
-<Step title="Create API keys">
-  Generate API keys scoped to your teams. Use these keys to make LLM requests through the proxy endpoint.
+<Step title="Use your API keys">
+  Use your API keys to make LLM requests through the proxy endpoint. You can create additional keys or rotate existing ones from the API Keys page.
 </Step>
 <Step title="Monitor usage">
   Track your token consumption, request counts, and costs per model and team from the portal dashboard.

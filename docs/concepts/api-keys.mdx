@@ -5,14 +5,20 @@ description: "Create, manage, and use API keys for LLM proxy access"
 
 API keys authenticate your requests to the LiteLLM proxy. Each key is scoped to a specific team and inherits that team's model access, rate limits, and budget.
 
-## Creating keys
+## Initial key
+
+When you first sign in to the portal, provisioning automatically generates an API key for each team you're assigned to. The portal displays these keys with copy functionality before you enter the main application. Copy them at this point — they are not shown again.
+
+## Creating additional keys
+
+To create more keys after initial provisioning:
 
 <Steps>
 <Step title="Open API Keys">
   In the portal, go to **API Keys** in the sidebar.
 </Step>
 <Step title="Create a new key">
-  Click **Create key**, provide a name, and select the team to associate it with.
+  Click **Create key** and select the team to associate it with.
 </Step>
 <Step title="Copy the key">
   Copy the generated key immediately. It is displayed only once and cannot be retrieved later.
@@ -33,7 +39,7 @@ curl -X POST /api/v1/keys/new \
 Include your API key in the `Authorization` header when making requests to the LiteLLM proxy:
 
 ```bash
-curl -X POST https://your-litellm-proxy/chat/completions \
+curl -X POST https://your-litellm-proxy/v1/chat/completions \
   -H "Authorization: Bearer sk-your-api-key" \
   -H "Content-Type: application/json" \
   -d '{
@@ -43,6 +49,10 @@ curl -X POST https://your-litellm-proxy/chat/completions \
 ```
 
 The proxy validates the key, checks team permissions for the requested model, and routes the request to the appropriate LLM provider.
+
+<Tip>
+  The **Models** page in the portal shows all models available to your teams. Click any model card to see copy-paste code examples for Python, curl, and TypeScript — each tailored to the model type (chat completions, embeddings, responses, etc.).
+</Tip>
 
 ## Key naming
 
