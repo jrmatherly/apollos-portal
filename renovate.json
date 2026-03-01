@@ -60,6 +60,11 @@
       "groupName": "GitHub Actions"
     },
     {
+      "description": "Ignore self-published GHCR images — pinning latest is counterproductive",
+      "matchPackagePatterns": ["^ghcr\\.io/jrmatherly/apollos-portal/"],
+      "enabled": false
+    },
+    {
       "description": "Suppress abandonment warnings for stable/feature-complete packages",
       "matchPackageNames": ["clsx", "slowapi", "dorny/paths-filter"],
       "abandonmentThreshold": null
