@@ -14,7 +14,7 @@
     {
       "description": "Auto-merge patch updates for Python dev dependency groups",
       "matchManagers": ["pep621"],
-      "matchDepGroups": ["dev"],
+      "matchDepTypes": ["dependency-groups"],
       "matchUpdateTypes": ["patch"],
       "automerge": true,
       "minimumReleaseAge": "7 days"
