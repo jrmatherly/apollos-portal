@@ -275,7 +275,7 @@ VITE_AZURE_TENANT_ID=<Directory (tenant) ID>
   The response should list all groups the user belongs to. Match the group `id` values against the `entra_group_id` entries in your `teams.yaml`.
 
   <Note>
-    Graph API returns a maximum of 999 results per page. If the response includes `@odata.nextLink`, follow it to get the complete list. The portal backend handles pagination automatically via the `msgraph-sdk-python` page iterator.
+    Graph API returns a maximum of 999 results per page. If the response includes `@odata.nextLink`, follow it to get the complete list. The portal backend handles pagination automatically.
   </Note>
 </Accordion>
 
