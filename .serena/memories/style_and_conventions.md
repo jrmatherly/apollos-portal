@@ -2,7 +2,7 @@
 
 ## Python (Backend + CLI)
 - **Package manager**: uv (not pip)
-- **Linter**: ruff (line-length=120, target=py312, select=E,F,I,N,W,UP,S)
+- **Linter**: ruff (line-length=120, target=py312, select=E,W,F,I,N,UP,B,SIM,C4,RUF,S,PT,DTZ,ASYNC)
 - **Formatter**: ruff format (separate from lint — CI checks both independently)
 - **Type hints**: Use throughout, `from __future__ import annotations` in model files
 - **SQLAlchemy models**: Use `TYPE_CHECKING` imports for forward references to avoid ruff F821

@@ -42,7 +42,8 @@
 - `mise run format` — ruff format
 - `mise run migrate` — alembic upgrade head
 - `mise run docker:reset` — reset Docker services and volumes
-- `mise run docs:openapi` — regenerate OpenAPI spec from FastAPI app (run after endpoint changes)
+- `mise run docs:openapi` — regenerate OpenAPI spec from FastAPI app (run after endpoint changes; skips if sources unchanged)
+- `mise run docs:llms` — regenerate llms.txt/llms-full.txt from docs (skips if sources unchanged)
 
 ## Docs (in docs/)
 - `mint dev` — preview docs locally at localhost:3000
