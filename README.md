@@ -10,9 +10,10 @@ apollos-portal/
 ├── frontend/         # React 19 + Vite SPA (Node 24)
 ├── cli/              # CLI with device-code auth (Python 3.12)
 ├── docs/             # Mintlify documentation site
-├── docker/           # Dockerfiles
-├── docker-compose.yml
-└── mise.toml         # Task runner
+├── docker/               # Dockerfiles
+├── docker-compose.yml    # Production (required env vars, no source mounts)
+├── docker-compose.dev.yml # Development (bind mounts, hot reload)
+└── mise.toml             # Task runner
 ```
 
 ## Tech Stack
@@ -55,19 +56,19 @@ cp frontend/.env.example frontend/.env
 # Edit frontend/.env with your Azure client ID and tenant ID
 ```
 
-### 2. Start with Docker Compose
+### 2. Start with Docker Compose (development)
 
 ```bash
-docker compose up
+docker compose -f docker-compose.dev.yml up
 ```
 
-This starts PostgreSQL 18, the backend (port 8000), and the frontend (port 3000).
+This starts PostgreSQL 18, the backend (port 8000) with hot reload, and the frontend (port 3000) with HMR.
 
 ### 3. Or run locally
 
 ```bash
 # Start database
-docker compose up -d db
+docker compose -f docker-compose.dev.yml up -d db
 
 # Backend
 cd backend
@@ -96,7 +97,7 @@ uv run apollos whoami
 ### Task runner (mise)
 
 ```bash
-mise run dev              # Start all services (docker compose up)
+mise run dev              # Start all dev services (docker-compose.dev.yml)
 mise run dev:backend      # Backend only with hot reload
 mise run dev:frontend     # Frontend only
 mise run dev:docs         # Mintlify docs preview server
@@ -108,7 +109,7 @@ mise run qa               # Full quality gate (check + test)
 mise run migrate          # Run database migrations
 mise run migrate:generate # Generate a new migration
 mise run db:shell         # Open psql shell
-mise run docker:reset     # Reset Docker services and volumes
+mise run docker:reset     # Reset dev Docker services and volumes
 ```
 
 ### Without mise

@@ -37,6 +37,9 @@ __pycache__/
 # Runtime
 *.log
 
+# Compose files (not needed in images)
+docker-compose*.yml
+
 # Docs
 *.md
 *.txt

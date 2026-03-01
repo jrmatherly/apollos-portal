@@ -52,14 +52,17 @@ jobs:
               - 'uv.lock'
               - 'docker/backend.Dockerfile'
               - 'docker-compose.yml'
+              - 'docker-compose.dev.yml'
             frontend:
               - 'frontend/**'
               - 'docker/frontend.Dockerfile'
               - 'docker-compose.yml'
+              - 'docker-compose.dev.yml'
             docs:
               - 'docs/**'
               - 'docker/docs.Dockerfile'
               - 'docker-compose.yml'
+              - 'docker-compose.dev.yml'
 
   build-backend:
     name: Build backend image

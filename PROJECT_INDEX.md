@@ -16,7 +16,7 @@ litellm-portal/
 │   │   ├── templates/email/   # Jinja2 email templates
 │   │   ├── config.py          # Settings (pydantic-settings)
 │   │   └── main.py            # FastAPI app factory
-│   └── tests/                 # 149 tests across 18 modules
+│   └── tests/                 # 178 tests across 21 modules
 ├── frontend/          # React 19 + Vite 7 + TypeScript 5.9
 │   └── src/
 │       ├── components/  # Shared UI (Sidebar, ConfirmDialog, NewKeyDialog)
@@ -39,7 +39,7 @@ litellm-portal/
 - **Frontend**: `frontend/src/main.tsx` → `App.tsx` — React with lazy-loaded routes, MSAL auth
 - **CLI**: `cli/apollos_cli/main.py` — Click CLI, device-code auth flow
 - **Tests**: `uv run --package apollos-portal-backend pytest -v`
-- **Dev server**: `docker compose up` or individual `npm run dev` / `uvicorn`
+- **Dev server**: `docker compose -f docker-compose.dev.yml up` or individual `npm run dev` / `uvicorn`
 
 ## Core Modules
 
@@ -92,12 +92,13 @@ litellm-portal/
 | `frontend/package.json` | Frontend deps (React 19, Vite 7, Tailwind v4) |
 | `mise.toml` | Task runner (dev, test, lint, deploy tasks) |
 | `biome.json` | Frontend linter/formatter config |
-| `docker-compose.yml` | Multi-container orchestration |
+| `docker-compose.yml` | Production deployment (required env vars) |
+| `docker-compose.dev.yml` | Development (bind mounts, hot reload) |
 | `backend/app/config.py` | Runtime settings via env vars (pydantic-settings) |
 
 ## Test Coverage
 
-- **149 tests** across **18 modules**, runs in ~0.6s
+- **178 tests** across **21 modules**, runs in ~0.6s
 - Unit tests: services (admin, auth, key, provisioning, rotation, reconciliation, notification, email, deprovisioning)
 - Integration tests: HTTP endpoints (28 tests via httpx ASGITransport)
 - Infrastructure: correlation ID, rate limit, exceptions, health, input validation, CSV export
@@ -133,7 +134,7 @@ uv sync                        # Python (backend + CLI)
 cd frontend && npm install     # Node
 
 # 2. Run development
-docker compose up              # All services
+docker compose -f docker-compose.dev.yml up  # All dev services
 # OR individually:
 cd backend && uv run uvicorn app.main:app --reload
 cd frontend && npm run dev
@@ -151,4 +152,4 @@ mise run qa                    # All checks
 - **26 frontend** TypeScript/TSX files (~1,900 LOC)
 - **3 CLI** Python files (~500 LOC)
 - **15 documentation** MDX pages
-- **18 test** modules (149 tests)
+- **21 test** modules (178 tests)

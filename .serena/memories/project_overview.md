@@ -34,7 +34,8 @@ apollos-portal/
 ├── cli/              # Click CLI with MSAL device-code auth (Python 3.12, uv)
 ├── docs/             # Mintlify documentation site (15 MDX pages)
 ├── docker/           # Dockerfiles (backend.Dockerfile, frontend.Dockerfile, docs.Dockerfile)
-├── docker-compose.yml # PostgreSQL 18 + backend + frontend
+├── docker-compose.yml     # Production (required env vars, no source mounts)
+├── docker-compose.dev.yml # Development (bind mounts, hot reload, hardcoded creds)
 ├── mise.toml         # Task runner (dev, test, lint, format, migrate, docker, qa)
 ├── CLAUDE.md         # Project conventions and commands
 └── .scratchpad/      # Planning docs (NOT tracked in git)

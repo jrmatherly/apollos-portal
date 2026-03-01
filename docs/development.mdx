@@ -18,10 +18,10 @@ The fastest way to run the full stack locally:
 ```bash
 git clone https://github.com/jrmatherly/apollos-portal.git
 cd apollos-portal
-docker compose up
+docker compose -f docker-compose.dev.yml up
 ```
 
-This starts PostgreSQL, the backend API, and the frontend. The portal is available at `http://localhost:5173`.
+This starts PostgreSQL, the backend API (with hot reload), and the frontend (with HMR). The portal is available at `http://localhost:5173`.
 
 ## Running services individually
 
@@ -137,7 +137,8 @@ apollos-portal/
 │       ├── pages/      # Route pages (Dashboard, ApiKeys, Teams, etc.)
 │       └── lib/        # API client, MSAL config
 ├── cli/               # Click CLI
-├── docker/            # Dockerfiles
-├── docs/              # This documentation site (Mintlify)
-└── docker-compose.yml
+├── docker/                # Dockerfiles
+├── docs/                  # This documentation site (Mintlify)
+├── docker-compose.yml     # Production deployment
+└── docker-compose.dev.yml # Development (bind mounts, hot reload)
 ```

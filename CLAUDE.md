@@ -24,7 +24,8 @@
 - CLI help: `cd cli && uv run apollos --help`
 - Docs dev: `cd docs && mint dev` (or `mise run dev:docs`)
 - Docs validate: `cd docs && mint validate && mint broken-links` (or `mise run check:docs`)
-- All services: `docker compose up`
+- Dev services: `docker compose -f docker-compose.dev.yml up` (or `mise run dev`)
+- Prod services: `docker compose up` (requires `POSTGRES_PASSWORD` and `DATABASE_URL` env vars)
 - DB migrations: `cd backend && uv run alembic upgrade head`
 - Upgrade Python deps: `uv lock --upgrade`
 - Check outdated Node deps: `cd frontend && npm outdated`
@@ -77,7 +78,8 @@
 - `docs/llms-full.txt` (37KB) — full docs content; read on-demand only when you need comprehensive documentation context (never auto-load)
 - `docs/skill.md` — AI agent instruction file for docs contributions
 - All three are auto-generated (`mise run docs:llms`) and self-hosted via `mint dev`, not Mintlify cloud
-- Docker: `docker/docs.Dockerfile` runs `mint dev` on port 3000 (mapped to 3001 in compose)
+- Docker: `docker/docs.Dockerfile` runs `mint dev` on port 3000 (mapped to 3001 in both compose files)
+- Docker Compose: `docker-compose.yml` = production (no source mounts, required env vars); `docker-compose.dev.yml` = development (bind mounts, hot reload, hardcoded dev credentials)
 
 ## Testing
 - Backend: pytest with pytest-asyncio (strict mode), httpx ASGITransport for endpoint tests

@@ -1,6 +1,6 @@
 [tasks.dev]
 description = "Start all development services"
-run = "docker compose up"
+run = "docker compose -f docker-compose.dev.yml up"
 
 [tasks."dev:backend"]
 description = "Start backend only (requires DB)"
@@ -101,13 +101,17 @@ description = "Stop Docker services"
 run = "docker compose down"
 
 [tasks."docker:reset"]
-description = "Reset Docker services and volumes"
+description = "Reset Docker services and volumes (dev)"
 confirm = "This will destroy all volumes. Continue?"
-run = "docker compose down -v && docker compose up -d"
+run = "docker compose -f docker-compose.dev.yml down -v && docker compose -f docker-compose.dev.yml up -d"
 
 [tasks."docker:docs"]
 description = "Start docs container"
 run = "docker compose up -d docs"
+
+[tasks."docker:dev"]
+description = "Start development services (detached)"
+run = "docker compose -f docker-compose.dev.yml up -d"
 
 [tasks."docs:openapi"]
 description = "Regenerate OpenAPI spec from FastAPI app"
@@ -123,5 +127,5 @@ sources = ["docs/**/*.mdx", "docs/docs.json"]
 outputs = ["docs/llms.txt", "docs/llms-full.txt"]
 
 [tasks."db:shell"]
-description = "Open psql shell"
-run = "docker compose exec db psql -U portal -d apollos_portal"
+description = "Open psql shell (dev)"
+run = "docker compose -f docker-compose.dev.yml exec db psql -U portal -d apollos_portal"

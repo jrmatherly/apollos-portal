@@ -30,13 +30,14 @@
 - `uv run apollos me` — fetch profile from backend
 
 ## Docker
-- `docker compose up` — start all services (db, backend, frontend)
-- `docker compose up -d db` — start just PostgreSQL
-- `docker compose down -v` — stop and remove volumes
-- `docker compose exec db psql -U portal -d apollos_portal` — psql shell
+- `docker compose -f docker-compose.dev.yml up` — start all dev services (db, backend, frontend with hot reload)
+- `docker compose -f docker-compose.dev.yml up -d db` — start just PostgreSQL (dev)
+- `docker compose -f docker-compose.dev.yml down -v` — stop dev services and remove volumes
+- `docker compose -f docker-compose.dev.yml exec db psql -U portal -d apollos_portal` — psql shell
+- `docker compose up` — start production services (requires `POSTGRES_PASSWORD` and `DATABASE_URL` env vars)
 
 ## mise (task runner)
-- `mise run dev` — docker compose up
+- `mise run dev` — start all dev services (docker-compose.dev.yml)
 - `mise run test` — backend pytest
 - `mise run lint` — ruff (backend + CLI) + biome (frontend)
 - `mise run format` — ruff format + biome format
@@ -44,7 +45,8 @@
 - `mise run check` — read-only lint + format + typecheck (CI equivalent, no writes)
 - `mise run check:docs` — docs validation (mint validate + broken-links)
 - `mise run qa` — full quality gate (check + test — run before committing)
-- `mise run docker:reset` — reset Docker services and volumes
+- `mise run docker:reset` — reset dev Docker services and volumes
+- `mise run docker:dev` — start dev services (detached)
 - `mise run docs:openapi` — regenerate OpenAPI spec from FastAPI app (run after endpoint changes; skips if sources unchanged)
 - `mise run docs:llms` — regenerate llms.txt/llms-full.txt from docs (skips if sources unchanged)
 
