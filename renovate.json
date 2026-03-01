@@ -58,6 +58,11 @@
       "description": "Group GitHub Actions updates",
       "matchManagers": ["github-actions"],
       "groupName": "GitHub Actions"
+    },
+    {
+      "description": "Suppress abandonment warnings for stable/feature-complete packages",
+      "matchPackageNames": ["clsx", "slowapi", "dorny/paths-filter"],
+      "abandonmentThreshold": null
     }
   ]
 }
