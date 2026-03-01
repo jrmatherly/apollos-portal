@@ -535,9 +535,11 @@ Keys expire automatically based on the `default_key_duration_days` setting confi
 
 From the **API Keys** page you can:
 
-- **View** all your keys with their status, creation date, expiration, spend, and associated team
+- **View** all your keys with their status, masked secret key preview (e.g., `sk-...Ab1z`), creation date, expiration, spend, and associated team
 - **Rotate** a key to expire the old key and generate a new one linked to it
 - **Revoke** keys that are no longer needed
+
+The secret key preview helps you identify which key is in use across your applications without exposing the full value.
 
 ### Rotation vs. revocation
 
