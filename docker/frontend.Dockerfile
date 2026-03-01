@@ -13,7 +13,7 @@ COPY . .
 RUN npm run build
 
 # --- Stage 2: Runtime ---
-FROM nginx:1.28-alpine
+FROM nginx:1.29-alpine
 
 # SPA routing: serve index.html for all routes, with security headers
 # $uri is an nginx variable, not a shell variable
