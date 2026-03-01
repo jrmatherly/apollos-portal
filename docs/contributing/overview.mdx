@@ -5,6 +5,18 @@ description: "How to contribute to the Apollos AI portal and documentation"
 
 Contributions to Apollos AI are welcome. This guide covers how to submit changes to both the codebase and documentation.
 
+## Prerequisites
+
+| Tool | Version | Purpose |
+|---|---|---|
+| Python | 3.12+ | Backend and CLI |
+| uv | Latest | Python package management |
+| Node.js | 24+ | Frontend |
+| Docker | Latest | PostgreSQL and full-stack dev |
+| mise | Latest | Task runner (optional) |
+
+See the [development guide](/development) for full setup instructions, environment variables, and project structure.
+
 ## Code contributions
 
 ### Getting started
@@ -31,6 +43,24 @@ This runs backend tests, linting (ruff), frontend type checking (tsc), and front
 - **TypeScript**: Biome handles linting and formatting. Run `cd frontend && npx biome check --write .` to auto-fix
 - **Commits**: Use conventional commit messages (`feat:`, `fix:`, `chore:`, `docs:`)
 
+### Repository structure
+
+The project uses a uv workspace with three packages:
+
+- `backend/` — `apollos-portal-backend` (FastAPI + SQLAlchemy)
+- `cli/` — `apollos-cli` (Click CLI with MSAL device-code auth)
+- Root `pyproject.toml` — workspace configuration and shared ruff settings
+
+### Claude Code (optional)
+
+If you use [Claude Code](/ai-tools/claude-code), copy the MCP server configuration:
+
+```bash
+cp .mcp.json.example .mcp.json
+```
+
+This enables context7 for live documentation lookup. See the [Claude Code setup guide](/ai-tools/claude-code) for available skills and automations.
+
 ## Documentation contributions
 
 ### Option 1: edit on GitHub
@@ -54,3 +84,13 @@ Navigate to the page you want to edit in the `docs/` directory and click the pen
 - Bold for UI elements: Click **Settings**
 - Code formatting for file names, commands, and code references
 - See `docs/AGENTS.md` for full terminology and style conventions
+
+## Entra ID app registration
+
+To test authentication locally, you need a Microsoft Entra ID app registration with:
+
+- **Redirect URI**: `http://localhost:5173` (SPA type)
+- **API permissions**: `User.Read`, `GroupMember.Read.All`
+- **Client secret** for backend service-to-service calls
+
+Set the corresponding environment variables in `backend/.env` and `frontend/.env` as described in the [development guide](/development).

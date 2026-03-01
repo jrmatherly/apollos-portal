@@ -917,6 +917,18 @@ The backend auto-generates an OpenAPI specification. When running locally:
 
 Contributions to Apollos AI are welcome. This guide covers how to submit changes to both the codebase and documentation.
 
+## Prerequisites
+
+| Tool | Version | Purpose |
+|---|---|---|
+| Python | 3.12+ | Backend and CLI |
+| uv | Latest | Python package management |
+| Node.js | 24+ | Frontend |
+| Docker | Latest | PostgreSQL and full-stack dev |
+| mise | Latest | Task runner (optional) |
+
+See the [development guide](/development) for full setup instructions, environment variables, and project structure.
+
 ## Code contributions
 
 ### Getting started
@@ -943,6 +955,24 @@ This runs backend tests, linting (ruff), frontend type checking (tsc), and front
 - **TypeScript**: Biome handles linting and formatting. Run `cd frontend && npx biome check --write .` to auto-fix
 - **Commits**: Use conventional commit messages (`feat:`, `fix:`, `chore:`, `docs:`)
 
+### Repository structure
+
+The project uses a uv workspace with three packages:
+
+- `backend/` — `apollos-portal-backend` (FastAPI + SQLAlchemy)
+- `cli/` — `apollos-cli` (Click CLI with MSAL device-code auth)
+- Root `pyproject.toml` — workspace configuration and shared ruff settings
+
+### Claude Code (optional)
+
+If you use [Claude Code](/ai-tools/claude-code), copy the MCP server configuration:
+
+```bash
+cp .mcp.json.example .mcp.json
+```
+
+This enables context7 for live documentation lookup. See the [Claude Code setup guide](/ai-tools/claude-code) for available skills and automations.
+
 ## Documentation contributions
 
 ### Option 1: edit on GitHub
@@ -967,80 +997,6 @@ Navigate to the page you want to edit in the `docs/` directory and click the pen
 - Code formatting for file names, commands, and code references
 - See `docs/AGENTS.md` for full terminology and style conventions
 
----
-
-## Development setup
-
-This guide covers the full development setup for contributing to the Apollos AI codebase. For a quicker overview, see the [development page](/development).
-
-## Prerequisites
-
-| Tool | Version | Purpose |
-|---|---|---|
-| Python | 3.12+ | Backend and CLI |
-| uv | Latest | Python package management |
-| Node.js | 24+ | Frontend |
-| Docker | Latest | PostgreSQL and full-stack dev |
-| mise | Latest | Task runner (optional) |
-
-## Repository structure
-
-The project uses a uv workspace with three packages:
-
-- `backend/` — `apollos-portal-backend` package
-- `cli/` — `apollos-cli` package
-- Root `pyproject.toml` — workspace configuration
-
-## Running tests
-
-### Backend
-
-```bash
-# Run all tests
-cd backend && uv run pytest -v
-
-# Run a specific test file
-uv run pytest tests/test_auth.py -v
-
-# Run with coverage
-uv run pytest --cov=app -v
-```
-
-### Frontend
-
-```bash
-# Type checking
-cd frontend && npx tsc --noEmit
-
-# Linting
-cd frontend && npx biome check .
-
-# Auto-fix lint issues
-cd frontend && npx biome check --write .
-```
-
-### All checks
-
-```bash
-# Run the full QA suite
-mise run qa
-```
-
-## Database
-
-PostgreSQL 18 runs via Docker Compose. The backend uses SQLAlchemy 2.0 with async support (asyncpg driver) and Alembic for migrations.
-
-```bash
-# Start just the database
-docker compose up db
-
-# Run migrations
-cd backend && uv run alembic upgrade head
-
-# Create a new migration after model changes
-cd backend && uv run alembic revision --autogenerate -m "description"
-```
-
 ## Entra ID app registration
 
 To test authentication locally, you need a Microsoft Entra ID app registration with:
@@ -1055,11 +1011,12 @@ Set the corresponding environment variables in `backend/.env` and `frontend/.env
 
 ## Claude Code setup
 
-Set up Claude Code to help you write and maintain your Mintlify documentation.
+Set up Claude Code to work with the Apollos AI codebase, including MCP servers, skills, and documentation tools.
 
 ## Prerequisites
 
 - Active Claude subscription (Pro, Max, or API access)
+- Node.js 24+ (for MCP servers and frontend tooling)
 
 ## Setup
 
@@ -1069,27 +1026,60 @@ Set up Claude Code to help you write and maintain your Mintlify documentation.
   npm install -g @anthropic-ai/claude-code
   ```
 
-**Install the Mintlify skill**
+**Configure MCP servers**
 
-In your docs directory, run:
+Copy the example MCP configuration to enable project-level MCP servers:
 
   ```bash
-  npx skills add https://mintlify.com/docs
+  cp .mcp.json.example .mcp.json
   ```
 
-  This gives Claude Code Mintlify's component reference, writing standards,
-  and workflow guidance.
+  This configures [context7](https://github.com/upstash/context7) for live documentation lookup of project dependencies (FastAPI, SQLAlchemy, React, MSAL, etc.).
 
-**Customize project instructions**
+  **Note:** `.mcp.json` is gitignored. You can add additional MCP servers to your local copy without affecting other contributors.
+  
 
-Edit `AGENTS.md` in your project root to add project-specific terminology,
-  style preferences, and content boundaries.
-
-**Start writing with Claude Code**
+**Start working**
 
 ```bash
   claude
   ```
+
+  The project includes built-in skills (`/api-doc`, `/new-endpoint`, `/precheck`, `/migration`) and subagents (`security-reviewer`, `docs-reviewer`) in the `.claude/` directory. These are available automatically.
+
+## Available automations
+
+### Skills
+
+| Skill | Command | Purpose |
+|-------|---------|---------|
+| API doc sync | `/api-doc` | Sync endpoint docs with backend routes |
+| New endpoint | `/new-endpoint` | Scaffold a FastAPI endpoint with tests |
+| Pre-commit check | `/precheck` | Run full QA suite (tests, lint, types) |
+| Migration | `/migration` | Generate and apply Alembic migrations |
+
+### Subagents
+
+| Agent | Purpose |
+|-------|---------|
+| `security-reviewer` | OWASP-focused security review (auth, CORS, injection, CSV) |
+| `docs-reviewer` | Cross-reference docs against code for accuracy |
+
+### Hooks
+
+Hooks run automatically on file edits:
+
+- **PostToolUse**: Auto-formats Python (ruff) and TypeScript/MDX (biome) on save
+- **PreToolUse**: Blocks edits to `.env`, `teams.yaml`, and lock files
+
+## Documentation workflow
+
+To contribute to this documentation site using Claude Code:
+
+1. Install the [Mintlify skill](https://mintlify.com/docs/mcp) for component reference and writing standards
+2. Read `docs/AGENTS.md` for project-specific terminology and style guide
+3. Preview changes with `cd docs && mint dev`
+4. Validate before committing with `cd docs && mint validate && mint broken-links`
 
 ---
 

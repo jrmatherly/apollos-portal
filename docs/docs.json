@@ -89,7 +89,7 @@
         "groups": [
           {
             "group": "Contributing",
-            "pages": ["contributing/overview", "contributing/development"]
+            "pages": ["contributing/overview"]
           },
           {
             "group": "AI tools",

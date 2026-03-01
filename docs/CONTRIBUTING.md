@@ -1,29 +1,16 @@
-# Contribute to Apollos AI documentation
+# Contributing to Apollos AI
 
-Thank you for contributing to the Apollos AI documentation.
+For the full contributing guide, see the [documentation site](https://mintlify.com) or run `mint dev` locally from the `docs/` directory.
 
-## How to contribute
-
-### Option 1: edit on GitHub
-
-1. Navigate to the page you want to edit in the `docs/` directory
-2. Click the pencil icon to edit directly
-3. Submit a pull request
-
-### Option 2: local development
+## Quick start
 
 1. Fork and clone the repository
-2. Install the Mintlify CLI: `npm i -g mint`
-3. Navigate to the `docs/` directory and run `mint dev`
-4. Preview at `http://localhost:3000`
-5. Make your changes and submit a pull request
-
-For more details, see the [contributing guide](docs/contributing/overview.mdx) in the docs directory.
+2. Follow the development guide in `docs/development.mdx` to set up your environment
+3. Create a branch, make changes, and run `mise run qa` before submitting a pull request
 
 ## Writing guidelines
 
 - Use active voice and second person ("you")
 - Keep sentences concise — one idea per sentence
 - Use sentence case for headings
-- Refer to `AGENTS.md` for project terminology and style conventions
-- Run `mint broken-links` before submitting
+- See `docs/AGENTS.md` for project terminology and style conventions

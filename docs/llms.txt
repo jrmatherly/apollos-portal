@@ -30,11 +30,10 @@
 ## Contributing
 
 - [Contributing](/contributing/overview): How to contribute to the Apollos AI portal and documentation
-- [Development setup](/contributing/development): Detailed development environment setup for contributors
 
 ## AI tools
 
-- [Claude Code setup](/ai-tools/claude-code): Configure Claude Code for your documentation workflow
+- [Claude Code setup](/ai-tools/claude-code): Configure Claude Code for the Apollos AI development workflow
 - [Cursor setup](/ai-tools/cursor): Configure Cursor for your documentation workflow
 - [Windsurf setup](/ai-tools/windsurf): Configure Windsurf for your documentation workflow
 
