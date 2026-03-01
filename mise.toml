@@ -93,8 +93,8 @@ description = "Full quality gate (checks + tests)"
 depends = ["check:backend", "check:cli", "check:frontend", "check:docs", "test"]
 
 [tasks."docker:up"]
-description = "Start Docker services"
-run = "docker compose up -d"
+description = "Start production services (pulls latest images)"
+run = "docker compose pull && docker compose up -d"
 
 [tasks."docker:down"]
 description = "Stop Docker services"
