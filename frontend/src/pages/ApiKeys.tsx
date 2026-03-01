@@ -234,7 +234,7 @@ export function ApiKeys() {
     <div className="p-8 max-w-7xl mx-auto w-full">
       <header className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-10">
         <div>
-          <h1 className="text-3xl font-semibold tracking-tight text-text-primary">API Keys</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-text-primary">API Keys</h1>
           <p className="text-text-secondary mt-1">
             Manage your keys and monitor authentication across your organization.
           </p>
@@ -285,10 +285,10 @@ export function ApiKeys() {
         </div>
       ) : (
         <section className="mb-10">
-          <div className="bg-surface border border-surface-border rounded-lg overflow-hidden">
+          <div className="bg-surface border border-surface-border rounded-xl overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
-                <thead className="bg-surface-border/10 border-b border-surface-border">
+                <thead className="bg-white/5 border-b border-surface-border">
                   <tr>
                     {visibleColumns.alias ? (
                       <SortableHeader
@@ -441,7 +441,7 @@ export function ApiKeys() {
 
       {revokedKeys.length > 0 ? (
         <section className="pb-20">
-          <details className="group border border-surface-border rounded-lg bg-surface-border/10">
+          <details className="group border border-surface-border rounded-xl bg-surface-border/10">
             <summary className="flex items-center justify-between p-4 cursor-pointer hover:bg-surface-border/20 transition-colors select-none">
               <div className="flex items-center gap-3">
                 <ChevronDown className="w-5 h-5 text-text-secondary group-open:rotate-180 transition-transform" />

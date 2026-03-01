@@ -71,56 +71,59 @@ export function Settings() {
   };
 
   return (
-    <div className="p-8 max-w-4xl mx-auto w-full">
-      <header className="mb-10">
-        <h2 className="text-3xl font-bold tracking-tight text-text-primary">Settings</h2>
-        <p className="text-text-secondary mt-2">
-          Manage your security preferences and notification configurations.
+    <div className="p-8 max-w-5xl mx-auto w-full">
+      <header className="mb-12">
+        <h2 className="text-4xl font-black tracking-tight text-text-primary">Settings</h2>
+        <p className="text-text-secondary mt-3 text-lg">
+          Manage your project configurations, key policies, and security preferences.
         </p>
       </header>
 
       <div className="space-y-8">
         {/* Default Key Expiration */}
-        <section className="bg-surface border border-surface-border rounded-lg p-6 shadow-sm">
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold flex items-center gap-2 text-text-primary">
-              <KeyRound className="w-5 h-5 text-primary" />
-              Default Key Expiration
-            </h3>
-            <p className="text-sm text-text-secondary mt-1">
-              Set the mandatory rotation cycle for all generated API keys.
-            </p>
+        <section className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-8 shadow-sm">
+          <div className="flex items-center gap-3 mb-2">
+            <KeyRound className="w-5 h-5 text-primary" />
+            <h3 className="text-xl font-bold text-text-primary">Default Key Expiration</h3>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <p className="text-text-secondary mb-8 leading-relaxed">
+            Choose the default lifespan for newly generated API keys. Shorter lifespans are
+            recommended for sensitive development environments.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {durations.map((d) => {
               const isSelected = settings?.default_key_duration_days === d.value;
               return (
                 <label
                   key={d.value}
-                  className={`relative flex items-center p-4 cursor-pointer rounded-md border transition-all group ${
-                    isSelected
-                      ? "border-primary bg-primary/5 hover:bg-primary/10"
-                      : "border-surface-border hover:bg-surface-border/50"
+                  className={`relative flex cursor-pointer rounded-xl border bg-white/5 p-5 transition-all hover:border-primary/50 ${
+                    isSelected ? "border-primary ring-2 ring-primary/20" : "border-white/10"
                   }`}
                 >
                   <input
                     type="radio"
                     name="expiry"
-                    className="w-4 h-4 text-primary border-surface-border focus:ring-primary bg-transparent"
+                    className="sr-only"
                     checked={isSelected}
                     onChange={() => handleDurationChange(d.value)}
                   />
-                  <div className="ml-4 flex-1">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-semibold text-text-primary">{d.label}</span>
-                      {d.badge ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[10px] font-bold uppercase tracking-wider">
-                          <ShieldCheck className="w-3 h-3" />
-                          {d.badge}
-                        </span>
-                      ) : null}
+                  <div className="flex w-full items-center justify-between">
+                    <div className="flex flex-col">
+                      <span className="text-sm font-bold text-text-primary">{d.label}</span>
+                      <span className="text-xs text-text-secondary mt-1">{d.desc}</span>
                     </div>
-                    <p className="text-xs text-text-secondary">{d.desc}</p>
+                    {d.badge ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[10px] font-bold uppercase tracking-wider">
+                        <ShieldCheck className="w-3 h-3" />
+                        {d.badge}
+                      </span>
+                    ) : (
+                      <div
+                        className={`size-5 rounded-full border-2 flex items-center justify-center transition-all ${isSelected ? "border-primary bg-primary" : "border-surface-border"}`}
+                      >
+                        {isSelected ? <div className="size-2 rounded-full bg-white" /> : null}
+                      </div>
+                    )}
                   </div>
                 </label>
               );
@@ -128,25 +131,27 @@ export function Settings() {
           </div>
         </section>
 
-        {/* Email Notifications */}
-        <section className="bg-surface border border-surface-border rounded-lg p-6 shadow-sm">
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold flex items-center gap-2 text-text-primary">
-              <Bell className="w-5 h-5 text-primary" />
-              Expiry Alerts
-            </h3>
-            <p className="text-sm text-text-secondary mt-1">
-              Receive automated warnings before API keys expire.
-            </p>
+        {/* Expiry Alerts */}
+        <section className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-8 shadow-sm">
+          <div className="flex items-center gap-3 mb-2">
+            <Bell className="w-5 h-5 text-primary" />
+            <h3 className="text-xl font-bold text-text-primary">Expiry Alerts</h3>
           </div>
-          <div className="divide-y divide-surface-border">
+          <p className="text-text-secondary mb-8 leading-relaxed">
+            Configure notification alerts to be sent before an API key expires to ensure
+            uninterrupted service.
+          </p>
+          <div className="space-y-4">
             {notifications.map((n) => {
               const enabled = settings?.[n.key] ?? false;
               return (
-                <div key={n.key} className="flex items-center justify-between py-4">
-                  <div>
-                    <p className="text-sm font-medium text-text-primary">{n.label}</p>
-                    <p className="text-xs text-text-secondary">{n.desc}</p>
+                <div
+                  key={n.key}
+                  className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/5"
+                >
+                  <div className="flex flex-col">
+                    <p className="text-sm font-bold text-text-primary">{n.label}</p>
+                    <p className="text-xs text-text-secondary mt-1">{n.desc}</p>
                   </div>
                   <button
                     type="button"

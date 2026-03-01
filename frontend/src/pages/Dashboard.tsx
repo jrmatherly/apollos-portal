@@ -1,4 +1,4 @@
-import { Clock, Loader2, TrendingUp } from "lucide-react";
+import { BarChart3, Clock, Database, DollarSign, Key, Loader2 } from "lucide-react";
 import { useMemo } from "react";
 import {
   Area,
@@ -114,31 +114,36 @@ export function Dashboard() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {/* Active Keys */}
-        <div className="bg-surface border border-surface-border rounded-lg p-5 flex flex-col justify-between">
-          <div className="flex justify-between items-start">
-            <span className="text-sm font-medium text-text-secondary">Active Keys</span>
+        <div className="bg-surface border border-surface-border rounded-xl p-5">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-semibold text-text-secondary uppercase tracking-wider">
+              Active Keys
+            </span>
+            <div className="p-1.5 bg-primary/10 rounded-lg">
+              <Key className="w-4 h-4 text-primary" />
+            </div>
           </div>
-          <div className="mt-4">
-            {isLoading ? (
-              <div className="h-9 bg-surface-border/20 rounded animate-pulse w-16" />
-            ) : (
-              <>
-                <span className="text-3xl font-bold font-mono text-text-primary">
-                  {activeKeyCount}
-                </span>
-                <p className="text-xs text-text-secondary mt-1">
-                  Across {teamsCount} team{teamsCount !== 1 ? "s" : ""}
-                </p>
-              </>
-            )}
-          </div>
+          {isLoading ? (
+            <div className="h-9 bg-surface-border/20 rounded animate-pulse w-16" />
+          ) : (
+            <div className="flex items-baseline gap-2">
+              <span className="text-3xl font-bold text-text-primary">{activeKeyCount}</span>
+              <span className="text-sm text-text-secondary">
+                Across {teamsCount} team{teamsCount !== 1 ? "s" : ""}
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Current Spend */}
-        <div className="bg-surface border border-surface-border rounded-lg p-5">
-          <div className="flex justify-between items-start mb-4">
-            <span className="text-sm font-medium text-text-secondary">Current Spend</span>
-            <TrendingUp className="w-5 h-5 text-primary" />
+        <div className="bg-surface border border-surface-border rounded-xl p-5">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-semibold text-text-secondary uppercase tracking-wider">
+              Current Spend
+            </span>
+            <div className="p-1.5 bg-secondary/10 rounded-lg">
+              <DollarSign className="w-4 h-4 text-secondary" />
+            </div>
           </div>
           {isLoading ? (
             <div className="h-9 bg-surface-border/20 rounded animate-pulse w-32" />
@@ -167,9 +172,14 @@ export function Dashboard() {
         </div>
 
         {/* Total Tokens */}
-        <div className="bg-surface border border-surface-border rounded-lg p-5">
-          <div className="flex justify-between items-start mb-4">
-            <span className="text-sm font-medium text-text-secondary">Total Tokens</span>
+        <div className="bg-surface border border-surface-border rounded-xl p-5">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-semibold text-text-secondary uppercase tracking-wider">
+              Total Tokens
+            </span>
+            <div className="p-1.5 bg-[#a855f7]/10 rounded-lg">
+              <Database className="w-4 h-4 text-[#a855f7]" />
+            </div>
           </div>
           {isLoading ? (
             <div className="h-9 bg-surface-border/20 rounded animate-pulse w-24" />
@@ -185,10 +195,14 @@ export function Dashboard() {
         </div>
 
         {/* Next Expiry */}
-        <div className="bg-surface border border-surface-border rounded-lg p-5">
-          <div className="flex justify-between items-start mb-4">
-            <span className="text-sm font-medium text-text-secondary">Next Expiry</span>
-            <Clock className="w-5 h-5 text-text-secondary" />
+        <div className="bg-surface border border-surface-border rounded-xl p-5">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-semibold text-text-secondary uppercase tracking-wider">
+              Next Expiry
+            </span>
+            <div className="p-1.5 bg-warning/10 rounded-lg">
+              <Clock className="w-4 h-4 text-warning" />
+            </div>
           </div>
           {isLoading ? (
             <div className="h-9 bg-surface-border/20 rounded animate-pulse w-24" />
@@ -211,9 +225,14 @@ export function Dashboard() {
       </div>
 
       {/* Spend Chart */}
-      <div className="bg-surface border border-surface-border rounded-lg flex-1 flex flex-col overflow-hidden h-[400px]">
+      <div className="bg-surface border border-surface-border rounded-xl flex-1 flex flex-col overflow-hidden h-[400px]">
         <div className="px-6 py-4 border-b border-surface-border flex justify-between items-center">
-          <h2 className="text-lg font-semibold text-text-primary">Daily Spend</h2>
+          <div>
+            <h2 className="text-lg font-semibold text-text-primary">Daily Spend</h2>
+            <p className="text-sm text-text-secondary">
+              Historical usage patterns across all models
+            </p>
+          </div>
           <div className="flex items-center gap-6">
             {modelNames.slice(0, 4).map((model, i) => (
               <div key={model} className="flex items-center gap-2">
@@ -234,8 +253,14 @@ export function Dashboard() {
               <Loader2 className="w-8 h-8 text-text-secondary animate-spin" />
             </div>
           ) : chartData.length === 0 ? (
-            <div className="w-full h-full flex items-center justify-center text-text-secondary">
-              No usage data yet
+            <div className="w-full h-full flex flex-col items-center justify-center text-text-secondary">
+              <div className="w-20 h-20 bg-surface-border/30 rounded-full flex items-center justify-center mb-6">
+                <BarChart3 className="w-10 h-10 text-text-muted/40" />
+              </div>
+              <p className="text-lg font-medium">No usage data yet</p>
+              <p className="text-sm max-w-xs text-center mt-2">
+                Create an API key and start making requests to see your usage data here.
+              </p>
             </div>
           ) : (
             <ResponsiveContainer width="100%" height="100%">

@@ -1,4 +1,15 @@
-import { Box, Check, Code, Copy, Loader2, X } from "lucide-react";
+import {
+  Box,
+  Brain,
+  Check,
+  CircuitBoard,
+  Code,
+  Copy,
+  Loader2,
+  Terminal,
+  X,
+  Zap,
+} from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { Highlight, themes } from "prism-react-renderer";
 import { type MouseEvent, useEffect, useMemo, useRef, useState } from "react";
@@ -361,26 +372,33 @@ function ModelUsageDialog({
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.15 }}
-            className="w-[90vw] max-w-4xl rounded-xl border border-border bg-surface shadow-lg"
+            className="w-[90vw] max-w-3xl rounded-xl border border-white/10 bg-surface/90 backdrop-blur-xl shadow-2xl overflow-hidden"
           >
-            <div className="flex items-center justify-between p-6 pb-0">
-              <div>
-                <h3 className="text-lg font-semibold text-text-primary">{model.model_name}</h3>
-                {model.litellm_model_name ? (
-                  <p className="text-text-secondary text-xs font-mono mt-0.5">
-                    {model.litellm_model_name}
-                  </p>
-                ) : null}
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-primary/20">
+                  <Terminal className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-text-primary">{model.model_name}</h3>
+                  {model.litellm_model_name ? (
+                    <p className="text-text-secondary text-xs font-medium mt-0.5">
+                      {model.litellm_model_name}
+                    </p>
+                  ) : null}
+                </div>
               </div>
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-lg p-1.5 text-text-secondary hover:bg-surface-hover transition-colors"
+                className="p-2 rounded-full text-text-secondary hover:bg-white/10 transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
+            {/* Model stats */}
             <div className="flex flex-wrap gap-x-6 gap-y-1 px-6 pt-4 text-xs text-text-secondary">
               {maxTokens != null ? (
                 <span>
@@ -406,67 +424,79 @@ function ModelUsageDialog({
               ) : null}
             </div>
 
-            <div className="px-6 pt-5 pb-6">
-              <p className="text-xs font-bold uppercase tracking-widest text-text-secondary mb-3">
-                Example Usage
-              </p>
-              <div className="rounded-lg border border-surface-border overflow-hidden">
-                <div className="flex items-center justify-between bg-surface-border/30 px-2">
-                  <div className="flex">
-                    {TABS.map((tab) => (
-                      <button
-                        key={tab}
-                        type="button"
-                        onClick={() => switchTab(tab)}
-                        className={`px-4 py-2.5 text-xs font-medium transition-colors ${
-                          activeTab === tab
-                            ? "text-primary border-b-2 border-primary"
-                            : "text-text-secondary hover:text-text-primary"
-                        }`}
-                      >
-                        {TAB_LABELS[tab]}
-                      </button>
-                    ))}
-                  </div>
+            {/* Tab bar */}
+            <div className="flex border-b border-white/5 bg-black/20 px-4 mt-4">
+              <div className="flex">
+                {TABS.map((tab) => (
                   <button
+                    key={tab}
                     type="button"
-                    onClick={handleCopy}
-                    className="rounded px-2 py-1 text-xs font-medium text-text-secondary hover:bg-surface-hover transition-colors inline-flex items-center gap-1"
+                    onClick={() => switchTab(tab)}
+                    className={`px-6 py-3 text-sm font-medium transition-colors ${
+                      activeTab === tab
+                        ? "text-primary font-semibold border-b-2 border-primary"
+                        : "text-text-secondary hover:text-text-primary"
+                    }`}
                   >
-                    {copied ? (
-                      <>
-                        <Check className="w-3 h-3 text-secondary" />
-                        Copied
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="w-3 h-3" />
-                        Copy
-                      </>
-                    )}
+                    {TAB_LABELS[tab]}
                   </button>
-                </div>
-                <Highlight
-                  theme={themes.nightOwl}
-                  code={examples[activeTab]}
-                  language={TAB_LANGUAGES[activeTab]}
-                >
-                  {({ style, tokens, getLineProps, getTokenProps }) => (
-                    <pre
-                      className="p-5 overflow-x-auto leading-relaxed font-mono text-[13px]"
-                      style={{ ...style, margin: 0, borderRadius: 0 }}
-                    >
-                      {tokens.map((line, i) => (
-                        <div key={i} {...getLineProps({ line })}>
-                          {line.map((token, key) => (
-                            <span key={key} {...getTokenProps({ token })} />
-                          ))}
-                        </div>
-                      ))}
-                    </pre>
-                  )}
-                </Highlight>
+                ))}
               </div>
+              <div className="flex-1" />
+              <button
+                type="button"
+                onClick={handleCopy}
+                className="flex items-center gap-2 px-3 my-2 text-xs font-bold text-text-secondary hover:text-text-primary border border-white/10 rounded-md transition-all"
+              >
+                {copied ? (
+                  <>
+                    <Check className="w-3 h-3 text-secondary" />
+                    Copied
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-3 h-3" />
+                    Copy Code
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* Code area */}
+            <Highlight
+              theme={themes.nightOwl}
+              code={examples[activeTab]}
+              language={TAB_LANGUAGES[activeTab]}
+            >
+              {({ style, tokens, getLineProps, getTokenProps }) => (
+                <pre
+                  className="px-6 py-5 overflow-x-auto leading-relaxed font-mono text-[13px] bg-[#0a0c14]"
+                  style={{ ...style, margin: 0, borderRadius: 0 }}
+                >
+                  {tokens.map((line, i) => (
+                    <div key={i} {...getLineProps({ line })}>
+                      {line.map((token, key) => (
+                        <span key={key} {...getTokenProps({ token })} />
+                      ))}
+                    </div>
+                  ))}
+                </pre>
+              )}
+            </Highlight>
+
+            {/* Footer */}
+            <div className="px-6 py-4 bg-black/40 border-t border-white/10 flex items-center justify-between">
+              <div className="flex items-center gap-2 text-xs text-text-secondary">
+                <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                Endpoint is active and ready
+              </div>
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2 text-sm font-bold bg-white/5 hover:bg-white/10 rounded-full transition-colors text-text-primary"
+              >
+                Close
+              </button>
             </div>
           </motion.div>
         </dialog>
@@ -475,61 +505,87 @@ function ModelUsageDialog({
   );
 }
 
+const MODE_ICONS: Record<string, { Icon: typeof Brain; bg: string; text: string }> = {
+  chat: { Icon: Brain, bg: "bg-[#8b5cf6]/20", text: "text-[#8b5cf6]" },
+  embedding: { Icon: CircuitBoard, bg: "bg-primary/20", text: "text-primary" },
+  image_generation: {
+    Icon: Zap,
+    bg: "bg-orange-500/20",
+    text: "text-orange-400",
+  },
+  audio_transcription: {
+    Icon: Terminal,
+    bg: "bg-secondary/20",
+    text: "text-secondary",
+  },
+  audio_speech: { Icon: Terminal, bg: "bg-blue-400/20", text: "text-blue-400" },
+  other: { Icon: Box, bg: "bg-slate-500/20", text: "text-slate-400" },
+};
+
 function ModelCard({ model, onClick }: { model: ModelInfo; onClick: () => void }) {
   const info = model.model_info ?? {};
   const maxTokens = info.max_tokens as number | undefined;
   const inputCostPerToken = info.input_cost_per_token as number | undefined;
   const outputCostPerToken = info.output_cost_per_token as number | undefined;
+  const modeStyle = MODE_ICONS[model.mode ?? "other"] ?? MODE_ICONS.other;
+  const ModeIcon = modeStyle.Icon;
 
   return (
     <button
       type="button"
       onClick={onClick}
-      className="bg-surface border border-surface-border rounded-xl overflow-hidden flex flex-col hover:border-primary/40 transition-all group cursor-pointer text-left w-full"
+      className="bg-white/3 backdrop-blur-md border border-white/10 rounded-xl overflow-hidden flex flex-col hover:border-primary/40 transition-all group cursor-pointer text-left w-full"
     >
-      <div className="p-6 flex-1 w-full">
-        <div className="flex justify-between items-start mb-4">
-          <div>
-            <h3 className="text-xl font-bold text-text-primary group-hover:text-primary transition-colors">
-              {model.model_name}
-            </h3>
-            {model.litellm_model_name ? (
-              <p className="text-text-secondary text-xs font-mono mt-1">
-                {model.litellm_model_name}
-              </p>
-            ) : null}
+      <div className="p-6 flex-1 w-full flex flex-col gap-5">
+        <div className="flex justify-between items-start">
+          <div className="flex gap-4 items-center">
+            <div
+              className={`w-12 h-12 rounded-xl ${modeStyle.bg} flex items-center justify-center ${modeStyle.text}`}
+            >
+              <ModeIcon className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-text-primary group-hover:text-primary transition-colors">
+                {model.model_name}
+              </h3>
+              {model.litellm_model_name ? (
+                <p className="text-text-secondary text-xs font-mono mt-0.5">
+                  {model.litellm_model_name}
+                </p>
+              ) : null}
+            </div>
           </div>
-          <Code className="w-4 h-4 text-text-secondary opacity-0 group-hover:opacity-100 transition-opacity" />
+          <Code className="w-4 h-4 text-text-secondary opacity-0 group-hover:opacity-100 transition-opacity shrink-0 mt-1" />
         </div>
-        <div className="space-y-3 pt-4 border-t border-surface-border">
+        <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/10">
           {maxTokens != null ? (
-            <div className="flex justify-between items-center">
-              <span className="text-text-secondary text-xs uppercase tracking-wider font-semibold">
+            <div>
+              <p className="text-[10px] text-text-secondary uppercase font-bold tracking-wider">
                 Context Window
-              </span>
-              <span className="text-text-primary font-mono text-sm">
+              </p>
+              <p className="text-text-primary text-sm font-medium mt-0.5">
                 {maxTokens.toLocaleString()}
-              </span>
+              </p>
             </div>
           ) : null}
           {inputCostPerToken != null ? (
-            <div className="flex justify-between items-center">
-              <span className="text-text-secondary text-xs uppercase tracking-wider font-semibold">
+            <div>
+              <p className="text-[10px] text-text-secondary uppercase font-bold tracking-wider">
                 Input Cost
-              </span>
-              <span className="text-text-primary font-mono text-sm">
+              </p>
+              <p className="text-text-primary text-sm font-medium font-mono mt-0.5">
                 ${(inputCostPerToken * 1_000_000).toFixed(2)} / 1M
-              </span>
+              </p>
             </div>
           ) : null}
           {outputCostPerToken != null ? (
-            <div className="flex justify-between items-center">
-              <span className="text-text-secondary text-xs uppercase tracking-wider font-semibold">
+            <div>
+              <p className="text-[10px] text-text-secondary uppercase font-bold tracking-wider">
                 Output Cost
-              </span>
-              <span className="text-text-primary font-mono text-sm">
+              </p>
+              <p className="text-text-primary text-sm font-medium font-mono mt-0.5">
                 ${(outputCostPerToken * 1_000_000).toFixed(2)} / 1M
-              </span>
+              </p>
             </div>
           ) : null}
         </div>
@@ -572,11 +628,9 @@ export function Models() {
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
             System Live
           </div>
-          <h1 className="text-4xl font-extrabold tracking-tight text-text-primary">
-            Available Models
-          </h1>
+          <h1 className="text-4xl font-black tracking-tight text-text-primary">Model Directory</h1>
           <p className="text-text-secondary max-w-2xl text-lg">
-            Models available to your teams through the Apollos AI gateway.
+            Deploy and manage high-performance LLMs for your production environment.
           </p>
         </div>
       </div>
