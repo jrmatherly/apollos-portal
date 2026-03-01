@@ -22,9 +22,11 @@ Apollos AI uses Microsoft Entra ID for authentication across all three component
 <Tab title="API (backend)">
   The backend uses **client credentials flow** for service-to-service calls (Microsoft Graph, LiteLLM) and validates user access tokens from the frontend.
 
-  - User tokens are validated against the Entra ID JWKS endpoint
-  - The `oid` (object ID) claim identifies the user
-  - Security group memberships are resolved via Microsoft Graph
+  - User tokens are validated by calling **Microsoft Graph `/me`** with the bearer token — if Graph accepts it, the token is valid
+  - The `oid` (object ID) claim from the Graph response identifies the user
+  - The JWT `aud` (audience) claim is verified against the app registration's client ID
+  - The JWT `roles` claim is extracted for admin role checks (e.g., `portal_admin`)
+  - Security group memberships are resolved via Microsoft Graph client credentials flow
 </Tab>
 
 <Tab title="CLI">
@@ -54,13 +56,14 @@ This happens automatically on the `/api/v1/provision` endpoint, called after the
 
 The backend validates every request by:
 
-- Checking the `Authorization: Bearer <token>` header
-- Verifying the token signature against Entra ID's JWKS keys
-- Validating the audience, issuer, and expiration claims
-- Extracting the user's `oid` for identity resolution
+1. Checking the `Authorization: Bearer <token>` header
+2. Calling Microsoft Graph `/me` with the token — a `401` from Graph means the token is invalid or expired
+3. Verifying the JWT `aud` claim matches the configured `AZURE_CLIENT_ID`
+4. Extracting the user's `oid`, name, and email from the Graph response
+5. Extracting the `roles` claim from the JWT payload for admin role checks
 
 <Note>
-  The backend uses the `HTTPBearer` security scheme. Missing or invalid tokens return a `401 Unauthorized` response.
+  The backend uses the `HTTPBearer` security scheme. Missing or invalid tokens return `401 Unauthorized`. If Graph API is unreachable (non-401 error), the backend returns `503 Service Unavailable` instead of failing silently.
 </Note>
 
 ## Entra ID setup

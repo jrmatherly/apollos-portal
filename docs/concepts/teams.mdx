@@ -59,6 +59,17 @@ The `litellm_role` field controls what team members can do within the LiteLLM pr
   `teams.yaml` contains Entra ID group IDs and is gitignored. Never commit this file. Use `teams.yaml.example` as a starting template.
 </Warning>
 
+### Gate groups
+
+The optional `required_groups` field controls who can access the portal, independent of team assignment:
+
+```yaml
+required_groups:
+  - "<Object ID of SG-AI-Platform-Users>"
+```
+
+If `required_groups` is set, a user must be a member of at least one listed group to sign in. If omitted, membership in any team group is sufficient. This lets you add someone to the gate group before assigning them to a team, or remove portal access without touching team groups.
+
 ## Provisioning flow
 
 When a user signs in, the provisioning endpoint:

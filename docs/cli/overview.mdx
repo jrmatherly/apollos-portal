@@ -61,7 +61,23 @@ The `login` command displays a URL and code. Open the URL in your browser, enter
 uv run apollos me
 ```
 
-This calls the `/api/v1/me` endpoint and displays your OID, name, email, admin status, and roles.
+This calls the `/api/v1/me` endpoint and displays a table:
+
+```
+┌──────────────────┐
+│  Portal Profile  │
+├───────┬──────────┤
+│ Field │ Value    │
+├───────┼──────────┤
+│ OID   │ abc-123  │
+│ Name  │ J. Smith │
+│ Email │ js@co.co │
+│ Admin │ True     │
+│ Roles │ portal…  │
+└───────┴──────────┘
+```
+
+If the portal backend is unreachable, the CLI prints a connection error and exits. API errors (e.g., `401 Unauthorized`) display the HTTP status code and response body.
 
 <Note>
   The CLI is under active development. Additional commands for key management and usage tracking are planned.

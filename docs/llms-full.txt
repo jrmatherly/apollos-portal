@@ -134,10 +134,10 @@ The fastest way to run the full stack locally:
 ```bash
 git clone https://github.com/jrmatherly/apollos-portal.git
 cd apollos-portal
-docker compose up
+docker compose -f docker-compose.dev.yml up
 ```
 
-This starts PostgreSQL, the backend API, and the frontend. The portal is available at `http://localhost:5173`.
+This starts PostgreSQL, the backend API (with hot reload), and the frontend (with HMR). The portal is available at `http://localhost:5173`.
 
 ## Running services individually
 
@@ -253,9 +253,10 @@ apollos-portal/
 │       ├── pages/      # Route pages (Dashboard, ApiKeys, Teams, etc.)
 │       └── lib/        # API client, MSAL config
 ├── cli/               # Click CLI
-├── docker/            # Dockerfiles
-├── docs/              # This documentation site (Mintlify)
-└── docker-compose.yml
+├── docker/                # Dockerfiles
+├── docs/                  # This documentation site (Mintlify)
+├── docker-compose.yml     # Production deployment
+└── docker-compose.dev.yml # Development (bind mounts, hot reload)
 ```
 
 ---
@@ -281,9 +282,11 @@ The portal uses **PKCE authorization code flow** via `@azure/msal-browser` v5.
 
 The backend uses **client credentials flow** for service-to-service calls (Microsoft Graph, LiteLLM) and validates user access tokens from the frontend.
 
-  - User tokens are validated against the Entra ID JWKS endpoint
-  - The `oid` (object ID) claim identifies the user
-  - Security group memberships are resolved via Microsoft Graph
+  - User tokens are validated by calling **Microsoft Graph `/me`** with the bearer token — if Graph accepts it, the token is valid
+  - The `oid` (object ID) claim from the Graph response identifies the user
+  - The JWT `aud` (audience) claim is verified against the app registration's client ID
+  - The JWT `roles` claim is extracted for admin role checks (e.g., `portal_admin`)
+  - Security group memberships are resolved via Microsoft Graph client credentials flow
 
 **CLI:**
 
@@ -311,12 +314,13 @@ This happens automatically on the `/api/v1/provision` endpoint, called after the
 
 The backend validates every request by:
 
-- Checking the `Authorization: Bearer <token>` header
-- Verifying the token signature against Entra ID's JWKS keys
-- Validating the audience, issuer, and expiration claims
-- Extracting the user's `oid` for identity resolution
+1. Checking the `Authorization: Bearer <token>` header
+2. Calling Microsoft Graph `/me` with the token — a `401` from Graph means the token is invalid or expired
+3. Verifying the JWT `aud` claim matches the configured `AZURE_CLIENT_ID`
+4. Extracting the user's `oid`, name, and email from the Graph response
+5. Extracting the `roles` claim from the JWT payload for admin role checks
 
-**Note:** The backend uses the `HTTPBearer` security scheme. Missing or invalid tokens return a `401 Unauthorized` response.
+**Note:** The backend uses the `HTTPBearer` security scheme. Missing or invalid tokens return `401 Unauthorized`. If Graph API is unreachable (non-401 error), the backend returns `503 Service Unavailable` instead of failing silently.
 
 
 ## Entra ID setup
@@ -382,6 +386,17 @@ The `litellm_role` field controls what team members can do within the LiteLLM pr
 **Warning:** `teams.yaml` contains Entra ID group IDs and is gitignored. Never commit this file. Use `teams.yaml.example` as a starting template.
 
 
+### Gate groups
+
+The optional `required_groups` field controls who can access the portal, independent of team assignment:
+
+```yaml
+required_groups:
+  - "<Object ID of SG-AI-Platform-Users>"
+```
+
+If `required_groups` is set, a user must be a member of at least one listed group to sign in. If omitted, membership in any team group is sufficient. This lets you add someone to the gate group before assigning them to a team, or remove portal access without touching team groups.
+
 ## Provisioning flow
 
 When a user signs in, the provisioning endpoint:
@@ -446,15 +461,43 @@ curl -X POST https://your-litellm-proxy/chat/completions \
 
 The proxy validates the key, checks team permissions for the requested model, and routes the request to the appropriate LLM provider.
 
+## Key naming
+
+Keys are automatically named using the format `{email-prefix}-{team-name}` (e.g., `jsmith-engineering-ai-team`). If a collision occurs with an existing active key, a random suffix is appended (e.g., `jsmith-engineering-ai-team-a1b2c3d4`).
+
+## Key status
+
+Each key has one of the following statuses:
+
+| Status | Description |
+|--------|-------------|
+| `active` | Key is valid and can be used for API requests |
+| `expiring_soon` | Key expires within 14 days — consider rotating |
+| `expired` | Key has passed its expiration date and is no longer valid |
+| `rotated` | Key was replaced by a newer key via rotation |
+| `revoked` | Key was manually revoked and permanently blocked |
+
+Keys expire automatically based on the `default_key_duration_days` setting configured for your account.
+
 ## Managing keys
 
 From the **API Keys** page you can:
 
-- **View** all your active keys with their creation date and associated team
-- **Rotate** a key to generate a new secret while keeping the same key ID
+- **View** all your keys with their status, creation date, expiration, spend, and associated team
+- **Rotate** a key to expire the old key and generate a new one linked to it
 - **Revoke** keys that are no longer needed
 
-**Note:** Revoking a key is immediate and irreversible. Any application using that key will stop working.
+### Rotation vs. revocation
+
+These operations differ in how the old key is handled:
+
+| | Rotation | Revocation |
+|---|---|---|
+| **Old key** | Expired (deleted from LiteLLM) | Blocked (soft-deleted, preserves spend history) |
+| **New key** | Created with `rotated_from_id` linking to old key | No new key created |
+| **Use case** | Scheduled credential refresh | Compromised or unused key |
+
+**Warning:** Both operations are irreversible. Rotation creates a replacement key automatically; revocation does not.
 
 
 ## Key scoping
@@ -495,9 +538,28 @@ Go to **Usage** in the sidebar to see:
 ### API
 
 ```bash
-curl /api/v1/usage \
+curl "/api/v1/usage?start_date=2026-01-01&end_date=2026-01-31" \
   -H "Authorization: Bearer <access-token>"
 ```
+
+Date parameters must use `YYYY-MM-DD` format (e.g., `2026-01-15`). Both are optional — omitting them returns all available usage data.
+
+The response includes per-request data points and an aggregate summary:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `data[].date` | string | Date of the request (`YYYY-MM-DD`) |
+| `data[].model` | string | LLM model used (e.g., `gpt-4o`) |
+| `data[].input_tokens` | integer | Prompt tokens consumed |
+| `data[].output_tokens` | integer | Completion tokens consumed |
+| `data[].spend` | float | Estimated cost for this request |
+| `data[].requests` | integer | Request count (always `1` per entry) |
+| `summary.total_spend` | float | Total cost across all entries |
+| `summary.total_tokens` | integer | Total input + output tokens |
+| `summary.total_requests` | integer | Total number of requests |
+
+**Note:** If the LiteLLM proxy is unreachable, the endpoint returns an empty response rather than an error — usage data may be temporarily unavailable without affecting other portal functionality.
+
 
 ## Budget limits
 
@@ -571,7 +633,23 @@ The `login` command displays a URL and code. Open the URL in your browser, enter
 uv run apollos me
 ```
 
-This calls the `/api/v1/me` endpoint and displays your OID, name, email, admin status, and roles.
+This calls the `/api/v1/me` endpoint and displays a table:
+
+```
+┌──────────────────┐
+│  Portal Profile  │
+├───────┬──────────┤
+│ Field │ Value    │
+├───────┼──────────┤
+│ OID   │ abc-123  │
+│ Name  │ J. Smith │
+│ Email │ js@co.co │
+│ Admin │ True     │
+│ Roles │ portal…  │
+└───────┴──────────┘
+```
+
+If the portal backend is unreachable, the CLI prints a connection error and exits. API errors (e.g., `401 Unauthorized`) display the HTTP status code and response body.
 
 **Note:** The CLI is under active development. Additional commands for key management and usage tracking are planned.
 

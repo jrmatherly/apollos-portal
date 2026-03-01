@@ -29,9 +29,29 @@ Go to **Usage** in the sidebar to see:
 ### API
 
 ```bash
-curl /api/v1/usage \
+curl "/api/v1/usage?start_date=2026-01-01&end_date=2026-01-31" \
   -H "Authorization: Bearer <access-token>"
 ```
+
+Date parameters must use `YYYY-MM-DD` format (e.g., `2026-01-15`). Both are optional — omitting them returns all available usage data.
+
+The response includes per-request data points and an aggregate summary:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `data[].date` | string | Date of the request (`YYYY-MM-DD`) |
+| `data[].model` | string | LLM model used (e.g., `gpt-4o`) |
+| `data[].input_tokens` | integer | Prompt tokens consumed |
+| `data[].output_tokens` | integer | Completion tokens consumed |
+| `data[].spend` | float | Estimated cost for this request |
+| `data[].requests` | integer | Request count (always `1` per entry) |
+| `summary.total_spend` | float | Total cost across all entries |
+| `summary.total_tokens` | integer | Total input + output tokens |
+| `summary.total_requests` | integer | Total number of requests |
+
+<Note>
+  If the LiteLLM proxy is unreachable, the endpoint returns an empty response rather than an error — usage data may be temporarily unavailable without affecting other portal functionality.
+</Note>
 
 ## Budget limits
 

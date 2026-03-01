@@ -44,17 +44,45 @@ curl -X POST https://your-litellm-proxy/chat/completions \
 
 The proxy validates the key, checks team permissions for the requested model, and routes the request to the appropriate LLM provider.
 
+## Key naming
+
+Keys are automatically named using the format `{email-prefix}-{team-name}` (e.g., `jsmith-engineering-ai-team`). If a collision occurs with an existing active key, a random suffix is appended (e.g., `jsmith-engineering-ai-team-a1b2c3d4`).
+
+## Key status
+
+Each key has one of the following statuses:
+
+| Status | Description |
+|--------|-------------|
+| `active` | Key is valid and can be used for API requests |
+| `expiring_soon` | Key expires within 14 days — consider rotating |
+| `expired` | Key has passed its expiration date and is no longer valid |
+| `rotated` | Key was replaced by a newer key via rotation |
+| `revoked` | Key was manually revoked and permanently blocked |
+
+Keys expire automatically based on the `default_key_duration_days` setting configured for your account.
+
 ## Managing keys
 
 From the **API Keys** page you can:
 
-- **View** all your active keys with their creation date and associated team
-- **Rotate** a key to generate a new secret while keeping the same key ID
+- **View** all your keys with their status, creation date, expiration, spend, and associated team
+- **Rotate** a key to expire the old key and generate a new one linked to it
 - **Revoke** keys that are no longer needed
 
-<Note>
-  Revoking a key is immediate and irreversible. Any application using that key will stop working.
-</Note>
+### Rotation vs. revocation
+
+These operations differ in how the old key is handled:
+
+| | Rotation | Revocation |
+|---|---|---|
+| **Old key** | Expired (deleted from LiteLLM) | Blocked (soft-deleted, preserves spend history) |
+| **New key** | Created with `rotated_from_id` linking to old key | No new key created |
+| **Use case** | Scheduled credential refresh | Compromised or unused key |
+
+<Warning>
+  Both operations are irreversible. Rotation creates a replacement key automatically; revocation does not.
+</Warning>
 
 ## Key scoping
 
