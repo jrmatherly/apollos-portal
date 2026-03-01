@@ -1,4 +1,4 @@
-import { Check, Copy } from "lucide-react";
+import { Check, Copy, Key } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
 
@@ -37,23 +37,28 @@ export function NewKeyDialog({
   return (
     <AnimatePresence>
       {open ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.15 }}
-            className="w-full max-w-md rounded-xl border border-border bg-surface p-6 shadow-lg"
+            className="w-full max-w-md rounded-xl border border-white/10 bg-surface/90 backdrop-blur-xl p-6 shadow-2xl"
           >
             {createdKey ? (
               <>
-                <h3 className="text-lg font-semibold text-text-primary">Key Created</h3>
-                <p className="mt-2 text-sm text-text-secondary">
-                  Your new key for <strong>{createdKey.team_alias}</strong> has been created. Copy
-                  it now — you won't be able to see it again.
+                <div className="size-10 rounded-xl bg-secondary/10 flex items-center justify-center mb-4">
+                  <Check className="w-5 h-5 text-secondary" />
+                </div>
+                <h3 className="text-lg font-bold text-text-primary">
+                  Key Created
+                </h3>
+                <p className="mt-2 text-sm text-text-secondary leading-relaxed">
+                  Your new key for <strong>{createdKey.team_alias}</strong> has
+                  been created. Copy it now — you won't be able to see it again.
                 </p>
                 <div className="mt-4 flex items-center gap-2">
-                  <code className="flex-1 rounded-lg border border-border bg-black/5 px-3 py-2 text-xs font-mono text-text-primary break-all">
+                  <code className="flex-1 rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-xs font-mono text-text-primary break-all">
                     {createdKey.key}
                   </code>
                   <button
@@ -62,7 +67,7 @@ export function NewKeyDialog({
                       navigator.clipboard.writeText(createdKey.key);
                       setCopied(true);
                     }}
-                    className="shrink-0 rounded-lg border border-border px-3 py-2 text-xs font-medium text-text-secondary hover:bg-surface-hover transition-colors inline-flex items-center gap-1.5"
+                    className="shrink-0 rounded-xl bg-white/5 border border-white/10 px-3 py-2 text-xs font-bold text-text-secondary hover:bg-white/10 transition-colors inline-flex items-center gap-1.5"
                   >
                     {copied ? (
                       <>
@@ -81,7 +86,7 @@ export function NewKeyDialog({
                   <button
                     type="button"
                     onClick={onCancel}
-                    className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90 transition-colors"
+                    className="rounded-xl bg-primary px-5 py-2.5 text-sm font-bold text-white hover:bg-primary/90 transition-colors"
                   >
                     Done
                   </button>
@@ -89,14 +94,19 @@ export function NewKeyDialog({
               </>
             ) : (
               <>
-                <h3 className="text-lg font-semibold text-text-primary">Generate New API Key</h3>
-                <p className="mt-2 text-sm text-text-secondary">
+                <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+                  <Key className="w-5 h-5 text-primary" />
+                </div>
+                <h3 className="text-lg font-bold text-text-primary">
+                  Generate New API Key
+                </h3>
+                <p className="mt-2 text-sm text-text-secondary leading-relaxed">
                   Select a team to generate a new API key for.
                 </p>
                 <select
                   value={selectedTeam}
                   onChange={(e) => setSelectedTeam(e.target.value)}
-                  className="mt-4 w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-primary"
+                  className="mt-4 w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-text-primary"
                 >
                   <option value="">Select a team...</option>
                   {teams.map((t) => (
@@ -110,7 +120,7 @@ export function NewKeyDialog({
                     type="button"
                     onClick={onCancel}
                     disabled={loading}
-                    className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-secondary hover:bg-surface-hover transition-colors disabled:opacity-50"
+                    className="rounded-xl bg-white/5 border border-white/10 px-5 py-2.5 text-sm font-bold text-text-secondary hover:bg-white/10 transition-colors disabled:opacity-50"
                   >
                     Cancel
                   </button>
@@ -118,7 +128,7 @@ export function NewKeyDialog({
                     type="button"
                     onClick={() => onSubmit(selectedTeam)}
                     disabled={!selectedTeam || loading}
-                    className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90 transition-colors disabled:opacity-50"
+                    className="rounded-xl bg-primary px-5 py-2.5 text-sm font-bold text-white hover:bg-primary/90 transition-colors disabled:opacity-50"
                   >
                     {loading ? "Generating..." : "Generate Key"}
                   </button>
