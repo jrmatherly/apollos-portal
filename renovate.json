@@ -32,6 +32,24 @@
       "groupName": "npm minor/patch dependencies"
     },
     {
+      "description": "Pin Python runtime to 3.12 — do not bump minor/major",
+      "matchPackageNames": ["python"],
+      "matchUpdateTypes": ["major", "minor"],
+      "enabled": false
+    },
+    {
+      "description": "Pin Node.js runtime to 24 — do not bump major",
+      "matchPackageNames": ["node"],
+      "matchUpdateTypes": ["major"],
+      "enabled": false
+    },
+    {
+      "description": "Pin PostgreSQL to 18 — major bumps require data migration",
+      "matchPackageNames": ["postgres"],
+      "matchUpdateTypes": ["major"],
+      "enabled": false
+    },
+    {
       "description": "Group Docker image updates",
       "matchManagers": ["dockerfile"],
       "groupName": "Docker images"
