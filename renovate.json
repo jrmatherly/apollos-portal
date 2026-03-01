@@ -1,72 +1,119 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:best-practices"],
+  "extends": [
+    "config:best-practices"
+  ],
   "timezone": "America/New_York",
-  "schedule": ["before 4am on Monday"],
+  "schedule": [
+    "before 4am on Monday"
+  ],
   "packageRules": [
     {
       "description": "Auto-merge patch updates for dev dependencies",
-      "matchDepTypes": ["devDependencies"],
-      "matchUpdateTypes": ["patch"],
+      "matchDepTypes": [
+        "devDependencies"
+      ],
+      "matchUpdateTypes": [
+        "patch"
+      ],
       "automerge": true,
       "minimumReleaseAge": "7 days"
     },
     {
       "description": "Auto-merge patch updates for Python dev dependency groups",
-      "matchManagers": ["pep621"],
-      "matchDepTypes": ["dependency-groups"],
-      "matchUpdateTypes": ["patch"],
+      "matchManagers": [
+        "pep621"
+      ],
+      "matchDepTypes": [
+        "dependency-groups"
+      ],
+      "matchUpdateTypes": [
+        "patch"
+      ],
       "automerge": true,
       "minimumReleaseAge": "7 days"
     },
     {
       "description": "Group Python minor and patch updates",
-      "matchManagers": ["pep621"],
-      "matchUpdateTypes": ["minor", "patch"],
+      "matchManagers": [
+        "pep621"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
       "groupName": "Python minor/patch dependencies"
     },
     {
       "description": "Group npm minor and patch updates",
-      "matchManagers": ["npm"],
-      "matchUpdateTypes": ["minor", "patch"],
+      "matchManagers": [
+        "npm"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
       "groupName": "npm minor/patch dependencies"
     },
     {
       "description": "Pin Python runtime to 3.12 — do not bump minor/major",
-      "matchPackageNames": ["python"],
-      "matchUpdateTypes": ["major", "minor"],
+      "matchPackageNames": [
+        "python"
+      ],
+      "matchUpdateTypes": [
+        "major",
+        "minor"
+      ],
       "enabled": false
     },
     {
       "description": "Pin Node.js runtime to 24 — do not bump major",
-      "matchPackageNames": ["node"],
-      "matchUpdateTypes": ["major"],
+      "matchPackageNames": [
+        "node"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
       "enabled": false
     },
     {
       "description": "Pin PostgreSQL to 18 — major bumps require data migration",
-      "matchPackageNames": ["postgres"],
-      "matchUpdateTypes": ["major"],
+      "matchPackageNames": [
+        "postgres"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
       "enabled": false
     },
     {
       "description": "Group Docker image updates",
-      "matchManagers": ["dockerfile"],
+      "matchManagers": [
+        "dockerfile"
+      ],
       "groupName": "Docker images"
     },
     {
       "description": "Group GitHub Actions updates",
-      "matchManagers": ["github-actions"],
+      "matchManagers": [
+        "github-actions"
+      ],
       "groupName": "GitHub Actions"
     },
     {
       "description": "Ignore self-published GHCR images — pinning latest is counterproductive",
-      "matchPackagePatterns": ["^ghcr\\.io/jrmatherly/apollos-portal/"],
-      "enabled": false
+      "enabled": false,
+      "matchPackageNames": [
+        "/^ghcr\\.io/jrmatherly/apollos-portal//"
+      ]
     },
     {
       "description": "Suppress abandonment warnings for stable/feature-complete packages",
-      "matchPackageNames": ["clsx", "slowapi", "dorny/paths-filter"],
+      "matchPackageNames": [
+        "clsx",
+        "slowapi",
+        "dorny/paths-filter"
+      ],
       "abandonmentThreshold": null
     }
   ]
