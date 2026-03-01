@@ -1,6 +1,20 @@
-# Apollos AI Self-Service Portal
+<p align="center">
+  <img src="frontend/public/apollos_ai_full_sm.png" alt="Apollos AI" width="600">
+</p>
 
-A self-service portal for managing LiteLLM proxy access through Microsoft Entra ID authentication. Users are automatically provisioned into LiteLLM teams based on their Entra ID security group memberships, with self-service API key management, usage tracking, and team dashboards.
+<p align="center">
+  Self-service portal for managing LiteLLM proxy access through Microsoft Entra ID
+</p>
+
+<p align="center">
+  <a href="https://github.com/jrmatherly/apollos-portal/actions/workflows/ci.yml"><img src="https://github.com/jrmatherly/apollos-portal/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://github.com/jrmatherly/apollos-portal/actions/workflows/docker.yml"><img src="https://github.com/jrmatherly/apollos-portal/actions/workflows/docker.yml/badge.svg" alt="Docker"></a>
+  <a href="https://github.com/jrmatherly/apollos-portal/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-blue" alt="License"></a>
+</p>
+
+---
+
+Users authenticate with Microsoft Entra ID, get automatically provisioned into LiteLLM teams based on security group memberships, and manage their own API keys, usage, and team dashboards.
 
 ## Architecture
 
