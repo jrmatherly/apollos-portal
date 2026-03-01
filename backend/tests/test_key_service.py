@@ -46,6 +46,15 @@ class TestComputeStatus:
         )
         assert _compute_status(key, now) == "expired"
 
+    def test_exact_expiry_boundary_is_expired(self):
+        """A key whose portal_expires_at equals now should be 'expired', not 'expiring_soon'."""
+        now = datetime.now(UTC)
+        key = FakeProvisionedKey(
+            status="active",
+            portal_expires_at=now,
+        )
+        assert _compute_status(key, now) == "expired"
+
     def test_expiring_soon(self):
         now = datetime.now(UTC)
         key = FakeProvisionedKey(

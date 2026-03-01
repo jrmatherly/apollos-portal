@@ -42,7 +42,7 @@ def _compute_status(key: ProvisionedKey, now: datetime) -> str:
     if key.status in ("revoked", "rotated"):
         return key.status
     expires = _normalize_expires(key)
-    if expires < now:
+    if expires <= now:
         return "expired"
     days_left = (expires - now).days
     if days_left <= 14:
