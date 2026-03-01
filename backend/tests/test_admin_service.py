@@ -178,6 +178,29 @@ class TestAdminDeprovisionUser:
         assert user.is_active is False
         session.commit.assert_called_once()
 
+    @pytest.mark.asyncio(loop_scope="function")
+    async def test_logs_warning_for_key_without_litellm_id(self):
+        """Keys with litellm_key_id=None should emit a structlog warning."""
+        orphan_key = FakeProvisionedKey(litellm_key_id=None, status="active")
+        user = FakeProvisionedUser(is_active=True, keys=[orphan_key])
+        session = _mock_session_returning(user)
+        litellm = AsyncMock()
+        admin = _mock_admin()
+
+        with (
+            patch("app.services.admin_service.log_action", new_callable=AsyncMock),
+            patch("app.services.admin_service.logger") as mock_logger,
+        ):
+            from app.services.admin_service import admin_deprovision_user
+
+            await admin_deprovision_user(session, litellm, admin, str(user.id))
+
+        assert orphan_key.status == "revoked"
+        litellm.block_key.assert_not_called()
+        mock_logger.warning.assert_called_once()
+        call_args = mock_logger.warning.call_args
+        assert "key_missing_litellm_id" in str(call_args)
+
 
 class TestAdminReprovisionUser:
     @pytest.mark.asyncio(loop_scope="function")

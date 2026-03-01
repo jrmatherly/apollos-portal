@@ -143,6 +143,13 @@ async def admin_deprovision_user(
                 await litellm.block_key(key.litellm_key_id)
             except Exception:
                 logger.exception("Failed to block LiteLLM key %s during admin deprovision", key.litellm_key_id)
+        else:
+            logger.warning(
+                "key_missing_litellm_id",
+                key_id=str(key.id),
+                key_alias=key.litellm_key_alias,
+                msg="Key has no LiteLLM ID — cannot block in proxy, may need manual cleanup",
+            )
         key.status = "revoked"
         key.revoked_at = datetime.now(UTC)
         await log_action(
