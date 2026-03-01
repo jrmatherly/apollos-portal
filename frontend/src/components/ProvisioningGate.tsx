@@ -3,6 +3,7 @@ import {
   Check,
   CircleAlert,
   Copy,
+  Download,
   Key,
   Loader2,
   Rocket,
@@ -24,7 +25,7 @@ const STEPS = [
   { label: "Generating initial API key", Icon: Key },
 ] as const;
 
-const STEP_DELAY = 600;
+const STEP_DELAY = 1200;
 
 export function ProvisioningGate({ children }: { children: ReactNode }) {
   const { data, isLoading, error } = useProvisionStatus();
@@ -34,6 +35,7 @@ export function ProvisioningGate({ children }: { children: ReactNode }) {
   const [completedSteps, setCompletedSteps] = useState(0);
   const [provisionResult, setProvisionResult] = useState<ProvisionResponse | null>(null);
   const [copiedKeys, setCopiedKeys] = useState<Set<string>>(new Set());
+  const [keysDownloaded, setKeysDownloaded] = useState(false);
   const provisionTriggered = useRef(false);
 
   // Auto-trigger provisioning when unprovisioned
@@ -116,6 +118,25 @@ export function ProvisioningGate({ children }: { children: ReactNode }) {
   // --- Show keys phase ---
   if (phase === "showKeys" && provisionResult) {
     const keysWithValues = provisionResult.keys_generated.filter((k) => k.key);
+    const allKeysCopied =
+      keysWithValues.length > 0 && keysWithValues.every((k) => copiedKeys.has(k.key_id));
+    const canContinue = allKeysCopied || keysDownloaded;
+
+    const handleDownloadKeys = () => {
+      const lines = keysWithValues.map(
+        (k) => `Team: ${k.team_alias}\nKey Alias: ${k.key_alias}\nAPI Key: ${k.key}\n`,
+      );
+      const content = `Apollos AI API Keys\nGenerated: ${new Date().toISOString()}\n\n${lines.join("\n")}`;
+      const blob = new Blob([content], { type: "text/plain" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "apollos-ai-api-keys.txt";
+      a.click();
+      URL.revokeObjectURL(url);
+      setKeysDownloaded(true);
+    };
+
     return (
       <div className="flex h-screen items-center justify-center bg-bg-primary">
         <motion.div
@@ -173,14 +194,33 @@ export function ProvisioningGate({ children }: { children: ReactNode }) {
             ))}
           </div>
 
-          <div className="mt-6 flex justify-center">
+          <div className="mt-4 flex justify-center">
             <button
               type="button"
+              onClick={handleDownloadKeys}
+              className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-secondary hover:bg-surface-hover transition-colors inline-flex items-center gap-1.5"
+            >
+              <Download className="w-4 h-4" />
+              Download All Keys
+            </button>
+          </div>
+
+          <div className="mt-6 flex flex-col items-center gap-2">
+            <button
+              type="button"
+              disabled={!canContinue}
               onClick={() => setPhase("done")}
-              className="rounded-lg bg-primary px-6 py-3 text-sm font-medium text-white hover:bg-primary/90 transition-colors"
+              className={
+                canContinue
+                  ? "rounded-lg bg-primary px-6 py-3 text-sm font-medium text-white hover:bg-primary/90 transition-colors"
+                  : "rounded-lg bg-primary px-6 py-3 text-sm font-medium text-white opacity-50 cursor-not-allowed transition-colors"
+              }
             >
               Continue to Portal
             </button>
+            {!canContinue ? (
+              <p className="text-xs text-text-muted">Copy or download your keys to continue</p>
+            ) : null}
           </div>
         </motion.div>
       </div>

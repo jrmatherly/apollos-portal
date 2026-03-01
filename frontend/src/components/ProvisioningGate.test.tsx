@@ -76,12 +76,12 @@ const provisionSuccessNoKeys: ProvisionResponse = {
 /** Advance fake timers through all provisioning steps + transition delay.
  * Each step fires a new setTimeout, so we advance incrementally with act() in between. */
 async function advanceThroughSteps() {
-  await act(async () => vi.advanceTimersByTime(700));
-  await act(async () => vi.advanceTimersByTime(700));
-  await act(async () => vi.advanceTimersByTime(700));
-  await act(async () => vi.advanceTimersByTime(700));
-  await act(async () => vi.advanceTimersByTime(700));
-  await act(async () => vi.advanceTimersByTime(700));
+  await act(async () => vi.advanceTimersByTime(1300));
+  await act(async () => vi.advanceTimersByTime(1300));
+  await act(async () => vi.advanceTimersByTime(1300));
+  await act(async () => vi.advanceTimersByTime(1300));
+  await act(async () => vi.advanceTimersByTime(1300));
+  await act(async () => vi.advanceTimersByTime(1300));
 }
 
 describe("ProvisioningGate", () => {
@@ -193,6 +193,9 @@ describe("ProvisioningGate", () => {
       { timeout: 5000 },
     );
 
+    // Must copy key before Continue is enabled
+    await user.click(screen.getByText("Copy"));
+
     await user.click(screen.getByText("Continue to Portal"));
 
     await waitFor(() => {
@@ -221,6 +224,70 @@ describe("ProvisioningGate", () => {
       },
       { timeout: 5000 },
     );
+
+    vi.useRealTimers();
+  });
+
+  it("Continue button is disabled until keys are copied", async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+
+    server.use(
+      http.get("/api/v1/status", () => HttpResponse.json(unprovisionedStatus)),
+      http.post("/api/v1/provision", () => HttpResponse.json(provisionSuccess)),
+    );
+
+    renderGate();
+    await advanceThroughSteps();
+
+    await waitFor(
+      () => {
+        expect(screen.getByText("Continue to Portal")).toBeInTheDocument();
+      },
+      { timeout: 5000 },
+    );
+
+    // Button should be disabled initially
+    expect(screen.getByText("Continue to Portal").closest("button")).toBeDisabled();
+    expect(screen.getByText("Copy or download your keys to continue")).toBeInTheDocument();
+
+    // Copy the key
+    await user.click(screen.getByText("Copy"));
+
+    // Button should now be enabled
+    expect(screen.getByText("Continue to Portal").closest("button")).not.toBeDisabled();
+    expect(screen.queryByText("Copy or download your keys to continue")).not.toBeInTheDocument();
+
+    vi.useRealTimers();
+  });
+
+  it("Download unlocks Continue button", async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+
+    server.use(
+      http.get("/api/v1/status", () => HttpResponse.json(unprovisionedStatus)),
+      http.post("/api/v1/provision", () => HttpResponse.json(provisionSuccess)),
+    );
+
+    renderGate();
+    await advanceThroughSteps();
+
+    await waitFor(
+      () => {
+        expect(screen.getByText("Continue to Portal")).toBeInTheDocument();
+      },
+      { timeout: 5000 },
+    );
+
+    // Button should be disabled initially
+    expect(screen.getByText("Continue to Portal").closest("button")).toBeDisabled();
+
+    // Click Download All Keys
+    await user.click(screen.getByText("Download All Keys"));
+
+    // Button should now be enabled
+    expect(screen.getByText("Continue to Portal").closest("button")).not.toBeDisabled();
 
     vi.useRealTimers();
   });
