@@ -64,6 +64,47 @@ def _session_with_user(db_user):
 
 
 # ==================================================================
+# Auth Security Boundary Tests
+# ==================================================================
+
+
+class TestAuthBoundary:
+    """Auth security boundary tests — no dependency overrides.
+
+    These tests hit endpoints WITHOUT overriding get_current_user or require_admin,
+    verifying that FastAPI's HTTPBearer scheme rejects unauthenticated requests.
+    """
+
+    @pytest.fixture(autouse=True)
+    def _setup(self):
+        # Intentionally NO auth dependency overrides — testing real auth rejection
+        app.dependency_overrides[get_session] = _empty_session
+        yield
+        app.dependency_overrides.clear()
+
+    @pytest.mark.asyncio(loop_scope="function")
+    async def test_user_endpoint_requires_bearer_token(self):
+        """GET /me without Authorization header returns 401."""
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            response = await client.get("/api/v1/me")
+        assert response.status_code == 401
+
+    @pytest.mark.asyncio(loop_scope="function")
+    async def test_keys_endpoint_requires_bearer_token(self):
+        """GET /keys without Authorization header returns 401."""
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            response = await client.get("/api/v1/keys")
+        assert response.status_code == 401
+
+    @pytest.mark.asyncio(loop_scope="function")
+    async def test_admin_endpoint_requires_bearer_token(self):
+        """GET /admin/users without Authorization header returns 401."""
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            response = await client.get("/api/v1/admin/users")
+        assert response.status_code == 401
+
+
+# ==================================================================
 # User Endpoint Tests
 # ==================================================================
 
