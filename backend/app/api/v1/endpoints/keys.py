@@ -12,7 +12,9 @@ router = APIRouter()
 
 
 @router.get("/keys", response_model=KeyListResponse)
+@limiter.limit("60/minute")
 async def get_keys(
+    request: Request,
     user: CurrentUser = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
 ):

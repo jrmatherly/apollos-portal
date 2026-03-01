@@ -132,7 +132,7 @@ async def admin_deprovision_user(
     if user is None:
         raise LookupError(f"User {user_id} not found")
     if not user.is_active:
-        raise ValueError(f"User {user.email} is already deprovisioned")
+        raise ValueError(f"User {user_id} is already deprovisioned")
 
     # Block all active keys (continue on LiteLLM failure; reconciliation job catches drift)
     for key in user.keys:
@@ -181,7 +181,7 @@ async def admin_reprovision_user(
     if user is None:
         raise LookupError(f"User {user_id} not found")
     if user.is_active:
-        raise ValueError(f"User {user.email} is already active")
+        raise ValueError(f"User {user_id} is already active")
 
     user.is_active = True
     user.deprovisioned_at = None

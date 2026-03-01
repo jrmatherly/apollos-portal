@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-import re
 from datetime import UTC, datetime, timedelta
+from uuid import uuid4
 
 import structlog
 from sqlalchemy import select
@@ -28,13 +28,10 @@ from app.services.audit import (
     log_action,
 )
 from app.services.litellm_client import LiteLLMClient
+from app.utils import slugify
 
 logger = structlog.stdlib.get_logger(__name__)
 
-
-def _slugify(text: str) -> str:
-    """Convert text to a URL-safe slug."""
-    return re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")
 
 
 async def get_provision_status(
@@ -59,7 +56,6 @@ async def get_provision_status(
     keys = [
         KeyDetail(
             key_id=k.id,
-            litellm_key_id=k.litellm_key_id or "",
             key_alias=k.litellm_key_alias,
             team_id=k.team_id,
             team_alias=k.team_alias,
@@ -231,9 +227,19 @@ async def provision_user(
             continue
 
         # Generate key
-        slug = _slugify(team_cfg.team_alias)
+        slug = slugify(team_cfg.team_alias)
         email_prefix = user.email.split("@")[0]
         key_alias = f"{email_prefix}-{slug}"
+
+        # Collision guard: append UUID suffix if alias already in use
+        alias_check = await session.execute(
+            select(ProvisionedKey).where(
+                ProvisionedKey.litellm_key_alias == key_alias,
+                ProvisionedKey.status == "active",
+            )
+        )
+        if alias_check.scalar_one_or_none():
+            key_alias = f"{key_alias}-{uuid4().hex[:8]}"
 
         expires_at = datetime.now(UTC) + timedelta(days=db_user.default_key_duration_days)
 
@@ -268,7 +274,6 @@ async def provision_user(
         keys_generated.append(
             KeyDetail(
                 key_id=db_key.id,
-                litellm_key_id=db_key.litellm_key_id or "",
                 key_alias=key_alias,
                 team_id=team_cfg.entra_group_id,
                 team_alias=team_cfg.team_alias,

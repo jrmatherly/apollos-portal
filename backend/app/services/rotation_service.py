@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-import re
-import time
 from datetime import UTC, datetime, timedelta
+from uuid import uuid4
 
 import structlog
 from sqlalchemy import select
@@ -16,12 +15,10 @@ from app.models.provisioned_user import ProvisionedUser
 from app.services.audit import ACTION_KEY_AUTO_ROTATED, log_action
 from app.services.email_service import render_template, send_email
 from app.services.litellm_client import LiteLLMClient
+from app.utils import slugify
 
 logger = structlog.stdlib.get_logger(__name__)
 
-
-def _slugify(text: str) -> str:
-    return re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")
 
 
 async def _auto_rotate_key(
@@ -51,7 +48,7 @@ async def _auto_rotate_key(
 
     # Build new alias with collision guard
     email_prefix = user.email.split("@")[0]
-    slug = _slugify(key.team_alias)
+    slug = slugify(key.team_alias)
     new_alias = f"{email_prefix}-{slug}"
 
     existing = await session.execute(
@@ -61,7 +58,7 @@ async def _auto_rotate_key(
         )
     )
     if existing.scalar_one_or_none():
-        new_alias = f"{new_alias}-{int(time.time()) % 10000}"
+        new_alias = f"{new_alias}-{uuid4().hex[:8]}"
 
     expires_at = now + timedelta(days=user.default_key_duration_days)
 

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-import re
 from datetime import UTC, datetime, timedelta
+from uuid import uuid4
 
 import structlog
 from fastapi import HTTPException, status
@@ -26,12 +26,10 @@ from app.services.audit import (
     log_action,
 )
 from app.services.litellm_client import LiteLLMClient
+from app.utils import slugify
 
 logger = structlog.stdlib.get_logger(__name__)
 
-
-def _slugify(text: str) -> str:
-    return re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")
 
 
 def _normalize_expires(key: ProvisionedKey) -> datetime:
@@ -130,7 +128,7 @@ async def create_key(
 
     # Build key alias
     email_prefix = user.email.split("@")[0]
-    slug = _slugify(member.team_alias)
+    slug = slugify(member.team_alias)
     key_alias = f"{email_prefix}-{slug}"
 
     # Check for alias collision and append suffix if needed
@@ -141,9 +139,7 @@ async def create_key(
         )
     )
     if existing.scalar_one_or_none():
-        import time
-
-        key_alias = f"{key_alias}-{int(time.time()) % 10000}"
+        key_alias = f"{key_alias}-{uuid4().hex[:8]}"
 
     expires_at = datetime.now(UTC) + timedelta(days=db_user.default_key_duration_days)
 
@@ -217,7 +213,7 @@ async def rotate_key(
 
     # Generate new key
     email_prefix = user.email.split("@")[0]
-    slug = _slugify(old_key.team_alias)
+    slug = slugify(old_key.team_alias)
     new_key_alias = f"{email_prefix}-{slug}"
 
     # Collision check
@@ -228,9 +224,7 @@ async def rotate_key(
         )
     )
     if existing.scalar_one_or_none():
-        import time
-
-        new_key_alias = f"{new_key_alias}-{int(time.time()) % 10000}"
+        new_key_alias = f"{new_key_alias}-{uuid4().hex[:8]}"
 
     expires_at = datetime.now(UTC) + timedelta(days=db_user.default_key_duration_days)
 

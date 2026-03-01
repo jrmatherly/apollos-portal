@@ -14,7 +14,6 @@ class TeamProvisionDetail(BaseModel):
 
 class KeyDetail(BaseModel):
     key_id: uuid.UUID
-    litellm_key_id: str
     key_alias: str
     team_id: str
     team_alias: str

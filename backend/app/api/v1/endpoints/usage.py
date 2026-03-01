@@ -1,10 +1,11 @@
 import structlog
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.auth import CurrentUser, get_current_user
 from app.core.database import get_session
+from app.core.rate_limit import limiter
 from app.models.provisioned_user import ProvisionedUser
 from app.schemas.common import UsageDataPoint, UsageResponse, UsageSummary
 from app.services.litellm_client import LiteLLMClient, get_litellm_client
@@ -15,7 +16,9 @@ router = APIRouter()
 
 
 @router.get("/usage", response_model=UsageResponse)
+@limiter.limit("30/minute")
 async def get_usage(
+    request: Request,
     user: CurrentUser = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
     litellm: LiteLLMClient = Depends(get_litellm_client),

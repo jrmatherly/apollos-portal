@@ -7,14 +7,15 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
 
 import pytest
-from app.services.rotation_service import _auto_rotate_key, _slugify
+from app.services.rotation_service import _auto_rotate_key
+from app.utils import slugify
 
 from .conftest import FakeProvisionedKey, FakeProvisionedUser
 
 
 class TestSlugify:
     def test_basic(self):
-        assert _slugify("Engineering Team") == "engineering-team"
+        assert slugify("Engineering Team") == "engineering-team"
 
 
 class TestAutoRotateKey:

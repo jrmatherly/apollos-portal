@@ -46,7 +46,9 @@ router = APIRouter(prefix="/admin", dependencies=[Depends(require_admin)])
 
 
 @router.get("/users", response_model=AdminUsersResponse)
+@limiter.limit("30/minute")
 async def admin_list_users(
+    request: Request,
     page: int = Query(1, ge=1),
     page_size: int = Query(50, ge=1, le=100),
     session: AsyncSession = Depends(get_session),
@@ -75,7 +77,9 @@ async def admin_list_users(
 
 
 @router.get("/users/{user_id}", response_model=AdminUserDetail)
+@limiter.limit("30/minute")
 async def admin_get_user(
+    request: Request,
     user_id: str = Path(max_length=36),
     session: AsyncSession = Depends(get_session),
 ):
@@ -162,7 +166,9 @@ async def admin_reprovision(
 
 
 @router.get("/keys", response_model=AdminKeysResponse)
+@limiter.limit("30/minute")
 async def admin_list_keys(
+    request: Request,
     page: int = Query(1, ge=1),
     page_size: int = Query(50, ge=1, le=100),
     status: Literal["active", "revoked", "expired"] = Query(default="active"),
@@ -215,7 +221,9 @@ async def admin_revoke_any_key(
 
 
 @router.get("/audit", response_model=AuditLogResponse)
+@limiter.limit("30/minute")
 async def admin_get_audit_log(
+    request: Request,
     actor_email: str | None = Query(None, max_length=320),
     action: str | None = Query(None, max_length=64),
     target_type: str | None = Query(None, max_length=64),
@@ -256,7 +264,9 @@ async def admin_get_audit_log(
 
 
 @router.get("/audit/export")
+@limiter.limit("30/minute")
 async def admin_export_audit_log(
+    request: Request,
     actor_email: str | None = Query(None, max_length=320),
     action: str | None = Query(None, max_length=64),
     target_type: str | None = Query(None, max_length=64),
@@ -313,6 +323,7 @@ async def admin_export_audit_log(
 
 
 @router.get("/health", response_model=AdminHealthResponse)
+@limiter.limit("30/minute")
 async def admin_scheduler_health(request: Request):
     """Get scheduler status and job information."""
     scheduler = getattr(request.app.state, "scheduler", None)

@@ -1,11 +1,12 @@
 import structlog
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.core.auth import CurrentUser, get_current_user
 from app.core.database import get_session
+from app.core.rate_limit import limiter
 from app.core.teams import TeamsConfig
 from app.models.provisioned_user import ProvisionedUser
 from app.schemas.common import TeamsResponse, TeamSummary
@@ -17,7 +18,9 @@ router = APIRouter()
 
 
 @router.get("/teams", response_model=TeamsResponse)
+@limiter.limit("60/minute")
 async def get_teams(
+    request: Request,
     user: CurrentUser = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
     litellm: LiteLLMClient = Depends(get_litellm_client),

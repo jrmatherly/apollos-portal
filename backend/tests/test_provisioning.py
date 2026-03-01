@@ -144,8 +144,8 @@ class TestProvisionUser:
         graph.get_user_groups.return_value = [{"id": "group-1"}]
 
         teams_config = _make_teams_config()
-        # execute calls: 1) user check→None, 2) membership check→None, 3) key check→None
-        session = _mock_session_multi(None, None, None)
+        # execute calls: 1) user check→None, 2) membership check→None, 3) key check→None, 4) alias collision→None
+        session = _mock_session_multi(None, None, None, None)
 
         with patch("app.services.provisioning.log_action", new_callable=AsyncMock):
             from app.services.provisioning import provision_user
@@ -179,7 +179,7 @@ class TestProvisionUser:
         graph = AsyncMock()
         graph.get_user_groups.return_value = [{"id": "group-1"}]
         teams_config = _make_teams_config()
-        session = _mock_session_multi(None, None, None)
+        session = _mock_session_multi(None, None, None, None)
 
         with patch("app.services.provisioning.log_action", new_callable=AsyncMock):
             from app.services.provisioning import provision_user
@@ -203,7 +203,7 @@ class TestProvisionUser:
         graph = AsyncMock()
         graph.get_user_groups.return_value = [{"id": "group-1"}]
         teams_config = _make_teams_config()
-        session = _mock_session_multi(db_user, None, None)
+        session = _mock_session_multi(db_user, None, None, None)
 
         with patch("app.services.provisioning.log_action", new_callable=AsyncMock):
             from app.services.provisioning import provision_user
@@ -253,8 +253,8 @@ class TestProvisionUser:
         graph = AsyncMock()
         graph.get_user_groups.return_value = [{"id": "group-1"}]
         teams_config = _make_teams_config()
-        # user new, membership exists, key new
-        session = _mock_session_multi(None, existing_membership, None)
+        # user new, membership exists, key new, alias collision check
+        session = _mock_session_multi(None, existing_membership, None, None)
 
         with patch("app.services.provisioning.log_action", new_callable=AsyncMock):
             from app.services.provisioning import provision_user
@@ -323,7 +323,7 @@ class TestProvisionUser:
         graph = AsyncMock()
         graph.get_user_groups.return_value = [{"id": "group-1"}]
         teams_config = _make_teams_config()
-        session = _mock_session_multi(None, None, None)
+        session = _mock_session_multi(None, None, None, None)
 
         with patch("app.services.provisioning.log_action", new_callable=AsyncMock):
             from app.services.provisioning import provision_user
@@ -340,22 +340,51 @@ class TestProvisionUser:
         mock_litellm_client.create_user.assert_not_called()
         assert result.litellm_user_id == "existing-litellm-id"
 
+    @pytest.mark.asyncio(loop_scope="function")
+    async def test_alias_collision_appends_uuid_suffix(self, mock_user, mock_litellm_client):
+        """When key alias already exists, a UUID suffix is appended."""
+        graph = AsyncMock()
+        graph.get_user_groups.return_value = [{"id": "group-1"}]
+        teams_config = _make_teams_config()
 
-# --- _slugify ---
+        existing_key = FakeProvisionedKey(litellm_key_alias="alice-alpha-team", status="active")
+        # execute calls: 1) user→None, 2) membership→None, 3) key→None, 4) alias collision→existing_key
+        session = _mock_session_multi(None, None, None, existing_key)
+
+        with patch("app.services.provisioning.log_action", new_callable=AsyncMock):
+            from app.services.provisioning import provision_user
+
+            result = await provision_user(
+                session,
+                mock_litellm_client,
+                graph,
+                teams_config,
+                mock_user,
+                default_key_duration_days=90,
+            )
+
+        # Key alias should have a UUID suffix (8 hex chars): alice-alpha-team-<8hex>
+        alias = result.keys_generated[0].key_alias
+        assert alias.startswith("alice-alpha-team-")
+        suffix = alias.removeprefix("alice-alpha-team-")
+        assert len(suffix) == 8
+
+
+# --- slugify ---
 
 
 class TestSlugify:
     def test_basic(self):
-        from app.services.provisioning import _slugify
+        from app.utils import slugify
 
-        assert _slugify("Alpha Team") == "alpha-team"
+        assert slugify("Alpha Team") == "alpha-team"
 
     def test_special_characters(self):
-        from app.services.provisioning import _slugify
+        from app.utils import slugify
 
-        assert _slugify("ML/AI-Research (dev)") == "ml-ai-research-dev"
+        assert slugify("ML/AI-Research (dev)") == "ml-ai-research-dev"
 
     def test_strips_leading_trailing_hyphens(self):
-        from app.services.provisioning import _slugify
+        from app.utils import slugify
 
-        assert _slugify("--hello--") == "hello"
+        assert slugify("--hello--") == "hello"

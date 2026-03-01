@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.auth import CurrentUser, get_current_user
 from app.core.database import get_session
+from app.core.rate_limit import limiter
 from app.models.provisioned_user import ProvisionedUser
 from app.schemas.settings import UserSettingsResponse, UserSettingsUpdate
 from app.services.audit import ACTION_SETTINGS_UPDATED, log_action
@@ -12,7 +13,9 @@ router = APIRouter()
 
 
 @router.get("/settings", response_model=UserSettingsResponse)
+@limiter.limit("60/minute")
 async def get_settings_endpoint(
+    request: Request,
     user: CurrentUser = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
 ):
@@ -32,7 +35,9 @@ async def get_settings_endpoint(
 
 
 @router.patch("/settings", response_model=UserSettingsResponse)
+@limiter.limit("20/minute")
 async def update_settings(
+    request: Request,
     body: UserSettingsUpdate,
     user: CurrentUser = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),

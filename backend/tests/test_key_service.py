@@ -4,26 +4,27 @@ from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
 
-from app.services.key_service import _compute_status, _days_until_expiry, _slugify
+from app.services.key_service import _compute_status, _days_until_expiry
+from app.utils import slugify
 
 from .conftest import FakeProvisionedKey
 
 
 class TestSlugify:
     def test_basic(self):
-        assert _slugify("Core Engine") == "core-engine"
+        assert slugify("Core Engine") == "core-engine"
 
     def test_special_characters(self):
-        assert _slugify("Hello World!! Test") == "hello-world-test"
+        assert slugify("Hello World!! Test") == "hello-world-test"
 
     def test_leading_trailing_hyphens(self):
-        assert _slugify("---Hello---") == "hello"
+        assert slugify("---Hello---") == "hello"
 
     def test_numbers(self):
-        assert _slugify("Team 42 Alpha") == "team-42-alpha"
+        assert slugify("Team 42 Alpha") == "team-42-alpha"
 
     def test_already_slug(self):
-        assert _slugify("already-slug") == "already-slug"
+        assert slugify("already-slug") == "already-slug"
 
 
 class TestComputeStatus:

@@ -15,7 +15,9 @@ router = APIRouter()
 
 
 @router.get("/status", response_model=ProvisionStatusResponse)
+@limiter.limit("60/minute")
 async def check_status(
+    request: Request,
     user: CurrentUser = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
 ):
