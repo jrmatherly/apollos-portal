@@ -5,22 +5,13 @@ import { ConfirmDialog } from "./ConfirmDialog";
 
 // jsdom does not implement showModal/close on <dialog>
 beforeEach(() => {
-  HTMLDialogElement.prototype.showModal =
-    HTMLDialogElement.prototype.showModal || vi.fn();
-  HTMLDialogElement.prototype.close =
-    HTMLDialogElement.prototype.close || vi.fn();
+  HTMLDialogElement.prototype.showModal = HTMLDialogElement.prototype.showModal || vi.fn();
+  HTMLDialogElement.prototype.close = HTMLDialogElement.prototype.close || vi.fn();
 });
 
 describe("ConfirmDialog", () => {
   it("renders nothing when closed", () => {
-    render(
-      <ConfirmDialog
-        open={false}
-        title="Delete?"
-        onConfirm={vi.fn()}
-        onCancel={vi.fn()}
-      />,
-    );
+    render(<ConfirmDialog open={false} title="Delete?" onConfirm={vi.fn()} onCancel={vi.fn()} />);
 
     expect(screen.queryByText("Delete?")).not.toBeInTheDocument();
   });
@@ -46,14 +37,7 @@ describe("ConfirmDialog", () => {
     const user = userEvent.setup();
     const onConfirm = vi.fn();
 
-    render(
-      <ConfirmDialog
-        open={true}
-        title="Confirm?"
-        onConfirm={onConfirm}
-        onCancel={vi.fn()}
-      />,
-    );
+    render(<ConfirmDialog open={true} title="Confirm?" onConfirm={onConfirm} onCancel={vi.fn()} />);
 
     await user.click(screen.getByText("Confirm"));
     expect(onConfirm).toHaveBeenCalledOnce();
@@ -63,14 +47,7 @@ describe("ConfirmDialog", () => {
     const user = userEvent.setup();
     const onCancel = vi.fn();
 
-    render(
-      <ConfirmDialog
-        open={true}
-        title="Confirm?"
-        onConfirm={vi.fn()}
-        onCancel={onCancel}
-      />,
-    );
+    render(<ConfirmDialog open={true} title="Confirm?" onConfirm={vi.fn()} onCancel={onCancel} />);
 
     await user.click(screen.getByText("Cancel"));
     expect(onCancel).toHaveBeenCalledOnce();

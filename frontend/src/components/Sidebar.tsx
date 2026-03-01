@@ -1,12 +1,4 @@
-import {
-  BarChart3,
-  Cpu,
-  Key,
-  LayoutDashboard,
-  LogOut,
-  Settings,
-  Users,
-} from "lucide-react";
+import { BarChart3, Cpu, Key, LayoutDashboard, LogOut, Settings, Users } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useUserPhoto } from "../hooks/useUserPhoto";
@@ -39,15 +31,9 @@ export function Sidebar() {
     <aside className="w-64 shrink-0 border-r border-surface-border bg-surface flex flex-col h-full fixed z-50">
       <div className="p-6">
         <div className="flex items-center gap-3 mb-8">
-          <img
-            src="/apollos_new_circle_no_bg_sm.svg"
-            alt="Apollos AI"
-            className="w-8 h-8"
-          />
+          <img src="/apollos_new_circle_no_bg_sm.svg" alt="Apollos AI" className="w-8 h-8" />
           <div>
-            <h1 className="text-sm font-bold tracking-tight text-text-primary">
-              Apollos AI
-            </h1>
+            <h1 className="text-sm font-bold tracking-tight text-text-primary">Apollos AI</h1>
             <p className="text-[10px] text-text-secondary font-medium uppercase tracking-widest">
               Self-Service Portal
             </p>
@@ -92,12 +78,8 @@ export function Sidebar() {
             </div>
           )}
           <div className="flex-1 min-w-0 text-left">
-            <p className="text-sm font-medium text-text-primary truncate">
-              {displayName}
-            </p>
-            <p className="text-xs text-text-secondary truncate">
-              {displayEmail}
-            </p>
+            <p className="text-sm font-medium text-text-primary truncate">{displayName}</p>
+            <p className="text-xs text-text-secondary truncate">{displayEmail}</p>
           </div>
           <LogOut className="w-4 h-4 text-text-secondary group-hover:text-text-primary transition-colors" />
         </button>

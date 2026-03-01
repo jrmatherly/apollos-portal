@@ -31,9 +31,7 @@ function createWrapper() {
   });
 
   return function Wrapper({ children }: { children: ReactNode }) {
-    return (
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-    );
+    return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
   };
 }
 
@@ -77,12 +75,7 @@ describe("useKeys", () => {
   });
 
   it("handles error state", async () => {
-    server.use(
-      http.get(
-        "/api/v1/keys",
-        () => new HttpResponse("Server error", { status: 500 }),
-      ),
-    );
+    server.use(http.get("/api/v1/keys", () => new HttpResponse("Server error", { status: 500 })));
 
     const { result } = renderHook(() => useKeys(), {
       wrapper: createWrapper(),

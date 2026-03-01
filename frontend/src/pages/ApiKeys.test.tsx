@@ -145,9 +145,7 @@ describe("ApiKeys", () => {
   });
 
   it("shows error state on API failure", async () => {
-    server.use(
-      http.get("/api/v1/keys", () => new HttpResponse(null, { status: 500 })),
-    );
+    server.use(http.get("/api/v1/keys", () => new HttpResponse(null, { status: 500 })));
 
     renderApiKeys();
     await waitFor(() => {

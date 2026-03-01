@@ -68,12 +68,7 @@ describe("api", () => {
     });
 
     it("throws ApiError on non-ok response", async () => {
-      server.use(
-        http.get(
-          "/api/v1/test",
-          () => new HttpResponse("Not found", { status: 404 }),
-        ),
-      );
+      server.use(http.get("/api/v1/test", () => new HttpResponse("Not found", { status: 404 })));
 
       await expect(api.get("/test")).rejects.toThrow(ApiError);
       await expect(api.get("/test")).rejects.toMatchObject({ status: 404 });
@@ -96,9 +91,7 @@ describe("api", () => {
     });
 
     it("sends POST request without body", async () => {
-      server.use(
-        http.post("/api/v1/test", () => HttpResponse.json({ ok: true })),
-      );
+      server.use(http.post("/api/v1/test", () => HttpResponse.json({ ok: true })));
 
       const result = await api.post<{ ok: boolean }>("/test");
       expect(result.ok).toBe(true);
@@ -124,9 +117,7 @@ describe("api", () => {
       } catch (err) {
         expect(err).toBeInstanceOf(ApiError);
         expect((err as InstanceType<typeof ApiError>).status).toBe(403);
-        expect((err as InstanceType<typeof ApiError>).message).toBe(
-          '{"detail":"Forbidden"}',
-        );
+        expect((err as InstanceType<typeof ApiError>).message).toBe('{"detail":"Forbidden"}');
       }
     });
   });

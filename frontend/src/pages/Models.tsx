@@ -46,9 +46,7 @@ function groupModelsByMode(
     )
     .map(([mode, models]) => ({
       mode,
-      label:
-        MODE_LABELS[mode] ??
-        `${mode.charAt(0).toUpperCase()}${mode.slice(1)} Models`,
+      label: MODE_LABELS[mode] ?? `${mode.charAt(0).toUpperCase()}${mode.slice(1)} Models`,
       models,
     }));
 }
@@ -69,10 +67,7 @@ const TAB_LANGUAGES: Record<CodeTab, string> = {
   typescript: "typescript",
 };
 
-function getCodeExamples(
-  modelName: string,
-  mode: string | null,
-): Record<CodeTab, string> {
+function getCodeExamples(modelName: string, mode: string | null): Record<CodeTab, string> {
   const base =
     import.meta.env.VITE_LITELLM_BASE_URL?.replace(/\/+$/, "") ||
     "https://your-litellm-proxy.example.com";
@@ -370,9 +365,7 @@ function ModelUsageDialog({
           >
             <div className="flex items-center justify-between p-6 pb-0">
               <div>
-                <h3 className="text-lg font-semibold text-text-primary">
-                  {model.model_name}
-                </h3>
+                <h3 className="text-lg font-semibold text-text-primary">{model.model_name}</h3>
                 {model.litellm_model_name ? (
                   <p className="text-text-secondary text-xs font-mono mt-0.5">
                     {model.litellm_model_name}
@@ -391,19 +384,13 @@ function ModelUsageDialog({
             <div className="flex flex-wrap gap-x-6 gap-y-1 px-6 pt-4 text-xs text-text-secondary">
               {maxTokens != null ? (
                 <span>
-                  <span className="font-semibold uppercase tracking-wider">
-                    Context:
-                  </span>{" "}
-                  <span className="text-text-primary font-mono">
-                    {maxTokens.toLocaleString()}
-                  </span>
+                  <span className="font-semibold uppercase tracking-wider">Context:</span>{" "}
+                  <span className="text-text-primary font-mono">{maxTokens.toLocaleString()}</span>
                 </span>
               ) : null}
               {inputCost != null ? (
                 <span>
-                  <span className="font-semibold uppercase tracking-wider">
-                    Input:
-                  </span>{" "}
+                  <span className="font-semibold uppercase tracking-wider">Input:</span>{" "}
                   <span className="text-text-primary font-mono">
                     ${(inputCost * 1_000_000).toFixed(2)}/1M
                   </span>
@@ -411,9 +398,7 @@ function ModelUsageDialog({
               ) : null}
               {outputCost != null ? (
                 <span>
-                  <span className="font-semibold uppercase tracking-wider">
-                    Output:
-                  </span>{" "}
+                  <span className="font-semibold uppercase tracking-wider">Output:</span>{" "}
                   <span className="text-text-primary font-mono">
                     ${(outputCost * 1_000_000).toFixed(2)}/1M
                   </span>
@@ -490,13 +475,7 @@ function ModelUsageDialog({
   );
 }
 
-function ModelCard({
-  model,
-  onClick,
-}: {
-  model: ModelInfo;
-  onClick: () => void;
-}) {
+function ModelCard({ model, onClick }: { model: ModelInfo; onClick: () => void }) {
   const info = model.model_info ?? {};
   const maxTokens = info.max_tokens as number | undefined;
   const inputCostPerToken = info.input_cost_per_token as number | undefined;
@@ -606,17 +585,13 @@ export function Models() {
         <div className="flex flex-col items-center justify-center py-20 text-text-secondary">
           <Box className="w-12 h-12 mb-4 opacity-50" />
           <p className="text-lg font-medium">No models available</p>
-          <p className="text-sm mt-1">
-            Models are assigned based on your team access.
-          </p>
+          <p className="text-sm mt-1">Models are assigned based on your team access.</p>
         </div>
       ) : (
         <div className="space-y-10">
           {groups.map((group) => (
             <section key={group.mode}>
-              <h2 className="text-2xl font-bold text-text-primary mb-6">
-                {group.label}
-              </h2>
+              <h2 className="text-2xl font-bold text-text-primary mb-6">{group.label}</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {group.models.map((model) => (
                   <ModelCard

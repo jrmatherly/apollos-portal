@@ -39,13 +39,9 @@ export const handlers = [
     }),
   ),
 
-  http.get<never, never, ModelsResponse>("/api/v1/models", () =>
-    HttpResponse.json({ models: [] }),
-  ),
+  http.get<never, never, ModelsResponse>("/api/v1/models", () => HttpResponse.json({ models: [] })),
 
-  http.get<never, never, TeamsResponse>("/api/v1/teams", () =>
-    HttpResponse.json({ teams: [] }),
-  ),
+  http.get<never, never, TeamsResponse>("/api/v1/teams", () => HttpResponse.json({ teams: [] })),
 
   http.get<never, never, UserSettingsResponse>("/api/v1/settings", () =>
     HttpResponse.json({

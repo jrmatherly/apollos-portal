@@ -113,11 +113,7 @@ describe("Dashboard", () => {
   });
 
   it("shows no expiring keys message when none are expiring", async () => {
-    server.use(
-      http.get("/api/v1/keys", () =>
-        HttpResponse.json({ active: [], revoked: [] }),
-      ),
-    );
+    server.use(http.get("/api/v1/keys", () => HttpResponse.json({ active: [], revoked: [] })));
 
     renderDashboard();
 
