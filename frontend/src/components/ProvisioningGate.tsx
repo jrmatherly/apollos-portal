@@ -12,7 +12,11 @@ import {
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { type ReactNode, useEffect, useRef, useState } from "react";
-import { useProvision, useProvisionStatus } from "../hooks/useProvisioning";
+import {
+  useInvalidateProvisionQueries,
+  useProvision,
+  useProvisionStatus,
+} from "../hooks/useProvisioning";
 import type { ProvisionResponse } from "../types/api";
 
 type Phase = "provisioning" | "showKeys" | "done";
@@ -30,6 +34,7 @@ const STEP_DELAY = 1200;
 export function ProvisioningGate({ children }: { children: ReactNode }) {
   const { data, isLoading, error } = useProvisionStatus();
   const provision = useProvision();
+  const invalidateProvisionQueries = useInvalidateProvisionQueries();
 
   const [phase, setPhase] = useState<Phase>("provisioning");
   const [completedSteps, setCompletedSteps] = useState(0);
@@ -82,12 +87,13 @@ export function ProvisioningGate({ children }: { children: ReactNode }) {
         ) {
           setPhase("showKeys");
         } else {
+          invalidateProvisionQueries();
           setPhase("done");
         }
       }, 400);
       return () => clearTimeout(timer);
     }
-  }, [completedSteps, provisionResult]);
+  }, [completedSteps, provisionResult, invalidateProvisionQueries]);
 
   // --- Loading state ---
   if (isLoading) {
@@ -110,8 +116,8 @@ export function ProvisioningGate({ children }: { children: ReactNode }) {
     );
   }
 
-  // --- Already provisioned (and never triggered provisioning this session) or done ---
-  if (phase === "done" || (data?.is_provisioned && !provisionTriggered.current)) {
+  // --- Already provisioned or done ---
+  if (phase === "done" || data?.is_provisioned) {
     return <>{children}</>;
   }
 
@@ -209,7 +215,10 @@ export function ProvisioningGate({ children }: { children: ReactNode }) {
             <button
               type="button"
               disabled={!canContinue}
-              onClick={() => setPhase("done")}
+              onClick={() => {
+                invalidateProvisionQueries();
+                setPhase("done");
+              }}
               className={
                 canContinue
                   ? "rounded-lg bg-primary px-6 py-3 text-sm font-medium text-white hover:bg-primary/90 transition-colors"

@@ -242,12 +242,19 @@ async def provision_user(
 
         expires_at = datetime.now(UTC) + timedelta(days=db_user.default_key_duration_days)
 
-        key_resp = await litellm.generate_key(
-            user_id=db_user.litellm_user_id or user.email,
-            team_id=team_cfg.entra_group_id,
-            models=team_cfg.models,
-            key_alias=key_alias,
-        )
+        try:
+            key_resp = await litellm.generate_key(
+                user_id=db_user.litellm_user_id or user.email,
+                team_id=team_cfg.entra_group_id,
+                models=team_cfg.models,
+                key_alias=key_alias,
+            )
+        except Exception:
+            logger.exception(
+                "Failed to generate LiteLLM key %s, skipping",
+                key_alias,
+            )
+            continue
 
         raw_key = key_resp.get("key", "")
         db_key = ProvisionedKey(

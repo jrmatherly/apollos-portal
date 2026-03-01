@@ -10,13 +10,17 @@ export function useProvisionStatus() {
 }
 
 export function useProvision() {
-  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: () => api.post<ProvisionResponse>("/provision"),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["provisionStatus"] });
-      queryClient.invalidateQueries({ queryKey: ["keys"] });
-      queryClient.invalidateQueries({ queryKey: ["teams"] });
-    },
   });
+}
+
+/** Invalidate provisioning-related queries. Call when the user completes the provisioning flow. */
+export function useInvalidateProvisionQueries() {
+  const queryClient = useQueryClient();
+  return () => {
+    queryClient.invalidateQueries({ queryKey: ["provisionStatus"] });
+    queryClient.invalidateQueries({ queryKey: ["keys"] });
+    queryClient.invalidateQueries({ queryKey: ["teams"] });
+  };
 }
