@@ -103,6 +103,33 @@ class TestAuthBoundary:
             response = await client.get("/api/v1/admin/users")
         assert response.status_code == 401
 
+    @pytest.mark.asyncio(loop_scope="function")
+    async def test_admin_endpoint_rejects_non_admin_user(self):
+        """GET /admin/users with valid non-admin user returns 403."""
+        app.dependency_overrides[get_current_user] = _mock_user
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            response = await client.get("/api/v1/admin/users")
+        assert response.status_code == 403
+        assert "Admin role required" in response.json()["detail"]
+
+    @pytest.mark.asyncio(loop_scope="function")
+    async def test_admin_deprovision_rejects_non_admin_user(self):
+        """POST /admin/users/{id}/deprovision with non-admin user returns 403."""
+        app.dependency_overrides[get_current_user] = _mock_user
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            response = await client.post("/api/v1/admin/users/some-id/deprovision")
+        assert response.status_code == 403
+        assert "Admin role required" in response.json()["detail"]
+
+    @pytest.mark.asyncio(loop_scope="function")
+    async def test_admin_keys_rejects_non_admin_user(self):
+        """GET /admin/keys with non-admin user returns 403."""
+        app.dependency_overrides[get_current_user] = _mock_user
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            response = await client.get("/api/v1/admin/keys")
+        assert response.status_code == 403
+        assert "Admin role required" in response.json()["detail"]
+
 
 # ==================================================================
 # User Endpoint Tests
