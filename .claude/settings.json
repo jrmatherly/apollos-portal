@@ -10,6 +10,16 @@
             "timeout": 15
           }
         ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "for file in $CLAUDE_FILE_PATHS; do if echo \"$file\" | grep -qE '\\.(tsx?)$' && ! echo \"$file\" | grep -q '\\.test\\.'; then base=\"${file%.tsx}\"; [ \"$base\" = \"$file\" ] && base=\"${file%.ts}\"; for ext in test.tsx test.ts; do tf=\"${base}.${ext}\"; if [ -f \"$tf\" ]; then cd \"$(git rev-parse --show-toplevel)/frontend\" && npx vitest run \"$tf\" --reporter=dot 2>&1 | tail -3; break; fi; done; fi; done",
+            "timeout": 30
+          }
+        ]
       }
     ],
     "PreToolUse": [

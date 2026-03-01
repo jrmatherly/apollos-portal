@@ -27,10 +27,10 @@ Set up Claude Code to work with the Apollos AI codebase, including MCP servers, 
   cp .mcp.json.example .mcp.json
   ```
 
-  This configures [context7](https://github.com/upstash/context7) for live documentation lookup of project dependencies (FastAPI, SQLAlchemy, React, MSAL, etc.).
+  The example configuration includes three MCP servers. Edit `.mcp.json` to add your GitHub PAT for the GitHub server, or remove servers you don't need.
 
   <Note>
-    `.mcp.json` is gitignored. You can add additional MCP servers to your local copy without affecting other contributors.
+    `.mcp.json` is gitignored. You can customize your local copy without affecting other contributors.
   </Note>
 </Step>
 
@@ -39,13 +39,58 @@ Set up Claude Code to work with the Apollos AI codebase, including MCP servers, 
   claude
   ```
 
-  The project includes built-in skills (`/api-doc`, `/new-endpoint`, `/precheck`, `/migration`) and subagents (`security-reviewer`, `docs-reviewer`) in the `.claude/` directory. These are available automatically.
+  The project includes built-in skills, subagents, and hooks in the `.claude/` directory. These are available automatically.
 </Step>
 </Steps>
 
-## Available automations
+## MCP servers
 
-### Skills
+The `.mcp.json.example` file configures these servers:
+
+| Server | Purpose | Setup |
+|--------|---------|-------|
+| [context7](https://github.com/upstash/context7) | Live documentation lookup for project dependencies (FastAPI, SQLAlchemy, React, MSAL, etc.) | Works out of the box |
+| [Playwright](https://github.com/anthropics/anthropic-mcp-playwright) | Browser automation for visual testing and E2E verification of frontend flows | Works out of the box |
+| [GitHub](https://github.com/anthropics/anthropic-mcp-github) | Structured access to issues, pull requests, and Actions status | Requires `GITHUB_PERSONAL_ACCESS_TOKEN` in `.mcp.json` |
+
+<Tabs>
+<Tab title="context7">
+  Provides live documentation for any library in the project's dependency tree. Ask questions like "how does FastAPI dependency injection work?" and Claude will fetch current docs instead of relying on training data.
+
+  No configuration required.
+</Tab>
+
+<Tab title="Playwright">
+  Enables browser automation for testing frontend flows visually. Useful for verifying:
+  - The auto-provisioning progress dialog and key display
+  - Responsive layout across screen sizes
+  - Copy-to-clipboard behavior
+  - Animation and transition rendering
+
+  No configuration required — launches a headless browser on demand.
+</Tab>
+
+<Tab title="GitHub">
+  Provides structured access to the `jrmatherly/apollos-portal` repository without shell commands. Supports:
+  - Viewing and creating pull requests
+  - Reading and commenting on issues
+  - Checking CI/Actions status
+
+  Requires a GitHub Personal Access Token with `repo` scope:
+
+  ```json
+  "github": {
+    "command": "npx",
+    "args": ["-y", "@anthropic/mcp-github"],
+    "env": {
+      "GITHUB_PERSONAL_ACCESS_TOKEN": "ghp_your_token_here"
+    }
+  }
+  ```
+</Tab>
+</Tabs>
+
+## Skills
 
 | Skill | Command | Purpose |
 |-------|---------|---------|
@@ -53,20 +98,26 @@ Set up Claude Code to work with the Apollos AI codebase, including MCP servers, 
 | New endpoint | `/new-endpoint` | Scaffold a FastAPI endpoint with tests |
 | Pre-commit check | `/precheck` | Run full QA suite (tests, lint, types) |
 | Migration | `/migration` | Generate and apply Alembic migrations |
+| Generate test | `/gen-test` | Scaffold a Vitest + RTL test file for a frontend component |
+| Dependency check | `/deps-check` | Audit Python and Node dependencies for updates and vulnerabilities |
 
-### Subagents
+## Subagents
 
 | Agent | Purpose |
 |-------|---------|
 | `security-reviewer` | OWASP-focused security review (auth, CORS, injection, CSV) |
 | `docs-reviewer` | Cross-reference docs against code for accuracy |
+| `provisioning-tester` | Validate consistency across the provisioning pipeline (backend, frontend, tests, config, docs) |
 
-### Hooks
+## Hooks
 
 Hooks run automatically on file edits:
 
-- **PostToolUse**: Auto-formats Python (ruff) and TypeScript/MDX (biome) on save
-- **PreToolUse**: Blocks edits to `.env`, `teams.yaml`, and lock files
+| Hook | Trigger | Behavior |
+|------|---------|----------|
+| Auto-format | PostToolUse (Edit/Write) | Formats Python (ruff) and TypeScript/MDX (biome) on save |
+| Related test runner | PostToolUse (Edit/Write) | Runs co-located `.test.tsx` file when a source `.tsx` file is edited |
+| File protection | PreToolUse (Edit/Write) | Blocks edits to `.env`, `teams.yaml`, and lock files |
 
 ## Documentation workflow
 

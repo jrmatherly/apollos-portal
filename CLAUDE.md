@@ -122,10 +122,10 @@
 - Node 24, Python 3.12, uv workspace (root pyproject.toml)
 
 ## Claude Code Automations
-- MCP servers: `cp .mcp.json.example .mcp.json` — `.mcp.json` is gitignored, `.mcp.json.example` is checked in
-- Skills: `/api-doc` (sync endpoint docs), `/new-endpoint` (scaffold FastAPI endpoint), `/precheck` (QA suite), `/migration` (Alembic)
-- Agents: `security-reviewer` (OWASP review), `docs-reviewer` (cross-ref docs vs code)
-- Hooks auto-format Python (ruff) and TS/MDX (biome) on edit; block `.env`, `teams.yaml`, and lock files
+- MCP servers: `cp .mcp.json.example .mcp.json` — `.mcp.json` is gitignored, `.mcp.json.example` is checked in; includes context7 (live docs), Playwright (browser automation), GitHub (PRs/issues — requires PAT)
+- Skills: `/api-doc` (sync endpoint docs), `/new-endpoint` (scaffold FastAPI endpoint), `/precheck` (QA suite), `/migration` (Alembic), `/gen-test` (scaffold Vitest + RTL test), `/deps-check` (audit Python + Node deps)
+- Agents: `security-reviewer` (OWASP review), `docs-reviewer` (cross-ref docs vs code), `provisioning-tester` (validate provisioning pipeline consistency)
+- Hooks: auto-format Python (ruff) and TS/MDX (biome) on edit; run co-located `.test.tsx` when source `.tsx` edited; block `.env`, `teams.yaml`, and lock files
 - Editing `.claude/settings.json` with the Edit tool fails on long escaped commands — use Write instead
 - Before creating PRs, verify `origin/main` is up to date (`git push origin main`) — unpushed main commits pollute the PR diff
 - Squash & merge is preferred for feature branches — keeps main history clean with one commit per phase

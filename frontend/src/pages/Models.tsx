@@ -1,6 +1,7 @@
 import { Box, Check, Code, Copy, Loader2, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Highlight, themes } from "prism-react-renderer";
+import { type MouseEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useModels } from "../hooks/useModels";
 import type { ModelInfo } from "../types/api";
 
@@ -61,6 +62,12 @@ const TAB_LABELS: Record<CodeTab, string> = {
 };
 
 const TABS: CodeTab[] = ["python", "curl", "typescript"];
+
+const TAB_LANGUAGES: Record<CodeTab, string> = {
+  python: "python",
+  curl: "bash",
+  typescript: "typescript",
+};
 
 function getCodeExamples(
   modelName: string,
@@ -333,6 +340,10 @@ function ModelUsageDialog({
     setCopied(false);
   };
 
+  const handleBackdropClick = (e: MouseEvent<HTMLDialogElement>) => {
+    if (e.target === dialogRef.current) onClose();
+  };
+
   const info = model.model_info ?? {};
   const maxTokens = info.max_tokens as number | undefined;
   const inputCost = info.input_cost_per_token as number | undefined;
@@ -344,6 +355,10 @@ function ModelUsageDialog({
         <dialog
           ref={dialogRef}
           onCancel={onClose}
+          onClick={handleBackdropClick}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") onClose();
+          }}
           className="fixed inset-0 z-50 m-auto bg-transparent backdrop:bg-black/50"
         >
           <motion.div
@@ -351,7 +366,7 @@ function ModelUsageDialog({
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.15 }}
-            className="w-full max-w-2xl rounded-xl border border-border bg-surface shadow-lg"
+            className="w-[90vw] max-w-4xl rounded-xl border border-border bg-surface shadow-lg"
           >
             <div className="flex items-center justify-between p-6 pb-0">
               <div>
@@ -373,7 +388,7 @@ function ModelUsageDialog({
               </button>
             </div>
 
-            <div className="flex gap-4 px-6 pt-4 text-xs text-text-secondary">
+            <div className="flex flex-wrap gap-x-6 gap-y-1 px-6 pt-4 text-xs text-text-secondary">
               {maxTokens != null ? (
                 <span>
                   <span className="font-semibold uppercase tracking-wider">
@@ -406,19 +421,19 @@ function ModelUsageDialog({
               ) : null}
             </div>
 
-            <div className="p-6 pt-4">
+            <div className="px-6 pt-5 pb-6">
               <p className="text-xs font-bold uppercase tracking-widest text-text-secondary mb-3">
                 Example Usage
               </p>
               <div className="rounded-lg border border-surface-border overflow-hidden">
-                <div className="flex items-center justify-between bg-surface-border/30 px-1">
+                <div className="flex items-center justify-between bg-surface-border/30 px-2">
                   <div className="flex">
                     {TABS.map((tab) => (
                       <button
                         key={tab}
                         type="button"
                         onClick={() => switchTab(tab)}
-                        className={`px-3 py-2 text-xs font-medium transition-colors ${
+                        className={`px-4 py-2.5 text-xs font-medium transition-colors ${
                           activeTab === tab
                             ? "text-primary border-b-2 border-primary"
                             : "text-text-secondary hover:text-text-primary"
@@ -446,22 +461,27 @@ function ModelUsageDialog({
                     )}
                   </button>
                 </div>
-                <pre className="p-4 overflow-x-auto bg-[#0d1117] text-sm leading-relaxed">
-                  <code className="text-text-primary font-mono text-xs">
-                    {examples[activeTab]}
-                  </code>
-                </pre>
+                <Highlight
+                  theme={themes.nightOwl}
+                  code={examples[activeTab]}
+                  language={TAB_LANGUAGES[activeTab]}
+                >
+                  {({ style, tokens, getLineProps, getTokenProps }) => (
+                    <pre
+                      className="p-5 overflow-x-auto leading-relaxed font-mono text-[13px]"
+                      style={{ ...style, margin: 0, borderRadius: 0 }}
+                    >
+                      {tokens.map((line, i) => (
+                        <div key={i} {...getLineProps({ line })}>
+                          {line.map((token, key) => (
+                            <span key={key} {...getTokenProps({ token })} />
+                          ))}
+                        </div>
+                      ))}
+                    </pre>
+                  )}
+                </Highlight>
               </div>
-            </div>
-
-            <div className="px-6 pb-6 flex justify-end">
-              <button
-                type="button"
-                onClick={onClose}
-                className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-secondary hover:bg-surface-hover transition-colors"
-              >
-                Close
-              </button>
             </div>
           </motion.div>
         </dialog>

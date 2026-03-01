@@ -32,8 +32,7 @@ export function ProvisioningGate({ children }: { children: ReactNode }) {
 
   const [phase, setPhase] = useState<Phase>("provisioning");
   const [completedSteps, setCompletedSteps] = useState(0);
-  const [provisionResult, setProvisionResult] =
-    useState<ProvisionResponse | null>(null);
+  const [provisionResult, setProvisionResult] = useState<ProvisionResponse | null>(null);
   const [copiedKeys, setCopiedKeys] = useState<Set<string>>(new Set());
   const provisionTriggered = useRef(false);
 
@@ -102,9 +101,7 @@ export function ProvisioningGate({ children }: { children: ReactNode }) {
     return (
       <div className="flex h-screen items-center justify-center bg-bg-primary">
         <div className="text-center">
-          <p className="text-destructive">
-            Failed to check provisioning status
-          </p>
+          <p className="text-destructive">Failed to check provisioning status</p>
           <p className="mt-1 text-sm text-text-muted">{String(error)}</p>
         </div>
       </div>
@@ -131,9 +128,7 @@ export function ProvisioningGate({ children }: { children: ReactNode }) {
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-secondary/10">
               <Check className="h-6 w-6 text-secondary" />
             </div>
-            <h2 className="mt-4 text-2xl font-semibold text-text-primary">
-              You're all set!
-            </h2>
+            <h2 className="mt-4 text-2xl font-semibold text-text-primary">You're all set!</h2>
             <p className="mt-2 text-sm text-text-secondary">
               Copy your API key now — you won't be able to see it again.
             </p>
@@ -146,9 +141,7 @@ export function ProvisioningGate({ children }: { children: ReactNode }) {
                 className="rounded-lg border border-border bg-black/5 p-4"
               >
                 <div className="flex items-center justify-between text-sm">
-                  <span className="font-medium text-text-primary">
-                    {keyDetail.team_alias}
-                  </span>
+                  <span className="font-medium text-text-primary">{keyDetail.team_alias}</span>
                   <span className="text-text-muted">{keyDetail.key_alias}</span>
                 </div>
                 <div className="mt-2 flex items-center gap-2">
@@ -159,9 +152,7 @@ export function ProvisioningGate({ children }: { children: ReactNode }) {
                     type="button"
                     onClick={() => {
                       navigator.clipboard.writeText(keyDetail.key as string);
-                      setCopiedKeys((prev) =>
-                        new Set(prev).add(keyDetail.key_id),
-                      );
+                      setCopiedKeys((prev) => new Set(prev).add(keyDetail.key_id));
                     }}
                     className="shrink-0 rounded-lg border border-border px-3 py-2 text-xs font-medium text-text-secondary hover:bg-surface-hover transition-colors inline-flex items-center gap-1.5"
                   >

@@ -1,6 +1,6 @@
 [tasks.dev]
-description = "Start all development services"
-run = "docker compose -f docker-compose.dev.yml up --build"
+description = "Start all development services (watches lockfiles for auto-rebuild)"
+run = "docker compose -f docker-compose.dev.yml up --build --watch -V"
 
 [tasks."dev:backend"]
 description = "Start backend only (requires DB)"

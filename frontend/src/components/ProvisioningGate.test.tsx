@@ -52,9 +52,7 @@ const unprovisionedStatus: ProvisionStatusResponse = {
 const provisionSuccess: ProvisionResponse = {
   user_id: "test-id",
   litellm_user_id: "litellm-id",
-  teams_provisioned: [
-    { team_id: "team-1", team_alias: "Engineering", role: "user" },
-  ],
+  teams_provisioned: [{ team_id: "team-1", team_alias: "Engineering", role: "user" }],
   keys_generated: [
     {
       key_id: "key-1",
@@ -88,9 +86,7 @@ async function advanceThroughSteps() {
 
 describe("ProvisioningGate", () => {
   it("renders children when user is provisioned", async () => {
-    server.use(
-      http.get("/api/v1/status", () => HttpResponse.json(provisionedStatus)),
-    );
+    server.use(http.get("/api/v1/status", () => HttpResponse.json(provisionedStatus)));
 
     renderGate();
     await waitFor(() => {
@@ -99,15 +95,11 @@ describe("ProvisioningGate", () => {
   });
 
   it("shows error state on API failure", async () => {
-    server.use(
-      http.get("/api/v1/status", () => new HttpResponse(null, { status: 500 })),
-    );
+    server.use(http.get("/api/v1/status", () => new HttpResponse(null, { status: 500 })));
 
     renderGate();
     await waitFor(() => {
-      expect(
-        screen.getByText("Failed to check provisioning status"),
-      ).toBeInTheDocument();
+      expect(screen.getByText("Failed to check provisioning status")).toBeInTheDocument();
     });
   });
 
@@ -215,9 +207,7 @@ describe("ProvisioningGate", () => {
 
     server.use(
       http.get("/api/v1/status", () => HttpResponse.json(unprovisionedStatus)),
-      http.post("/api/v1/provision", () =>
-        HttpResponse.json(provisionSuccessNoKeys),
-      ),
+      http.post("/api/v1/provision", () => HttpResponse.json(provisionSuccessNoKeys)),
     );
 
     renderGate();
@@ -238,10 +228,7 @@ describe("ProvisioningGate", () => {
   it("shows retry button on provision error", async () => {
     server.use(
       http.get("/api/v1/status", () => HttpResponse.json(unprovisionedStatus)),
-      http.post(
-        "/api/v1/provision",
-        () => new HttpResponse(null, { status: 500 }),
-      ),
+      http.post("/api/v1/provision", () => new HttpResponse(null, { status: 500 })),
     );
 
     renderGate();
