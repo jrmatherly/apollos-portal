@@ -4,13 +4,7 @@
  */
 
 import { QueryClientProvider } from "@tanstack/react-query";
-import {
-  Component,
-  type ErrorInfo,
-  lazy,
-  type ReactNode,
-  Suspense,
-} from "react";
+import { Component, type ErrorInfo, lazy, type ReactNode, Suspense } from "react";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { ProvisioningGate } from "./components/ProvisioningGate";
@@ -19,24 +13,12 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { queryClient } from "./lib/queryClient";
 import { Login } from "./pages/Login";
 
-const Dashboard = lazy(() =>
-  import("./pages/Dashboard").then((m) => ({ default: m.Dashboard })),
-);
-const ApiKeys = lazy(() =>
-  import("./pages/ApiKeys").then((m) => ({ default: m.ApiKeys })),
-);
-const Usage = lazy(() =>
-  import("./pages/Usage").then((m) => ({ default: m.Usage })),
-);
-const Models = lazy(() =>
-  import("./pages/Models").then((m) => ({ default: m.Models })),
-);
-const Teams = lazy(() =>
-  import("./pages/Teams").then((m) => ({ default: m.Teams })),
-);
-const Settings = lazy(() =>
-  import("./pages/Settings").then((m) => ({ default: m.Settings })),
-);
+const Dashboard = lazy(() => import("./pages/Dashboard").then((m) => ({ default: m.Dashboard })));
+const ApiKeys = lazy(() => import("./pages/ApiKeys").then((m) => ({ default: m.ApiKeys })));
+const Usage = lazy(() => import("./pages/Usage").then((m) => ({ default: m.Usage })));
+const Models = lazy(() => import("./pages/Models").then((m) => ({ default: m.Models })));
+const Teams = lazy(() => import("./pages/Teams").then((m) => ({ default: m.Teams })));
+const Settings = lazy(() => import("./pages/Settings").then((m) => ({ default: m.Settings })));
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -68,12 +50,8 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
       return (
         <div className="flex h-screen items-center justify-center bg-bg-primary">
           <div className="text-center space-y-4">
-            <h1 className="text-xl font-semibold text-text-primary">
-              Something went wrong
-            </h1>
-            <p className="text-sm text-text-secondary">
-              An unexpected error occurred.
-            </p>
+            <h1 className="text-xl font-semibold text-text-primary">Something went wrong</h1>
+            <p className="text-sm text-text-secondary">An unexpected error occurred.</p>
             <button
               type="button"
               onClick={() => window.location.reload()}

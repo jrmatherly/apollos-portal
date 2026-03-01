@@ -6,10 +6,8 @@ function getBudgetColor(pct: number): {
   bar: string;
   label: string;
 } {
-  if (pct >= 85)
-    return { text: "text-warning", bar: "bg-warning", label: "Near Limit" };
-  if (pct >= 60)
-    return { text: "text-primary", bar: "bg-primary", label: "Moderate" };
+  if (pct >= 85) return { text: "text-warning", bar: "bg-warning", label: "Near Limit" };
+  if (pct >= 60) return { text: "text-primary", bar: "bg-primary", label: "Moderate" };
   return { text: "text-secondary", bar: "bg-secondary", label: "Healthy" };
 }
 
@@ -41,9 +39,7 @@ export function Teams() {
     <div className="p-8 max-w-7xl mx-auto w-full">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight text-text-primary">
-            Team Management
-          </h2>
+          <h2 className="text-3xl font-bold tracking-tight text-text-primary">Team Management</h2>
           <p className="text-text-secondary mt-1">
             View your team allocations and LLM resource usage.
           </p>
@@ -54,18 +50,13 @@ export function Teams() {
         <div className="flex flex-col items-center justify-center py-20 text-text-secondary">
           <Users className="w-12 h-12 mb-4 opacity-50" />
           <p className="text-lg font-medium">No teams found</p>
-          <p className="text-sm mt-1">
-            Teams are provisioned based on your organization access.
-          </p>
+          <p className="text-sm mt-1">Teams are provisioned based on your organization access.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {teams.map((team) => {
             const spend = team.spend ?? 0;
-            const budgetPct =
-              team.max_budget > 0
-                ? Math.round((spend / team.max_budget) * 100)
-                : 0;
+            const budgetPct = team.max_budget > 0 ? Math.round((spend / team.max_budget) * 100) : 0;
             const colors = getBudgetColor(budgetPct);
 
             return (
@@ -81,9 +72,7 @@ export function Teams() {
                     Active
                   </span>
                 </div>
-                <h3 className="text-lg font-bold mb-1 text-text-primary">
-                  {team.team_alias}
-                </h3>
+                <h3 className="text-lg font-bold mb-1 text-text-primary">{team.team_alias}</h3>
                 {team.member_count != null && (
                   <p className="text-sm text-text-secondary mb-6">
                     {team.member_count} Member
@@ -94,9 +83,7 @@ export function Teams() {
                 {team.max_budget > 0 && (
                   <div className="mb-6">
                     <div className="flex justify-between text-[11px] font-bold mb-1.5 uppercase tracking-wide">
-                      <span className="text-text-secondary">
-                        Budget Utilized
-                      </span>
+                      <span className="text-text-secondary">Budget Utilized</span>
                       <span className={colors.text}>
                         {budgetPct}% ({colors.label})
                       </span>

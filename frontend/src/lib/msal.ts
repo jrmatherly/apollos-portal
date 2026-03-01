@@ -1,16 +1,10 @@
-import {
-  type Configuration,
-  LogLevel,
-  PublicClientApplication,
-} from "@azure/msal-browser";
+import { type Configuration, LogLevel, PublicClientApplication } from "@azure/msal-browser";
 
 const msalConfig: Configuration = {
   auth: {
     clientId: import.meta.env.VITE_AZURE_CLIENT_ID || "",
     authority: `https://login.microsoftonline.com/${import.meta.env.VITE_AZURE_TENANT_ID || "common"}`,
-    redirectUri:
-      import.meta.env.VITE_AZURE_REDIRECT_URI ||
-      "http://localhost:3000/auth/callback",
+    redirectUri: import.meta.env.VITE_AZURE_REDIRECT_URI || "http://localhost:3000/auth/callback",
     postLogoutRedirectUri: "/",
   },
   cache: {

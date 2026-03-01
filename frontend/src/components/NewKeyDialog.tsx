@@ -46,12 +46,10 @@ export function NewKeyDialog({
           >
             {createdKey ? (
               <>
-                <h3 className="text-lg font-semibold text-text-primary">
-                  Key Created
-                </h3>
+                <h3 className="text-lg font-semibold text-text-primary">Key Created</h3>
                 <p className="mt-2 text-sm text-text-secondary">
-                  Your new key for <strong>{createdKey.team_alias}</strong> has
-                  been created. Copy it now — you won't be able to see it again.
+                  Your new key for <strong>{createdKey.team_alias}</strong> has been created. Copy
+                  it now — you won't be able to see it again.
                 </p>
                 <div className="mt-4 flex items-center gap-2">
                   <code className="flex-1 rounded-lg border border-border bg-black/5 px-3 py-2 text-xs font-mono text-text-primary break-all">
@@ -80,9 +78,7 @@ export function NewKeyDialog({
               </>
             ) : (
               <>
-                <h3 className="text-lg font-semibold text-text-primary">
-                  Generate New API Key
-                </h3>
+                <h3 className="text-lg font-semibold text-text-primary">Generate New API Key</h3>
                 <p className="mt-2 text-sm text-text-secondary">
                   Select a team to generate a new API key for.
                 </p>
