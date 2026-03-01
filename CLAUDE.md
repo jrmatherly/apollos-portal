@@ -30,6 +30,8 @@
 - Check outdated Node deps: `cd frontend && npm outdated`
 - Regenerate OpenAPI spec: `mise run docs:openapi` (run after any endpoint change)
 - Regenerate llms.txt files: `mise run docs:llms` (run after adding/modifying docs pages)
+- Read-only CI check: `mise run check` (lint + format + typecheck, no writes)
+- Validate docs: `mise run check:docs` (mint validate + broken-links)
 
 ## Conventions
 - Branding: "Apollos AI" — not "NEXUS AI", "LiteLLM Portal", or Stitch artifacts
@@ -52,6 +54,7 @@
 - structlog logging: use `structlog.stdlib.get_logger(__name__)` at module level, after all imports (avoids ruff E402)
 - structlog correlation IDs: use `structlog.contextvars.bind_contextvars(correlation_id=cid)` — never custom ContextVar
 - External API error handling pattern: wrap calls (e.g. `litellm.block_key()`) in try/except, log with structlog, continue — reconciliation jobs resolve drift
+- Shared utilities: `backend/app/utils.py` contains `slugify()` — imported by key_service, provisioning, and rotation_service
 - Entra ID group resolution: NEVER use JWT `groups` claim (200-group overage limit silently breaks) — always use Graph API `/users/{oid}/memberOf` with client credentials
 - Token validation: v1 validates by calling Graph `/me` with user's bearer token (not local JWKS) — see `backend/app/core/auth.py`
 - `_get_token_claims()` in auth.py returns both `roles` and `aud` from JWT payload — JWT `aud` verified against `azure_client_id` for defense-in-depth
@@ -108,6 +111,12 @@
 - Before creating PRs, verify `origin/main` is up to date (`git push origin main`) — unpushed main commits pollute the PR diff
 - Squash & merge is preferred for feature branches — keeps main history clean with one commit per phase
 - Cross-session memory: use `.serena/memories/` only — do not create Claude Code auto-memory directories
+
+## Renovate
+- Config: `renovate.json` — `config:best-practices` preset, weekly schedule (Mon before 4am ET)
+- Runtime pins: Python 3.12, Node 24, PostgreSQL 18 — major/minor bumps disabled
+- Auto-merge: patch updates for devDependencies and Python dependency-groups (7-day release age)
+- Grouping: Python deps, npm deps, Docker images, and GitHub Actions each get a single grouped PR
 
 ## Serena MCP
 - Project name: `apollos-portal` (config: `.serena/project.yml`)

@@ -38,9 +38,12 @@
 ## mise (task runner)
 - `mise run dev` — docker compose up
 - `mise run test` — backend pytest
-- `mise run lint` — ruff + tsc
-- `mise run format` — ruff format
+- `mise run lint` — ruff (backend + CLI) + biome (frontend)
+- `mise run format` — ruff format + biome format
 - `mise run migrate` — alembic upgrade head
+- `mise run check` — read-only lint + format + typecheck (CI equivalent, no writes)
+- `mise run check:docs` — docs validation (mint validate + broken-links)
+- `mise run qa` — full quality gate (check + test — run before committing)
 - `mise run docker:reset` — reset Docker services and volumes
 - `mise run docs:openapi` — regenerate OpenAPI spec from FastAPI app (run after endpoint changes; skips if sources unchanged)
 - `mise run docs:llms` — regenerate llms.txt/llms-full.txt from docs (skips if sources unchanged)

@@ -28,7 +28,7 @@ apollos-portal/
 │   │   ├── services/          # 9 services (provisioning, key, admin, rotation, reconciliation, notification, email, deprovisioning, litellm_client) + audit
 │   │   └── templates/email/   # Jinja2 email templates (5 templates)
 │   ├── alembic/       # Database migrations
-│   └── tests/         # 170 pytest tests (20 test files, ~0.6s)
+│   └── tests/         # 170 pytest tests (21 test files, ~0.6s)
 ├── frontend/         # React 19 + Vite 7 SPA (Node 24, TypeScript 5.9)
 ├── cli/              # Click CLI with MSAL device-code auth (Python 3.12, uv)
 ├── docs/             # Mintlify documentation site (15 MDX pages)
