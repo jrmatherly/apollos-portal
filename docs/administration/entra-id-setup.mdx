@@ -24,7 +24,7 @@ You also need:
   |---|---|
   | **Name** | `Apollos AI Self-Service Portal` |
   | **Supported account types** | `Accounts in this organizational directory only` (single tenant) |
-  | **Redirect URI** | Select **Single-page application (SPA)** → `http://localhost:5173/auth/callback` |
+  | **Redirect URI** | Select **Single-page application (SPA)** → `http://localhost:3000/auth/callback` |
 
   <Warning>
     The redirect URI must be under the **Single-page application** platform, not **Web**. MSAL.js uses auth code + PKCE for token redemption, which Entra ID only permits for the SPA platform. Using the Web platform causes `AADSTS9002326: Cross-origin token redemption is permitted only for the 'Single-Page Application' client-type`.
@@ -100,7 +100,7 @@ Go to **Authentication** in your App Registration.
   Under **Single-page application** → **Redirect URIs**, add:
 
   ```
-  http://localhost:5173/auth/callback          (development)
+  http://localhost:3000/auth/callback          (development)
   https://ai-portal.company.com/auth/callback  (production)
   ```
 </Step>

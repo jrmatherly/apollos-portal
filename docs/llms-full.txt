@@ -134,10 +134,13 @@ The fastest way to run the full stack locally:
 ```bash
 git clone https://github.com/jrmatherly/apollos-portal.git
 cd apollos-portal
-docker compose -f docker-compose.dev.yml up
+mise run dev
 ```
 
-This starts PostgreSQL, the backend API (with hot reload), and the frontend (with HMR). The portal is available at `http://localhost:5173`.
+This starts PostgreSQL, the backend API (with hot reload), the frontend (with HMR), and the docs preview server. The portal is available at `http://localhost:3000`, the API at `http://localhost:8000`, and docs at `http://localhost:3001`.
+
+**Tip:** `mise run dev` automatically rebuilds Docker images when Dockerfiles change. You can also run `docker compose -f docker-compose.dev.yml up --build` directly.
+
 
 ## Running services individually
 
@@ -160,7 +163,7 @@ npm install
 npm run dev
 ```
 
-The frontend dev server starts at `http://localhost:5173` with hot module replacement.
+The frontend dev server starts at `http://localhost:3000` with hot module replacement.
 
 ### CLI
 
@@ -183,7 +186,7 @@ LITELLM_MASTER_KEY=sk-your-litellm-master-key
 AZURE_TENANT_ID=your-tenant-id
 AZURE_CLIENT_ID=your-client-id
 AZURE_CLIENT_SECRET=your-client-secret
-PORTAL_BASE_URL=http://localhost:5173
+PORTAL_BASE_URL=http://localhost:3000
 ```
 
 ### Frontend
@@ -677,7 +680,7 @@ Navigate to [Azure Portal](https://portal.azure.com) → **Microsoft Entra ID** 
   |---|---|
   | **Name** | `Apollos AI Self-Service Portal` |
   | **Supported account types** | `Accounts in this organizational directory only` (single tenant) |
-  | **Redirect URI** | Select **Single-page application (SPA)** → `http://localhost:5173/auth/callback` |
+  | **Redirect URI** | Select **Single-page application (SPA)** → `http://localhost:3000/auth/callback` |
 
   **Warning:** The redirect URI must be under the **Single-page application** platform, not **Web**. MSAL.js uses auth code + PKCE for token redemption, which Entra ID only permits for the SPA platform. Using the Web platform causes `AADSTS9002326: Cross-origin token redemption is permitted only for the 'Single-Page Application' client-type`.
   
@@ -747,7 +750,7 @@ Go to **Authentication** in your App Registration.
 Under **Single-page application** → **Redirect URIs**, add:
 
   ```
-  http://localhost:5173/auth/callback          (development)
+  http://localhost:3000/auth/callback          (development)
   https://ai-portal.company.com/auth/callback  (production)
   ```
 
@@ -1106,7 +1109,7 @@ Navigate to the page you want to edit in the `docs/` directory and click the pen
 
 To test authentication locally, you need a Microsoft Entra ID app registration with:
 
-- **Redirect URI**: `http://localhost:5173` (SPA type)
+- **Redirect URI**: `http://localhost:3000` (SPA type)
 - **API permissions**: `User.Read`, `GroupMember.Read.All`
 - **Client secret** for backend service-to-service calls
 
