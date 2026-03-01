@@ -23,6 +23,7 @@ class ModelInfo(BaseModel):
     model_name: str
     litellm_model_name: str | None = None
     model_info: dict[str, Any] | None = None
+    mode: str | None = None
 
 
 class ModelsResponse(BaseModel):

@@ -23,7 +23,7 @@ class UserTeamMembership(Base):
     team_id: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     team_alias: Mapped[str] = mapped_column(String(255), nullable=False)
     entra_group_id: Mapped[str] = mapped_column(String(36), nullable=False)
-    litellm_role: Mapped[str] = mapped_column(String(50), default="internal_user", nullable=False)
+    litellm_role: Mapped[str] = mapped_column(String(50), default="user", nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
     user: Mapped[ProvisionedUser] = relationship(back_populates="team_memberships")

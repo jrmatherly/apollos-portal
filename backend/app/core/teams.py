@@ -17,7 +17,8 @@ class TeamConfig:
     max_budget: float = 0
     budget_duration: str = "30d"
     team_member_budget: float = 0
-    litellm_role: str = "internal_user"
+    litellm_role: str = "user"
+    is_default: bool = False
 
 
 @dataclass
@@ -35,10 +36,18 @@ class TeamsConfig:
         return None
 
     def get_qualifying_teams(self, user_group_ids: list[str]) -> list[TeamConfig]:
-        """Return team configs for groups the user belongs to."""
+        """Return team configs for groups the user belongs to.
+
+        Default teams (is_default=True) are suppressed when the user qualifies
+        for at least one non-default team. Default teams are only returned as a
+        fallback when they are the user's only option.
+        """
         team_group_ids = {t.entra_group_id for t in self.teams}
         matching = [gid for gid in user_group_ids if gid in team_group_ids]
-        return [self.get_team_by_group_id(gid) for gid in matching if self.get_team_by_group_id(gid)]
+        all_teams = [self.get_team_by_group_id(gid) for gid in matching if self.get_team_by_group_id(gid)]
+
+        non_default = [t for t in all_teams if not t.is_default]
+        return non_default if non_default else all_teams
 
     def is_user_authorized(self, user_group_ids: list[str]) -> bool:
         """Check if user is in at least one required group (gate check).
@@ -64,8 +73,17 @@ def load_teams_config(config_path: str) -> TeamsConfig:
     if not raw:
         return TeamsConfig()
 
+    valid_team_roles = {"user", "admin"}
     teams = []
     for entry in raw.get("teams", []):
+        role = entry.get("litellm_role", "user")
+        if role not in valid_team_roles:
+            logger.warning(
+                "Invalid litellm_role %r for team %s — must be 'user' or 'admin', defaulting to 'user'",
+                role,
+                entry.get("team_alias", "unknown"),
+            )
+            role = "user"
         teams.append(
             TeamConfig(
                 entra_group_id=entry["entra_group_id"],
@@ -74,7 +92,8 @@ def load_teams_config(config_path: str) -> TeamsConfig:
                 max_budget=entry.get("max_budget", 0),
                 budget_duration=entry.get("budget_duration", "30d"),
                 team_member_budget=entry.get("team_member_budget", 0),
-                litellm_role=entry.get("litellm_role", "internal_user"),
+                litellm_role=role,
+                is_default=entry.get("is_default", False),
             )
         )
 

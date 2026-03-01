@@ -16,12 +16,16 @@ teams:
     max_budget: 500
     budget_duration: "30d"
     team_member_budget: 25
-    litellm_role: "internal_user"
+    litellm_role: "user"
 
-  # Add more team mappings as needed:
-  # - entra_group_id: "..."
-  #   team_alias: "Data Science Team"
-  #   models: [...]
+  # Default/fallback team — suppressed when the user qualifies for a non-default team.
+  # Only used when a user has no other team membership.
+  # - entra_group_id: "REPLACE-WITH-FALLBACK-GROUP-OBJECT-ID"
+  #   team_alias: "All Users"
+  #   models: ["gpt-5-mini"]
+  #   max_budget: 50
+  #   budget_duration: "30d"
+  #   is_default: true
 
 # Gate: user must be in at least one of these groups to access the portal.
 # If omitted, membership in any team group above qualifies.

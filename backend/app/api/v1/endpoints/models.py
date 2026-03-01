@@ -60,11 +60,14 @@ async def get_models(
         litellm_model_name = model_data.get("litellm_params", {}).get("model", "")
 
         if model_name in allowed_models or litellm_model_name in allowed_models:
+            model_info = model_data.get("model_info")
+            mode = model_info.get("mode") if isinstance(model_info, dict) else None
             filtered.append(
                 ModelInfo(
                     model_name=model_name,
                     litellm_model_name=litellm_model_name or None,
-                    model_info=model_data.get("model_info"),
+                    model_info=model_info,
+                    mode=mode,
                 )
             )
 

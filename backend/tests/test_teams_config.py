@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import pytest
-from app.core.teams import TeamConfig, TeamsConfig
+from app.core.teams import TeamConfig, TeamsConfig, load_teams_config
 
 
 @pytest.fixture
@@ -37,6 +37,26 @@ def teams_config_no_gate() -> TeamsConfig:
     )
 
 
+@pytest.fixture
+def teams_config_with_default() -> TeamsConfig:
+    """Config with both default and non-default teams."""
+    return TeamsConfig(
+        teams=[
+            TeamConfig(
+                entra_group_id="group-alpha",
+                team_alias="Alpha Team",
+                models=["gpt-4"],
+            ),
+            TeamConfig(
+                entra_group_id="group-default",
+                team_alias="All Users",
+                models=["gpt-4o-mini"],
+                is_default=True,
+            ),
+        ],
+    )
+
+
 class TestGetTeamByGroupId:
     def test_found(self, teams_config: TeamsConfig):
         team = teams_config.get_team_by_group_id("group-alpha")
@@ -61,6 +81,24 @@ class TestGetQualifyingTeams:
         result = teams_config.get_qualifying_teams(["group-other"])
         assert result == []
 
+    def test_default_suppressed_when_non_default_exists(self, teams_config_with_default: TeamsConfig):
+        """User in both default and non-default teams gets only non-default."""
+        result = teams_config_with_default.get_qualifying_teams(["group-alpha", "group-default"])
+        assert len(result) == 1
+        assert result[0].team_alias == "Alpha Team"
+
+    def test_default_returned_when_only_option(self, teams_config_with_default: TeamsConfig):
+        """User in only the default team gets the default team."""
+        result = teams_config_with_default.get_qualifying_teams(["group-default"])
+        assert len(result) == 1
+        assert result[0].team_alias == "All Users"
+        assert result[0].is_default is True
+
+    def test_is_default_field_defaults_to_false(self):
+        """TeamConfig.is_default defaults to False."""
+        team = TeamConfig(entra_group_id="g1", team_alias="T1")
+        assert team.is_default is False
+
 
 class TestIsUserAuthorized:
     def test_authorized_with_gate_group(self, teams_config: TeamsConfig):
@@ -78,3 +116,21 @@ class TestIsUserAuthorized:
     def test_no_gate_no_team_fails(self, teams_config_no_gate: TeamsConfig):
         """Without required_groups, user in no team group is unauthorized."""
         assert teams_config_no_gate.is_user_authorized(["unrelated"]) is False
+
+
+class TestLoadTeamsConfig:
+    def test_parses_is_default(self, tmp_path):
+        """is_default is parsed from YAML config."""
+        config_file = tmp_path / "teams.yaml"
+        config_file.write_text(
+            "teams:\n"
+            '  - entra_group_id: "g1"\n'
+            '    team_alias: "Default Team"\n'
+            "    is_default: true\n"
+            '  - entra_group_id: "g2"\n'
+            '    team_alias: "Normal Team"\n'
+        )
+        config = load_teams_config(str(config_file))
+        assert len(config.teams) == 2
+        assert config.teams[0].is_default is True
+        assert config.teams[1].is_default is False

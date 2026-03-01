@@ -105,6 +105,7 @@ export interface ModelInfo {
   model_name: string;
   litellm_model_name: string | null;
   model_info: Record<string, unknown> | null;
+  mode: string | null;
 }
 
 export interface ModelsResponse {

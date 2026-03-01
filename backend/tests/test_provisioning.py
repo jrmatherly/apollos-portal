@@ -29,7 +29,7 @@ def _make_teams_config(
                 max_budget=100,
                 budget_duration="30d",
                 team_member_budget=10,
-                litellm_role="internal_user",
+                litellm_role="user",
             ),
         ]
     return TeamsConfig(teams=teams, required_groups=required_groups or [])
@@ -88,7 +88,7 @@ class TestGetProvisionStatus:
     @pytest.mark.asyncio(loop_scope="function")
     async def test_provisioned_user(self, mock_user):
         """Returns full response with teams and active keys."""
-        membership = FakeTeamMembership(team_id="group-1", team_alias="Alpha Team", litellm_role="internal_user")
+        membership = FakeTeamMembership(team_id="group-1", team_alias="Alpha Team", litellm_role="user")
         key = FakeProvisionedKey(
             litellm_key_id="tok-1",
             litellm_key_alias="alice-alpha",

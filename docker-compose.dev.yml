@@ -26,7 +26,7 @@ services:
       dockerfile: docker/backend.Dockerfile
     container_name: apollos-portal-migrate
     environment:
-      DATABASE_URL: postgresql+asyncpg://portal:portal@db:5432/apollos_portal
+      DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://portal:portal@db:5432/apollos_portal}
     volumes:
       - ./backend:/app/backend
     depends_on:
@@ -45,7 +45,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      DATABASE_URL: postgresql+asyncpg://portal:portal@db:5432/apollos_portal
+      DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://portal:portal@db:5432/apollos_portal}
       UV_LINK_MODE: copy
       TEAMS_CONFIG_PATH: ${TEAMS_CONFIG_PATH:-backend/teams.yaml}
     env_file:
@@ -59,6 +59,12 @@ services:
       migrate:
         condition: service_completed_successfully
     command: uv run --frozen uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload --app-dir backend
+    develop:
+      watch:
+        - action: rebuild
+          path: pyproject.toml
+        - action: rebuild
+          path: uv.lock
 
   frontend:
     build:
@@ -77,6 +83,12 @@ services:
     depends_on:
       - backend
     command: npm run dev
+    develop:
+      watch:
+        - action: rebuild
+          path: frontend/package.json
+        - action: rebuild
+          path: frontend/package-lock.json
 
   docs:
     build:
@@ -89,6 +101,10 @@ services:
     volumes:
       - ./docs:/app
       - /app/node_modules
+    develop:
+      watch:
+        - action: rebuild
+          path: docs/package.json
 
 volumes:
   portal_db_data:

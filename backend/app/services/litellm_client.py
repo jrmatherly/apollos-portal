@@ -11,6 +11,18 @@ from app.config import Settings
 logger = structlog.stdlib.get_logger(__name__)
 
 
+def _raise_with_body(resp: httpx.Response) -> None:
+    """Call raise_for_status but log the response body first for debugging."""
+    if resp.is_error:
+        logger.error(
+            "LiteLLM API error",
+            status=resp.status_code,
+            url=str(resp.url),
+            body=resp.text[:500],
+        )
+    resp.raise_for_status()
+
+
 class LiteLLMClient:
     """Async client for the LiteLLM Admin API.
 
@@ -44,7 +56,7 @@ class LiteLLMClient:
         resp = await self._client.get("/team/info", params={"team_id": team_id})
         if resp.status_code == 404:
             return None
-        resp.raise_for_status()
+        _raise_with_body(resp)
         return resp.json()
 
     async def create_team(
@@ -68,13 +80,13 @@ class LiteLLMClient:
         if max_budget_in_team is not None:
             payload["max_budget_in_team"] = max_budget_in_team
         resp = await self._client.post("/team/new", json=payload)
-        resp.raise_for_status()
+        _raise_with_body(resp)
         return resp.json()
 
     async def list_teams(self) -> list[dict[str, Any]]:
         """GET /team/list — list all teams."""
         resp = await self._client.get("/team/list")
-        resp.raise_for_status()
+        _raise_with_body(resp)
         data = resp.json()
         # LiteLLM returns either a list or {"data": [...]}
         if isinstance(data, list):
@@ -99,7 +111,7 @@ class LiteLLMClient:
                 "user_alias": user_alias,
             },
         )
-        resp.raise_for_status()
+        _raise_with_body(resp)
         return resp.json()
 
     async def get_user(self, user_id: str) -> dict[str, Any] | None:
@@ -107,7 +119,7 @@ class LiteLLMClient:
         resp = await self._client.get("/user/info", params={"user_id": user_id})
         if resp.status_code == 404:
             return None
-        resp.raise_for_status()
+        _raise_with_body(resp)
         return resp.json()
 
     # --- Team Membership ---
@@ -119,15 +131,21 @@ class LiteLLMClient:
         user_id: str,
         role: str = "user",
     ) -> dict[str, Any]:
-        """POST /team/member_add — add a user to a team."""
+        """POST /team/member_add — add a user to a team (idempotent)."""
         resp = await self._client.post(
             "/team/member_add",
             json={
                 "team_id": team_id,
-                "member": [{"user_id": user_id, "role": role}],
+                "member": {"user_id": user_id, "role": role},
             },
         )
-        resp.raise_for_status()
+        if resp.status_code == 400:
+            body = resp.json()
+            error_type = body.get("error", {}).get("type", "")
+            if error_type == "team_member_already_in_team":
+                logger.info("User already in team, skipping", user_id=user_id, team_id=team_id)
+                return body
+        _raise_with_body(resp)
         return resp.json()
 
     # --- Keys ---
@@ -150,7 +168,7 @@ class LiteLLMClient:
                 "key_alias": key_alias,
             },
         )
-        resp.raise_for_status()
+        _raise_with_body(resp)
         return resp.json()
 
     async def get_key_info(self, key: str) -> dict[str, Any] | None:
@@ -158,7 +176,7 @@ class LiteLLMClient:
         resp = await self._client.get("/key/info", params={"key": key})
         if resp.status_code == 404:
             return None
-        resp.raise_for_status()
+        _raise_with_body(resp)
         return resp.json()
 
     async def list_keys(self, *, user_id: str | None = None, team_id: str | None = None) -> list[dict[str, Any]]:
@@ -169,7 +187,7 @@ class LiteLLMClient:
         if team_id:
             params["team_id"] = team_id
         resp = await self._client.get("/key/list", params=params)
-        resp.raise_for_status()
+        _raise_with_body(resp)
         data = resp.json()
         if isinstance(data, list):
             return data
@@ -178,13 +196,13 @@ class LiteLLMClient:
     async def block_key(self, key: str) -> dict[str, Any]:
         """POST /key/block — soft-disable a key (preserves audit trail)."""
         resp = await self._client.post("/key/block", json={"key": key})
-        resp.raise_for_status()
+        _raise_with_body(resp)
         return resp.json()
 
     async def delete_key(self, key: str) -> dict[str, Any]:
         """POST /key/delete — permanently delete a key."""
         resp = await self._client.post("/key/delete", json={"keys": [key]})
-        resp.raise_for_status()
+        _raise_with_body(resp)
         return resp.json()
 
     # --- Models ---
@@ -192,7 +210,7 @@ class LiteLLMClient:
     async def list_models(self) -> list[dict[str, Any]]:
         """GET /model/info — list all available models."""
         resp = await self._client.get("/model/info")
-        resp.raise_for_status()
+        _raise_with_body(resp)
         data = resp.json()
         return data.get("data", [])
 
@@ -214,7 +232,7 @@ class LiteLLMClient:
         if end_date:
             params["end_date"] = end_date
         resp = await self._client.get("/spend/logs", params=params)
-        resp.raise_for_status()
+        _raise_with_body(resp)
         data = resp.json()
         if isinstance(data, list):
             return data

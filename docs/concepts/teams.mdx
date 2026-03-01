@@ -29,34 +29,47 @@ teams:
     max_budget: 500
     budget_duration: "30d"
     team_member_budget: 25
-    litellm_role: "internal_user"
+    litellm_role: "user"
+
+  - entra_group_id: "yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy"
+    team_alias: "All AI Users"
+    models: ["gpt-4o-mini"]
+    max_budget: 50
+    budget_duration: "30d"
+    is_default: true
 ```
 
 ### Configuration reference
 
-| Field | Required | Default | Description |
-|-------|----------|---------|-------------|
-| `entra_group_id` | Yes | — | Object ID of the Entra ID security group |
-| `team_alias` | Yes | — | Display name for the team in LiteLLM and the portal |
-| `models` | No | `[]` | LLM models this team can access |
-| `max_budget` | No | `0` | Maximum spend for the team per budget period (0 = unlimited) |
-| `budget_duration` | No | `"30d"` | Budget reset period (e.g., `"30d"`, `"7d"`) |
-| `team_member_budget` | No | `0` | Per-user budget cap within this team (0 = unlimited) |
-| `litellm_role` | No | `"internal_user"` | LiteLLM role assigned to team members |
+| Field                | Required | Default  | Description                                                                         |
+| -------------------- | -------- | -------- | ----------------------------------------------------------------------------------- |
+| `entra_group_id`     | Yes      | —        | Object ID of the Entra ID security group                                            |
+| `team_alias`         | Yes      | —        | Display name for the team in LiteLLM and the portal                                 |
+| `models`             | No       | `[]`     | LLM models this team can access                                                     |
+| `max_budget`         | No       | `0`      | Maximum spend for the team per budget period (0 = unlimited)                        |
+| `budget_duration`    | No       | `"30d"`  | Budget reset period (e.g., `"30d"`, `"7d"`)                                         |
+| `team_member_budget` | No       | `0`      | Per-user budget cap within this team (0 = unlimited)                                |
+| `litellm_role`       | No       | `"user"` | LiteLLM team membership role (`"user"` or `"admin"`)                                |
+| `is_default`         | No       | `false`  | Mark as a fallback team — suppressed when the user qualifies for a non-default team |
 
 ### Team member roles
 
-The `litellm_role` field controls what team members can do within the LiteLLM proxy:
+The `litellm_role` field controls the user's role within the LiteLLM team:
 
-| Role | Description |
-|------|-------------|
-| `internal_user` | Standard user with budget controls and access to assigned models |
-| `internal_user_viewer` | Read-only user — can view usage but cannot create API keys |
-| `proxy_admin` | Full administrative access to the LiteLLM proxy |
-| `proxy_admin_viewer` | Read-only admin — can view all teams and users but not modify |
+| Role    | Description                                                         |
+| ------- | ------------------------------------------------------------------- |
+| `user`  | Standard team member — can use assigned models within budget limits |
+| `admin` | Team administrator — can manage team members and settings           |
+
+### Default (fallback) teams
+
+A team with `is_default: true` acts as a fallback. During provisioning, if a user qualifies for at least one non-default team, default teams are suppressed — the user is only provisioned into their non-default teams. Default teams are only used when they are the user's sole option.
+
+This prevents users in a specific team (e.g., "Engineering AI Team") from also being provisioned into a generic "All AI Users" team, which would create an unnecessary extra API key and clutter the Teams page.
 
 <Warning>
-  `teams.yaml` contains Entra ID group IDs and is gitignored. Never commit this file. Use `teams.yaml.example` as a starting template.
+  `teams.yaml` contains Entra ID group IDs and is gitignored. Never commit this
+  file. Use `teams.yaml.example` as a starting template.
 </Warning>
 
 ### Gate groups
