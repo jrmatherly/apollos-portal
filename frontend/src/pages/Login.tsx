@@ -38,11 +38,11 @@ export function Login() {
             Sign in with your organization account to access the AI portal.
           </p>
 
-          {error && (
+          {error ? (
             <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3 mb-6">
               <p className="text-destructive text-sm">{error}</p>
             </div>
-          )}
+          ) : null}
 
           <button
             type="button"

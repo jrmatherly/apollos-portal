@@ -109,6 +109,7 @@ class LiteLLMClient:
                 "user_id": user_id,
                 "user_email": user_email,
                 "user_alias": user_alias,
+                "auto_create_key": False,
             },
         )
         _raise_with_body(resp)

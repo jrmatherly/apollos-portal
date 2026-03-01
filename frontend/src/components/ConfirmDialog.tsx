@@ -38,7 +38,7 @@ export function ConfirmDialog({
 
   return (
     <AnimatePresence>
-      {open && (
+      {open ? (
         <dialog
           ref={dialogRef}
           onCancel={onCancel}
@@ -52,7 +52,9 @@ export function ConfirmDialog({
             className="w-full max-w-md rounded-xl border border-border bg-surface p-6 shadow-lg"
           >
             <h3 className="text-lg font-semibold text-text-primary">{title}</h3>
-            {description && <p className="mt-2 text-sm text-text-secondary">{description}</p>}
+            {description ? (
+              <p className="mt-2 text-sm text-text-secondary">{description}</p>
+            ) : null}
             <div className="mt-6 flex justify-end gap-3">
               <button
                 type="button"
@@ -68,12 +70,12 @@ export function ConfirmDialog({
                 disabled={loading}
                 className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors disabled:opacity-50 ${confirmColors}`}
               >
-                {loading ? "..." : confirmLabel}
+                {loading ? "..." : String(confirmLabel)}
               </button>
             </div>
           </motion.div>
         </dialog>
-      )}
+      ) : null}
     </AnimatePresence>
   );
 }

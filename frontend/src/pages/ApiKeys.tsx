@@ -1,8 +1,23 @@
-import { ArrowDown, ArrowUp, Check, ChevronDown, Columns, Key, Loader2 } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowUp,
+  Check,
+  ChevronDown,
+  Columns,
+  Copy,
+  Key,
+  Loader2,
+} from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 import { NewKeyDialog } from "../components/NewKeyDialog";
-import { useCreateKey, useKeys, useRevokeKey, useRotateKey } from "../hooks/useKeys";
+import {
+  useCreateKey,
+  useKeys,
+  useRevokeKey,
+  useRotateKey,
+} from "../hooks/useKeys";
 import type { KeyListItem } from "../types/api";
 
 function formatDate(dateString: string) {
@@ -72,7 +87,9 @@ function SortableHeader({
       className={`group/th px-6 py-3 text-[11px] font-bold text-text-secondary uppercase tracking-widest whitespace-nowrap cursor-pointer hover:bg-surface-border/20 transition-colors select-none ${align === "right" ? "text-right" : "text-left"}`}
       onClick={() => onSort(column)}
     >
-      <div className={`flex items-center gap-1 ${align === "right" ? "justify-end" : ""}`}>
+      <div
+        className={`flex items-center gap-1 ${align === "right" ? "justify-end" : ""}`}
+      >
         {label}
         {sortConfig.key === column ? (
           sortConfig.direction === "asc" ? (
@@ -107,6 +124,10 @@ export function ApiKeys() {
     key: string;
     key_alias: string;
     team_alias: string;
+  } | null>(null);
+  const [rotatedKey, setRotatedKey] = useState<{
+    key: string;
+    key_alias: string;
   } | null>(null);
 
   const teams = useMemo(() => {
@@ -144,7 +165,10 @@ export function ApiKeys() {
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setShowColumnDropdown(false);
       }
     }
@@ -229,9 +253,12 @@ export function ApiKeys() {
     <div className="p-8 max-w-7xl mx-auto w-full">
       <header className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-10">
         <div>
-          <h1 className="text-3xl font-semibold tracking-tight text-text-primary">API Keys</h1>
+          <h1 className="text-3xl font-semibold tracking-tight text-text-primary">
+            API Keys
+          </h1>
           <p className="text-text-secondary mt-1">
-            Manage your keys and monitor authentication across your organization.
+            Manage your keys and monitor authentication across your
+            organization.
           </p>
         </div>
         <div className="flex items-center gap-3 w-full sm:w-auto">
@@ -253,21 +280,27 @@ export function ApiKeys() {
               <Columns className="w-4 h-4" />
               Columns
             </button>
-            {showColumnDropdown && (
+            {showColumnDropdown ? (
               <div className="absolute right-0 mt-2 w-48 bg-surface border border-surface-border rounded-lg shadow-xl z-20 py-1">
                 {Object.entries(visibleColumns).map(([key, isVisible]) => (
                   <button
                     type="button"
                     key={key}
-                    onClick={() => toggleColumn(key as keyof typeof visibleColumns)}
+                    onClick={() =>
+                      toggleColumn(key as keyof typeof visibleColumns)
+                    }
                     className="w-full text-left px-4 py-2 text-sm text-text-secondary hover:bg-surface-border/20 flex items-center justify-between"
                   >
-                    <span className="capitalize">{key.replace(/([A-Z])/g, " $1").trim()}</span>
-                    {isVisible && <Check className="w-4 h-4 text-primary" />}
+                    <span className="capitalize">
+                      {key.replace(/([A-Z])/g, " $1").trim()}
+                    </span>
+                    {isVisible ? (
+                      <Check className="w-4 h-4 text-primary" />
+                    ) : null}
                   </button>
                 ))}
               </div>
-            )}
+            ) : null}
           </div>
         </div>
       </header>
@@ -276,7 +309,9 @@ export function ApiKeys() {
         <div className="flex flex-col items-center justify-center py-20 text-text-secondary">
           <Key className="w-12 h-12 mb-4 opacity-50" />
           <p className="text-lg font-medium">No active keys</p>
-          <p className="text-sm mt-1">No API keys found. Generate a new key to get started.</p>
+          <p className="text-sm mt-1">
+            No API keys found. Generate a new key to get started.
+          </p>
         </div>
       ) : (
         <section className="mb-10">
@@ -285,47 +320,47 @@ export function ApiKeys() {
               <table className="w-full text-left border-collapse">
                 <thead className="bg-surface-border/10 border-b border-surface-border">
                   <tr>
-                    {visibleColumns.alias && (
+                    {visibleColumns.alias ? (
                       <SortableHeader
                         column="alias"
                         label="Key Alias"
                         sortConfig={sortConfig}
                         onSort={handleSort}
                       />
-                    )}
-                    {visibleColumns.team && (
+                    ) : null}
+                    {visibleColumns.team ? (
                       <SortableHeader
                         column="team"
                         label="Team"
                         sortConfig={sortConfig}
                         onSort={handleSort}
                       />
-                    )}
-                    {visibleColumns.status && (
+                    ) : null}
+                    {visibleColumns.status ? (
                       <SortableHeader
                         column="status"
                         label="Status"
                         sortConfig={sortConfig}
                         onSort={handleSort}
                       />
-                    )}
-                    {visibleColumns.created && (
+                    ) : null}
+                    {visibleColumns.created ? (
                       <SortableHeader
                         column="created"
                         label="Created"
                         sortConfig={sortConfig}
                         onSort={handleSort}
                       />
-                    )}
-                    {visibleColumns.expires && (
+                    ) : null}
+                    {visibleColumns.expires ? (
                       <SortableHeader
                         column="expires"
                         label="Expires"
                         sortConfig={sortConfig}
                         onSort={handleSort}
                       />
-                    )}
-                    {visibleColumns.spend && (
+                    ) : null}
+                    {visibleColumns.spend ? (
                       <SortableHeader
                         column="spend"
                         label="Spend"
@@ -333,12 +368,12 @@ export function ApiKeys() {
                         sortConfig={sortConfig}
                         onSort={handleSort}
                       />
-                    )}
-                    {visibleColumns.actions && (
+                    ) : null}
+                    {visibleColumns.actions ? (
                       <th className="px-6 py-3 text-[11px] font-bold text-text-secondary uppercase tracking-widest text-right whitespace-nowrap">
                         Actions
                       </th>
-                    )}
+                    ) : null}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-surface-border">
@@ -347,17 +382,17 @@ export function ApiKeys() {
                       key={item.id}
                       className="group hover:bg-surface-border/20 transition-colors"
                     >
-                      {visibleColumns.alias && (
+                      {visibleColumns.alias ? (
                         <td className="px-6 py-4 text-sm font-medium text-text-primary whitespace-nowrap">
                           {item.litellm_key_alias}
                         </td>
-                      )}
-                      {visibleColumns.team && (
+                      ) : null}
+                      {visibleColumns.team ? (
                         <td className="px-6 py-4 text-sm text-text-secondary whitespace-nowrap">
                           {item.team_alias}
                         </td>
-                      )}
-                      {visibleColumns.status && (
+                      ) : null}
+                      {visibleColumns.status ? (
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span
                             className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium border ${statusBadge(item.status)}`}
@@ -365,29 +400,33 @@ export function ApiKeys() {
                             {statusLabel(item.status)}
                           </span>
                         </td>
-                      )}
-                      {visibleColumns.created && (
+                      ) : null}
+                      {visibleColumns.created ? (
                         <td className="px-6 py-4 text-sm text-text-secondary tabular-nums whitespace-nowrap">
                           {formatDate(item.created_at)}
                         </td>
-                      )}
-                      {visibleColumns.expires && (
+                      ) : null}
+                      {visibleColumns.expires ? (
                         <td className="px-6 py-4 text-sm text-text-secondary tabular-nums whitespace-nowrap">
                           <span
                             className={
-                              item.status === "expiring_soon" ? "text-warning/80 font-medium" : ""
+                              item.status === "expiring_soon"
+                                ? "text-warning/80 font-medium"
+                                : ""
                             }
                           >
                             {formatExpiry(item)}
                           </span>
                         </td>
-                      )}
-                      {visibleColumns.spend && (
+                      ) : null}
+                      {visibleColumns.spend ? (
                         <td className="px-6 py-4 text-sm font-mono text-text-primary text-right tabular-nums whitespace-nowrap">
-                          {item.last_spend != null ? `$${item.last_spend.toFixed(2)}` : "-"}
+                          {item.last_spend != null
+                            ? `$${item.last_spend.toFixed(2)}`
+                            : "-"}
                         </td>
-                      )}
-                      {visibleColumns.actions && (
+                      ) : null}
+                      {visibleColumns.actions ? (
                         <td className="px-6 py-4 text-right space-x-4 whitespace-nowrap">
                           <button
                             type="button"
@@ -418,7 +457,7 @@ export function ApiKeys() {
                             Revoke
                           </button>
                         </td>
-                      )}
+                      ) : null}
                     </tr>
                   ))}
                 </tbody>
@@ -428,13 +467,15 @@ export function ApiKeys() {
         </section>
       )}
 
-      {revokedKeys.length > 0 && (
+      {revokedKeys.length > 0 ? (
         <section className="pb-20">
           <details className="group border border-surface-border rounded-lg bg-surface-border/10">
             <summary className="flex items-center justify-between p-4 cursor-pointer hover:bg-surface-border/20 transition-colors select-none">
               <div className="flex items-center gap-3">
                 <ChevronDown className="w-5 h-5 text-text-secondary group-open:rotate-180 transition-transform" />
-                <span className="text-sm font-medium text-text-primary">Revoked Keys History</span>
+                <span className="text-sm font-medium text-text-primary">
+                  Revoked Keys History
+                </span>
                 <span className="px-1.5 py-0.5 text-[10px] bg-surface-border text-text-secondary rounded-md border border-surface-border">
                   {revokedKeys.length}
                 </span>
@@ -461,7 +502,10 @@ export function ApiKeys() {
                   </thead>
                   <tbody className="divide-y divide-surface-border/50">
                     {revokedKeys.map((item) => (
-                      <tr key={item.id} className="hover:bg-surface-border/10 transition-colors">
+                      <tr
+                        key={item.id}
+                        className="hover:bg-surface-border/10 transition-colors"
+                      >
                         <td className="py-3 px-4 text-xs text-text-secondary whitespace-nowrap">
                           {item.litellm_key_alias}
                         </td>
@@ -482,7 +526,7 @@ export function ApiKeys() {
             </div>
           </details>
         </section>
-      )}
+      ) : null}
       <NewKeyDialog
         open={showNewKey}
         teams={teams}
@@ -507,7 +551,9 @@ export function ApiKeys() {
 
       <ConfirmDialog
         open={confirmAction !== null}
-        title={confirmAction?.type === "revoke" ? "Revoke API Key" : "Rotate API Key"}
+        title={
+          confirmAction?.type === "revoke" ? "Revoke API Key" : "Rotate API Key"
+        }
         description={
           confirmAction?.type === "revoke"
             ? `This will permanently disable key "${confirmAction.keyAlias}". This cannot be undone.`
@@ -526,11 +572,99 @@ export function ApiKeys() {
           if (confirmAction.type === "revoke") {
             revokeKey.mutate(confirmAction.keyId, { onSettled });
           } else {
-            rotateKey.mutate(confirmAction.keyId, { onSettled });
+            rotateKey.mutate(confirmAction.keyId, {
+              onSuccess: (data) => {
+                setRotatedKey({
+                  key: data.new_key,
+                  key_alias: data.new_key_alias,
+                });
+              },
+              onSettled: () => {
+                setPendingKeyId(null);
+                setConfirmAction(null);
+              },
+            });
           }
         }}
         onCancel={() => setConfirmAction(null)}
       />
+
+      <RotatedKeyDialog
+        rotatedKey={rotatedKey}
+        onClose={() => setRotatedKey(null)}
+      />
     </div>
+  );
+}
+
+function RotatedKeyDialog({
+  rotatedKey,
+  onClose,
+}: {
+  rotatedKey: { key: string; key_alias: string } | null;
+  onClose: () => void;
+}) {
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (rotatedKey) setCopied(false);
+  }, [rotatedKey]);
+
+  return (
+    <AnimatePresence>
+      {rotatedKey ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.15 }}
+            className="w-full max-w-md rounded-xl border border-border bg-surface p-6 shadow-lg"
+          >
+            <h3 className="text-lg font-semibold text-text-primary">
+              Key Rotated
+            </h3>
+            <p className="mt-2 text-sm text-text-secondary">
+              Your new key <strong>{rotatedKey.key_alias}</strong> is ready.
+              Copy it now — you won't be able to see it again.
+            </p>
+            <div className="mt-4 flex items-center gap-2">
+              <code className="flex-1 rounded-lg border border-border bg-black/5 px-3 py-2 text-xs font-mono text-text-primary break-all">
+                {rotatedKey.key}
+              </code>
+              <button
+                type="button"
+                onClick={() => {
+                  navigator.clipboard.writeText(rotatedKey.key);
+                  setCopied(true);
+                }}
+                className="shrink-0 rounded-lg border border-border px-3 py-2 text-xs font-medium text-text-secondary hover:bg-surface-hover transition-colors inline-flex items-center gap-1.5"
+              >
+                {copied ? (
+                  <>
+                    <Check className="w-3.5 h-3.5 text-secondary" />
+                    Copied
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-3.5 h-3.5" />
+                    Copy
+                  </>
+                )}
+              </button>
+            </div>
+            <div className="mt-6 flex justify-end">
+              <button
+                type="button"
+                onClick={onClose}
+                className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90 transition-colors"
+              >
+                Done
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      ) : null}
+    </AnimatePresence>
   );
 }

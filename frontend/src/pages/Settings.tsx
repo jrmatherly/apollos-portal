@@ -1,4 +1,4 @@
-import { Bell, KeyRound, Loader2 } from "lucide-react";
+import { Bell, KeyRound, Loader2, ShieldCheck } from "lucide-react";
 import { useSettings, useUpdateSettings } from "../hooks/useSettings";
 
 export function Settings() {
@@ -73,7 +73,9 @@ export function Settings() {
   return (
     <div className="p-8 max-w-4xl mx-auto w-full">
       <header className="mb-10">
-        <h2 className="text-3xl font-bold tracking-tight text-text-primary">Settings</h2>
+        <h2 className="text-3xl font-bold tracking-tight text-text-primary">
+          Settings
+        </h2>
         <p className="text-text-secondary mt-2">
           Manage your security preferences and notification configurations.
         </p>
@@ -93,7 +95,8 @@ export function Settings() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {durations.map((d) => {
-              const isSelected = settings?.default_key_duration_days === d.value;
+              const isSelected =
+                settings?.default_key_duration_days === d.value;
               return (
                 <label
                   key={d.value}
@@ -112,12 +115,15 @@ export function Settings() {
                   />
                   <div className="ml-4 flex-1">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-semibold text-text-primary">{d.label}</span>
-                      {d.badge && (
-                        <span className="px-2 py-0.5 rounded-full bg-secondary/10 text-secondary text-[10px] font-bold uppercase tracking-wider">
+                      <span className="text-sm font-semibold text-text-primary">
+                        {d.label}
+                      </span>
+                      {d.badge ? (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[10px] font-bold uppercase tracking-wider">
+                          <ShieldCheck className="w-3 h-3" />
                           {d.badge}
                         </span>
-                      )}
+                      ) : null}
                     </div>
                     <p className="text-xs text-text-secondary">{d.desc}</p>
                   </div>
@@ -142,9 +148,14 @@ export function Settings() {
             {notifications.map((n) => {
               const enabled = settings?.[n.key] ?? false;
               return (
-                <div key={n.key} className="flex items-center justify-between py-4">
+                <div
+                  key={n.key}
+                  className="flex items-center justify-between py-4"
+                >
                   <div>
-                    <p className="text-sm font-medium text-text-primary">{n.label}</p>
+                    <p className="text-sm font-medium text-text-primary">
+                      {n.label}
+                    </p>
                     <p className="text-xs text-text-secondary">{n.desc}</p>
                   </div>
                   <button

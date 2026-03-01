@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
-import { http, HttpResponse } from "msw";
+import { HttpResponse, http } from "msw";
 import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
 import { server } from "../test/mocks/server";
@@ -48,7 +48,10 @@ describe("ApiKeys", () => {
   it("shows empty state when no keys exist", async () => {
     server.use(
       http.get("/api/v1/keys", () =>
-        HttpResponse.json({ active: [], revoked: [] } satisfies KeyListResponse),
+        HttpResponse.json({
+          active: [],
+          revoked: [],
+        } satisfies KeyListResponse),
       ),
     );
 
@@ -76,9 +79,7 @@ describe("ApiKeys", () => {
       revoked: [],
     };
 
-    server.use(
-      http.get("/api/v1/keys", () => HttpResponse.json(response)),
-    );
+    server.use(http.get("/api/v1/keys", () => HttpResponse.json(response)));
 
     renderApiKeys();
     await waitFor(() => {
@@ -108,9 +109,7 @@ describe("ApiKeys", () => {
       revoked: [],
     };
 
-    server.use(
-      http.get("/api/v1/keys", () => HttpResponse.json(response)),
-    );
+    server.use(http.get("/api/v1/keys", () => HttpResponse.json(response)));
 
     renderApiKeys();
     await waitFor(() => {
@@ -137,9 +136,7 @@ describe("ApiKeys", () => {
       ],
     };
 
-    server.use(
-      http.get("/api/v1/keys", () => HttpResponse.json(response)),
-    );
+    server.use(http.get("/api/v1/keys", () => HttpResponse.json(response)));
 
     renderApiKeys();
     await waitFor(() => {

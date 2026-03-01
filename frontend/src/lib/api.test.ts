@@ -1,4 +1,4 @@
-import { http, HttpResponse } from "msw";
+import { HttpResponse, http } from "msw";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { server } from "../test/mocks/server";
 
@@ -69,7 +69,10 @@ describe("api", () => {
 
     it("throws ApiError on non-ok response", async () => {
       server.use(
-        http.get("/api/v1/test", () => new HttpResponse("Not found", { status: 404 })),
+        http.get(
+          "/api/v1/test",
+          () => new HttpResponse("Not found", { status: 404 }),
+        ),
       );
 
       await expect(api.get("/test")).rejects.toThrow(ApiError);
@@ -86,7 +89,9 @@ describe("api", () => {
         }),
       );
 
-      const result = await api.post<{ received: { foo: string } }>("/test", { foo: "bar" });
+      const result = await api.post<{ received: { foo: string } }>("/test", {
+        foo: "bar",
+      });
       expect(result.received).toEqual({ foo: "bar" });
     });
 
@@ -103,11 +108,13 @@ describe("api", () => {
   describe("error handling", () => {
     it("throws ApiError with response body as message", async () => {
       server.use(
-        http.get("/api/v1/fail", () =>
-          new HttpResponse('{"detail":"Forbidden"}', {
-            status: 403,
-            headers: { "Content-Type": "application/json" },
-          }),
+        http.get(
+          "/api/v1/fail",
+          () =>
+            new HttpResponse('{"detail":"Forbidden"}', {
+              status: 403,
+              headers: { "Content-Type": "application/json" },
+            }),
         ),
       );
 
@@ -117,7 +124,9 @@ describe("api", () => {
       } catch (err) {
         expect(err).toBeInstanceOf(ApiError);
         expect((err as InstanceType<typeof ApiError>).status).toBe(403);
-        expect((err as InstanceType<typeof ApiError>).message).toBe('{"detail":"Forbidden"}');
+        expect((err as InstanceType<typeof ApiError>).message).toBe(
+          '{"detail":"Forbidden"}',
+        );
       }
     });
   });

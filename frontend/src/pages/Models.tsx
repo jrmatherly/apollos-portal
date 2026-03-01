@@ -138,8 +138,8 @@ export function Models() {
     <div className="p-8 max-w-7xl mx-auto w-full space-y-8">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
         <div className="space-y-2">
-          <div className="flex items-center gap-2 text-primary font-mono text-xs font-bold uppercase tracking-widest">
-            <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+          <div className="flex items-center gap-2 text-emerald-400 font-mono text-xs font-bold uppercase tracking-widest">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
             System Live
           </div>
           <h1 className="text-4xl font-extrabold tracking-tight text-text-primary">

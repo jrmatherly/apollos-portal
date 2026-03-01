@@ -1,3 +1,4 @@
+import { Check, Copy } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
 
@@ -35,7 +36,7 @@ export function NewKeyDialog({
 
   return (
     <AnimatePresence>
-      {open && (
+      {open ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
@@ -46,10 +47,12 @@ export function NewKeyDialog({
           >
             {createdKey ? (
               <>
-                <h3 className="text-lg font-semibold text-text-primary">Key Created</h3>
+                <h3 className="text-lg font-semibold text-text-primary">
+                  Key Created
+                </h3>
                 <p className="mt-2 text-sm text-text-secondary">
-                  Your new key for <strong>{createdKey.team_alias}</strong> has been created. Copy
-                  it now — you won't be able to see it again.
+                  Your new key for <strong>{createdKey.team_alias}</strong> has
+                  been created. Copy it now — you won't be able to see it again.
                 </p>
                 <div className="mt-4 flex items-center gap-2">
                   <code className="flex-1 rounded-lg border border-border bg-black/5 px-3 py-2 text-xs font-mono text-text-primary break-all">
@@ -61,9 +64,19 @@ export function NewKeyDialog({
                       navigator.clipboard.writeText(createdKey.key);
                       setCopied(true);
                     }}
-                    className="shrink-0 rounded-lg border border-border px-3 py-2 text-xs font-medium text-text-secondary hover:bg-surface-hover transition-colors"
+                    className="shrink-0 rounded-lg border border-border px-3 py-2 text-xs font-medium text-text-secondary hover:bg-surface-hover transition-colors inline-flex items-center gap-1.5"
                   >
-                    {copied ? "Copied!" : "Copy"}
+                    {copied ? (
+                      <>
+                        <Check className="w-3.5 h-3.5 text-secondary" />
+                        Copied
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-3.5 h-3.5" />
+                        Copy
+                      </>
+                    )}
                   </button>
                 </div>
                 <div className="mt-6 flex justify-end">
@@ -78,7 +91,9 @@ export function NewKeyDialog({
               </>
             ) : (
               <>
-                <h3 className="text-lg font-semibold text-text-primary">Generate New API Key</h3>
+                <h3 className="text-lg font-semibold text-text-primary">
+                  Generate New API Key
+                </h3>
                 <p className="mt-2 text-sm text-text-secondary">
                   Select a team to generate a new API key for.
                 </p>
@@ -116,7 +131,7 @@ export function NewKeyDialog({
             )}
           </motion.div>
         </div>
-      )}
+      ) : null}
     </AnimatePresence>
   );
 }

@@ -68,8 +68,12 @@
 - React ErrorBoundary requires class component (React 19 has no hooks equivalent)
 - MSAL browser init: module-level singleton promise pattern prevents double-init in React Strict Mode
 - Graph API pagination: always follow `@odata.nextLink` pages; use `$top=999` to minimize round trips — see `backend/app/core/graph.py`
+- Graph API `/me/photo/$value` returns binary profile photo using existing `User.Read` scope — see `frontend/src/hooks/useUserPhoto.ts`
+- Biome `noLeakedRender` (nursery): use `{x ? <Comp/> : null}` not `{x && <Comp/>}`; variables in ternary alternates need `String(v)` wrapper
 - LiteLLM `/team/info` response nests team data under `team_info` key — access `resp["team_info"]["members_with_roles"]`, not `resp["members_with_roles"]`
 - LiteLLM `members_with_roles` includes a `default_user_id` service account — always filter it out of user-facing member counts and lists
+- LiteLLM `POST /user/new` auto-creates a key by default — always pass `auto_create_key: false` to prevent orphan "Unknown" keys
+- LiteLLM `POST /key/block` sets `blocked: true` but keys remain visible in LiteLLM Virtual Keys UI — this is expected behavior
 - Models endpoint extracts `mode` from `model_info.mode` (values: `chat`, `embedding`, etc.) — frontend groups models by mode
 
 ## Documentation (docs/)

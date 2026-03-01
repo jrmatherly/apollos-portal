@@ -18,7 +18,9 @@ export function ProvisioningGate({ children }: { children: ReactNode }) {
     return (
       <div className="flex h-screen items-center justify-center bg-bg-primary">
         <div className="text-center">
-          <p className="text-destructive">Failed to check provisioning status</p>
+          <p className="text-destructive">
+            Failed to check provisioning status
+          </p>
           <p className="mt-1 text-sm text-text-muted">{String(error)}</p>
         </div>
       </div>
@@ -30,14 +32,19 @@ export function ProvisioningGate({ children }: { children: ReactNode }) {
       <div className="flex h-screen items-center justify-center bg-bg-primary">
         <div className="max-w-md rounded-xl border border-surface-border bg-surface p-8 text-center shadow-lg">
           <Rocket className="mx-auto h-12 w-12 text-primary" />
-          <h2 className="mt-4 text-2xl font-semibold text-text-primary">Welcome to Apollos AI</h2>
+          <h2 className="mt-4 text-2xl font-semibold text-text-primary">
+            Welcome to Apollos AI
+          </h2>
           <p className="mt-2 text-text-secondary">
-            Your account needs to be provisioned before you can access the portal. This will set up
-            your teams and generate API keys based on your organization access.
+            Your account needs to be provisioned before you can access the
+            portal. This will set up your teams and generate API keys based on
+            your organization access.
           </p>
-          {provision.error && (
-            <p className="mt-3 text-sm text-destructive">{String(provision.error)}</p>
-          )}
+          {provision.error ? (
+            <p className="mt-3 text-sm text-destructive">
+              {String(provision.error)}
+            </p>
+          ) : null}
           <button
             type="button"
             onClick={() => provision.mutate()}

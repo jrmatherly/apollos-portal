@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { renderHook, waitFor } from "@testing-library/react";
-import { http, HttpResponse } from "msw";
+import { HttpResponse, http } from "msw";
 import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { server } from "../test/mocks/server";
@@ -31,7 +31,9 @@ function createWrapper() {
   });
 
   return function Wrapper({ children }: { children: ReactNode }) {
-    return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+    return (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    );
   };
 }
 
@@ -54,11 +56,11 @@ describe("useKeys", () => {
       revoked: [],
     };
 
-    server.use(
-      http.get("/api/v1/keys", () => HttpResponse.json(mockResponse)),
-    );
+    server.use(http.get("/api/v1/keys", () => HttpResponse.json(mockResponse)));
 
-    const { result } = renderHook(() => useKeys(), { wrapper: createWrapper() });
+    const { result } = renderHook(() => useKeys(), {
+      wrapper: createWrapper(),
+    });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
@@ -68,16 +70,23 @@ describe("useKeys", () => {
   });
 
   it("handles loading state", () => {
-    const { result } = renderHook(() => useKeys(), { wrapper: createWrapper() });
+    const { result } = renderHook(() => useKeys(), {
+      wrapper: createWrapper(),
+    });
     expect(result.current.isLoading).toBe(true);
   });
 
   it("handles error state", async () => {
     server.use(
-      http.get("/api/v1/keys", () => new HttpResponse("Server error", { status: 500 })),
+      http.get(
+        "/api/v1/keys",
+        () => new HttpResponse("Server error", { status: 500 }),
+      ),
     );
 
-    const { result } = renderHook(() => useKeys(), { wrapper: createWrapper() });
+    const { result } = renderHook(() => useKeys(), {
+      wrapper: createWrapper(),
+    });
 
     await waitFor(() => expect(result.current.isError).toBe(true));
 

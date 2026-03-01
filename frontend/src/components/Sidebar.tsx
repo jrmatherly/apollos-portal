@@ -1,6 +1,15 @@
-import { BarChart3, Cpu, Key, LayoutDashboard, LogOut, Settings, Users, Zap } from "lucide-react";
+import {
+  BarChart3,
+  Cpu,
+  Key,
+  LayoutDashboard,
+  LogOut,
+  Settings,
+  Users,
+} from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { useUserPhoto } from "../hooks/useUserPhoto";
 import { cn } from "../lib/utils";
 
 const navItems = [
@@ -14,6 +23,7 @@ const navItems = [
 
 export function Sidebar() {
   const { user, logout } = useAuth();
+  const photoUrl = useUserPhoto();
 
   const displayName = user?.name || "User";
   const displayEmail = user?.username || "";
@@ -29,11 +39,15 @@ export function Sidebar() {
     <aside className="w-64 shrink-0 border-r border-surface-border bg-surface flex flex-col h-full fixed z-50">
       <div className="p-6">
         <div className="flex items-center gap-3 mb-8">
-          <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center text-white">
-            <Zap className="w-5 h-5 fill-current" />
-          </div>
+          <img
+            src="/apollos_new_circle_no_bg_sm.svg"
+            alt="Apollos AI"
+            className="w-8 h-8"
+          />
           <div>
-            <h1 className="text-sm font-bold tracking-tight text-text-primary">Apollos AI</h1>
+            <h1 className="text-sm font-bold tracking-tight text-text-primary">
+              Apollos AI
+            </h1>
             <p className="text-[10px] text-text-secondary font-medium uppercase tracking-widest">
               Self-Service Portal
             </p>
@@ -66,12 +80,24 @@ export function Sidebar() {
           onClick={() => logout()}
           className="w-full flex items-center gap-3 px-3 py-2 rounded-md hover:bg-surface-border/50 transition-colors cursor-pointer group"
         >
-          <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xs ring-2 ring-transparent group-hover:ring-primary/50 transition-all">
-            {initials}
-          </div>
+          {photoUrl ? (
+            <img
+              src={photoUrl}
+              alt={displayName}
+              className="w-8 h-8 rounded-full object-cover ring-2 ring-transparent group-hover:ring-primary/50 transition-all"
+            />
+          ) : (
+            <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xs ring-2 ring-transparent group-hover:ring-primary/50 transition-all">
+              {initials}
+            </div>
+          )}
           <div className="flex-1 min-w-0 text-left">
-            <p className="text-sm font-medium text-text-primary truncate">{displayName}</p>
-            <p className="text-xs text-text-secondary truncate">{displayEmail}</p>
+            <p className="text-sm font-medium text-text-primary truncate">
+              {displayName}
+            </p>
+            <p className="text-xs text-text-secondary truncate">
+              {displayEmail}
+            </p>
           </div>
           <LogOut className="w-4 h-4 text-text-secondary group-hover:text-text-primary transition-colors" />
         </button>
