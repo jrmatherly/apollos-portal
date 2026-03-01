@@ -77,7 +77,7 @@ function PageLoader() {
 
 function AppLayout() {
   return (
-    <div className="flex h-screen overflow-hidden dark">
+    <div className="flex h-screen overflow-hidden">
       <Sidebar />
       <main className="flex-1 ml-64 overflow-y-auto bg-bg-primary">
         <Suspense fallback={<PageLoader />}>

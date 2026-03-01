@@ -32,7 +32,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    command: ["alembic", "-c", "backend/alembic.ini", "upgrade", "head"]
+    working_dir: /app/backend
+    command: ["alembic", "upgrade", "head"]
     restart: "no"
 
   backend:

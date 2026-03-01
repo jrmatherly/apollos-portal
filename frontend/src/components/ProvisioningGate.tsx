@@ -8,18 +8,18 @@ export function ProvisioningGate({ children }: { children: ReactNode }) {
 
   if (isLoading) {
     return (
-      <div className="flex h-full items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+      <div className="flex h-screen items-center justify-center bg-bg-primary">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex h-full items-center justify-center">
+      <div className="flex h-screen items-center justify-center bg-bg-primary">
         <div className="text-center">
-          <p className="text-red-400">Failed to check provisioning status</p>
-          <p className="mt-1 text-sm text-zinc-500">{String(error)}</p>
+          <p className="text-destructive">Failed to check provisioning status</p>
+          <p className="mt-1 text-sm text-text-muted">{String(error)}</p>
         </div>
       </div>
     );
@@ -27,22 +27,22 @@ export function ProvisioningGate({ children }: { children: ReactNode }) {
 
   if (data && !data.is_provisioned) {
     return (
-      <div className="flex h-full items-center justify-center">
-        <div className="max-w-md rounded-xl border border-zinc-700 bg-zinc-800/50 p-8 text-center">
-          <Rocket className="mx-auto h-12 w-12 text-blue-500" />
-          <h2 className="mt-4 text-2xl font-semibold text-white">Welcome to Apollos AI</h2>
-          <p className="mt-2 text-zinc-400">
+      <div className="flex h-screen items-center justify-center bg-bg-primary">
+        <div className="max-w-md rounded-xl border border-surface-border bg-surface p-8 text-center shadow-lg">
+          <Rocket className="mx-auto h-12 w-12 text-primary" />
+          <h2 className="mt-4 text-2xl font-semibold text-text-primary">Welcome to Apollos AI</h2>
+          <p className="mt-2 text-text-secondary">
             Your account needs to be provisioned before you can access the portal. This will set up
             your teams and generate API keys based on your organization access.
           </p>
           {provision.error && (
-            <p className="mt-3 text-sm text-red-400">{String(provision.error)}</p>
+            <p className="mt-3 text-sm text-destructive">{String(provision.error)}</p>
           )}
           <button
             type="button"
             onClick={() => provision.mutate()}
             disabled={provision.isPending}
-            className="mt-6 inline-flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-3 text-sm font-medium text-white transition hover:bg-blue-700 disabled:opacity-50"
+            className="mt-6 inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-medium text-white transition hover:bg-primary/90 disabled:opacity-50"
           >
             {provision.isPending ? (
               <>
