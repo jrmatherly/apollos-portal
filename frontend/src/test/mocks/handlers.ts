@@ -67,4 +67,10 @@ export const handlers = [
       next_expiry_days: null,
     }),
   ),
+
+  // Suppress MSW warnings for Graph API photo endpoint used by useUserPhoto hook
+  http.get(
+    "https://graph.microsoft.com/v1.0/me/photo/:size",
+    () => new HttpResponse(null, { status: 404 }),
+  ),
 ];
