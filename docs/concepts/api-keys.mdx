@@ -80,6 +80,8 @@ These operations differ in how the old key is handled:
 | **New key** | Created with `rotated_from_id` linking to old key | No new key created |
 | **Use case** | Scheduled credential refresh | Compromised or unused key |
 
+After rotation, the portal displays the new key in a dialog so you can copy it. Like key creation, the new key is shown only once.
+
 <Warning>
   Both operations are irreversible. Rotation creates a replacement key automatically; revocation does not.
 </Warning>

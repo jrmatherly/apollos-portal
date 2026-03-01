@@ -65,9 +65,10 @@ Navigate to the Apollos AI portal and click **Sign in with Microsoft**. You'll b
 
 1. Go to **API Keys** in the sidebar
   2. Click **Create key**
-  3. Give your key a name (e.g., "development")
-  4. Select the team to associate the key with
-  5. Copy the key — it won't be shown again
+  3. Select the team to associate the key with
+  4. Copy the key — it won't be shown again
+
+  The key name is auto-generated from your email and team name (e.g., `jsmith-engineering-ai-team`).
 
   **Warning:** Store your API key securely. You cannot retrieve it after creation — only create a new one.
   
@@ -528,6 +529,8 @@ These operations differ in how the old key is handled:
 | **Old key** | Expired (deleted from LiteLLM) | Blocked (soft-deleted, preserves spend history) |
 | **New key** | Created with `rotated_from_id` linking to old key | No new key created |
 | **Use case** | Scheduled credential refresh | Compromised or unused key |
+
+After rotation, the portal displays the new key in a dialog so you can copy it. Like key creation, the new key is shown only once.
 
 **Warning:** Both operations are irreversible. Rotation creates a replacement key automatically; revocation does not.
 
@@ -1167,7 +1170,7 @@ Navigate to the page you want to edit in the `docs/` directory and click the pen
 
 To test authentication locally, you need a Microsoft Entra ID app registration with:
 
-- **Redirect URI**: `http://localhost:3000` (SPA type)
+- **Redirect URI**: `http://localhost:3000/auth/callback` (SPA type)
 - **API permissions**: `User.Read`, `GroupMember.Read.All`
 - **Client secret** for backend service-to-service calls
 
