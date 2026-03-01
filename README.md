@@ -20,14 +20,17 @@ Users authenticate with Microsoft Entra ID, get automatically provisioned into L
 
 ```
 apollos-portal/
-├── backend/          # FastAPI API server (Python 3.12)
-├── frontend/         # React 19 + Vite SPA (Node 24)
-├── cli/              # CLI with device-code auth (Python 3.12)
-├── docs/             # Mintlify documentation site
-├── docker/               # Dockerfiles
-├── docker-compose.yml    # Production (GHCR images, migrate service)
+├── backend/               # FastAPI API server (Python 3.12)
+├── frontend/              # React 19 + Vite SPA (Node 24)
+├── cli/                   # CLI with device-code auth (Python 3.12)
+├── docs/                  # Mintlify documentation site
+├── docker/                # Dockerfiles
+├── scripts/               # Utility scripts
+├── docker-compose.yml     # Production (GHCR images, migrate service)
 ├── docker-compose.dev.yml # Development (local builds, bind mounts, hot reload)
-└── mise.toml             # Task runner
+├── biome.json             # Biome configuration
+├── mise.toml              # Task runner
+└── pyproject.toml         # Python configuration
 ```
 
 ## Tech Stack
@@ -49,7 +52,7 @@ apollos-portal/
 - [uv](https://docs.astral.sh/uv/) — Python package manager
 - [Docker](https://www.docker.com/) and Docker Compose
 - [mise](https://mise.jdx.dev/) (optional) — task runner
-- An [Azure app registration](https://portal.azure.com/) with Microsoft Graph `User.Read` and `GroupMember.Read.All` permissions
+- An [Azure app registration](https://portal.azure.com/) with Microsoft Graph `User.Read` (delegated) and `GroupMember.Read.All` (application) permissions
 
 ## Quick Start
 
@@ -163,7 +166,7 @@ cd frontend && npx biome format --write .
 | `DATABASE_URL` | PostgreSQL connection string | `postgresql+asyncpg://portal:portal@localhost:5432/apollos_portal` |
 | `PORTAL_BASE_URL` | Frontend URL (used for CORS) | `http://localhost:3000` |
 | `PORTAL_ADMIN_ROLE` | Entra app role for portal admins | `portal_admin` |
-| `TEAMS_CONFIG_PATH` | Path to teams YAML config | `teams.yaml` |
+| `TEAMS_CONFIG_PATH` | Path to teams YAML config | `backend/teams.yaml` |
 
 ### Frontend (`frontend/.env`)
 
