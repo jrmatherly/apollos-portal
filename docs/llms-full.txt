@@ -1190,7 +1190,7 @@ Navigate to the page you want to edit in the `docs/` directory and click the pen
 To test authentication locally, you need a Microsoft Entra ID app registration with:
 
 - **Redirect URI**: `http://localhost:3000/auth/callback` (SPA type)
-- **API permissions**: `User.Read`, `GroupMember.Read.All`
+- **API permissions**: `User.Read` (delegated), `GroupMember.Read.All` (application)
 - **Client secret** for backend service-to-service calls
 
 Set the corresponding environment variables in `backend/.env` and `frontend/.env` as described in the [development guide](/development).
