@@ -24,7 +24,7 @@ mise run dev
 This starts PostgreSQL, the backend API (with hot reload), the frontend (with HMR), and the docs preview server. The portal is available at `http://localhost:3000`, the API at `http://localhost:8000`, and docs at `http://localhost:3001`.
 
 <Tip>
-  `mise run dev` automatically rebuilds Docker images when Dockerfiles change. You can also run `docker compose -f docker-compose.dev.yml up --build` directly.
+  `mise run dev` uses Docker Compose watch mode, which automatically rebuilds containers when lockfiles change (`package.json`, `package-lock.json`, `pyproject.toml`, `uv.lock`). The `-V` flag ensures anonymous volumes (like `node_modules`) are recreated on each start so new dependencies are always picked up.
 </Tip>
 
 ## Running services individually

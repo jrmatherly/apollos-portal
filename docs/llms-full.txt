@@ -16,11 +16,11 @@ Sign in with your Microsoft Entra ID account. The portal uses PKCE redirect flow
 
 **Get provisioned**
 
-On first login, the portal maps your Entra ID security group memberships to LiteLLM teams. Each team has its own model access, rate limits, and budgets.
+On first login, the portal automatically maps your Entra ID security group memberships to LiteLLM teams and generates an initial API key for each team. A progress dialog walks you through the setup and displays your keys with copy functionality.
 
-**Create API keys**
+**Use your API keys**
 
-Generate API keys scoped to your teams. Use these keys to make LLM requests through the proxy endpoint.
+Use your API keys to make LLM requests through the proxy endpoint. You can create additional keys or rotate existing ones from the API Keys page.
 
 **Monitor usage**
 
@@ -55,22 +55,24 @@ All three components authenticate against Microsoft Entra ID and interact with a
 
 ## Get started
 
-**Sign in to the portal**
+**Sign in and get provisioned**
 
 Navigate to the Apollos AI portal and click **Sign in with Microsoft**. You'll be redirected to Microsoft's login page for authentication.
 
-  After signing in, the portal automatically provisions your account by mapping your Entra ID security group memberships to LiteLLM teams.
+  On first login, the portal automatically provisions your account:
 
-**Create an API key**
+  1. Validates your Entra ID credentials
+  2. Resolves your security group memberships
+  3. Creates your LiteLLM team memberships
+  4. Generates an initial API key for each team
 
-1. Go to **API Keys** in the sidebar
-  2. Click **Create key**
-  3. Select the team to associate the key with
-  4. Copy the key — it won't be shown again
+  A progress dialog shows each step as it completes.
 
-  The key name is auto-generated from your email and team name (e.g., `jsmith-engineering-ai-team`).
+**Copy your API key**
 
-  **Warning:** Store your API key securely. You cannot retrieve it after creation — only create a new one.
+After provisioning completes, the portal displays your generated API key(s) with a **Copy** button. Copy each key before clicking **Continue to Portal** — they are shown only once.
+
+  **Warning:** Store your API key securely. You cannot retrieve it after this screen. If you lose it, go to **API Keys** and create a new one or rotate the existing key.
   
 
 **Make your first request**
@@ -78,7 +80,7 @@ Navigate to the Apollos AI portal and click **Sign in with Microsoft**. You'll b
 Use your API key to send a request through the LiteLLM proxy:
 
   ```bash
-  curl -X POST https://your-litellm-proxy/chat/completions \
+  curl -X POST https://your-litellm-proxy/v1/chat/completions \
     -H "Authorization: Bearer sk-your-api-key" \
     -H "Content-Type: application/json" \
     -d '{
@@ -90,6 +92,9 @@ Use your API key to send a request through the LiteLLM proxy:
   ```
 
   The proxy routes your request to the appropriate LLM provider based on your team's model access configuration.
+
+  **Tip:** Go to **Models** in the sidebar and click any model card to see ready-to-use code examples in Python, curl, and TypeScript — tailored to that model's type (chat, embedding, responses, etc.).
+  
 
 **Monitor usage**
 
@@ -140,7 +145,7 @@ mise run dev
 
 This starts PostgreSQL, the backend API (with hot reload), the frontend (with HMR), and the docs preview server. The portal is available at `http://localhost:3000`, the API at `http://localhost:8000`, and docs at `http://localhost:3001`.
 
-**Tip:** `mise run dev` automatically rebuilds Docker images when Dockerfiles change. You can also run `docker compose -f docker-compose.dev.yml up --build` directly.
+**Tip:** `mise run dev` uses Docker Compose watch mode, which automatically rebuilds containers when lockfiles change (`package.json`, `package-lock.json`, `pyproject.toml`, `uv.lock`). The `-V` flag ensures anonymous volumes (like `node_modules`) are recreated on each start so new dependencies are always picked up.
 
 
 ## Running services individually
@@ -198,7 +203,10 @@ Frontend environment variables use the `VITE_` prefix. Create a `.env` file in t
 VITE_API_BASE_URL=http://localhost:8000
 VITE_AZURE_CLIENT_ID=your-client-id
 VITE_AZURE_TENANT_ID=your-tenant-id
+VITE_LITELLM_BASE_URL=http://localhost:4000
 ```
+
+`VITE_LITELLM_BASE_URL` populates the code examples shown in the **Models** page. If not set, examples display a placeholder URL.
 
 ## Running tests
 
@@ -319,15 +327,16 @@ The CLI uses **device code flow** via the MSAL Python library.
 
 ## Team provisioning
 
-When a user first authenticates, the backend provisions them by:
+When a user first authenticates, the portal auto-triggers provisioning. The backend:
 
-1. Validating their Entra ID access token
-2. Querying Microsoft Graph for their security group memberships
-3. Matching group IDs against the `teams.yaml` configuration
-4. Creating or updating the user's LiteLLM team memberships
-5. Returning the user's profile and team list
+1. Validates their Entra ID access token
+2. Queries Microsoft Graph for their security group memberships
+3. Matches group IDs against the `teams.yaml` configuration
+4. Creates or updates the user's LiteLLM team memberships
+5. Generates an initial API key for each provisioned team
+6. Returns the user's profile, team list, and generated keys
 
-This happens automatically on the `/api/v1/provision` endpoint, called after the first successful login.
+The portal shows a progress dialog during this process, then displays the generated API key(s) with copy functionality before entering the main application. This happens automatically on the `/api/v1/provision` endpoint — no manual action is required from the user.
 
 ## Token validation
 
@@ -430,13 +439,14 @@ If `required_groups` is set, a user must be a member of at least one listed grou
 
 ## Provisioning flow
 
-When a user signs in, the provisioning endpoint:
+When a user signs in for the first time, provisioning auto-triggers and the portal shows a progress dialog. The backend:
 
 1. Resolves the user's Entra ID security group memberships via Microsoft Graph
 2. Matches those groups against the `teams.yaml` configuration
 3. Filters out default teams if the user qualifies for any non-default team
 4. Creates or updates LiteLLM team memberships for the remaining matched groups
-5. Returns the user's teams with their model access and budget information
+5. Generates an initial API key for each provisioned team
+6. Returns the user's teams, model access, budget information, and generated keys
 
 Users are automatically added to or removed from teams based on their current security group memberships. Changes in Entra ID are reflected the next time the user signs in.
 
@@ -455,7 +465,13 @@ In the portal, go to **Teams** in the sidebar to see:
 
 API keys authenticate your requests to the LiteLLM proxy. Each key is scoped to a specific team and inherits that team's model access, rate limits, and budget.
 
-## Creating keys
+## Initial key
+
+When you first sign in to the portal, provisioning automatically generates an API key for each team you're assigned to. The portal displays these keys with copy functionality before you enter the main application. Copy them at this point — they are not shown again.
+
+## Creating additional keys
+
+To create more keys after initial provisioning:
 
 **Open API Keys**
 
@@ -463,7 +479,7 @@ In the portal, go to **API Keys** in the sidebar.
 
 **Create a new key**
 
-Click **Create key**, provide a name, and select the team to associate it with.
+Click **Create key** and select the team to associate it with.
 
 **Copy the key**
 
@@ -483,7 +499,7 @@ curl -X POST /api/v1/keys/new \
 Include your API key in the `Authorization` header when making requests to the LiteLLM proxy:
 
 ```bash
-curl -X POST https://your-litellm-proxy/chat/completions \
+curl -X POST https://your-litellm-proxy/v1/chat/completions \
   -H "Authorization: Bearer sk-your-api-key" \
   -H "Content-Type: application/json" \
   -d '{
@@ -493,6 +509,9 @@ curl -X POST https://your-litellm-proxy/chat/completions \
 ```
 
 The proxy validates the key, checks team permissions for the requested model, and routes the request to the appropriate LLM provider.
+
+**Tip:** The **Models** page in the portal shows all models available to your teams. Click any model card to see copy-paste code examples for Python, curl, and TypeScript — each tailored to the model type (chat completions, embeddings, responses, etc.).
+
 
 ## Key naming
 
@@ -1140,7 +1159,7 @@ If you use [Claude Code](/ai-tools/claude-code), copy the MCP server configurati
 cp .mcp.json.example .mcp.json
 ```
 
-This enables context7 for live documentation lookup. See the [Claude Code setup guide](/ai-tools/claude-code) for available skills and automations.
+This enables context7 (live documentation lookup), Playwright (browser automation), and GitHub (PR/issue management) MCP servers. The GitHub server requires a Personal Access Token — see the [Claude Code setup guide](/ai-tools/claude-code) for configuration details and available skills.
 
 ## Documentation contributions
 
@@ -1203,9 +1222,9 @@ Copy the example MCP configuration to enable project-level MCP servers:
   cp .mcp.json.example .mcp.json
   ```
 
-  This configures [context7](https://github.com/upstash/context7) for live documentation lookup of project dependencies (FastAPI, SQLAlchemy, React, MSAL, etc.).
+  The example configuration includes three MCP servers. Edit `.mcp.json` to add your GitHub PAT for the GitHub server, or remove servers you don't need.
 
-  **Note:** `.mcp.json` is gitignored. You can add additional MCP servers to your local copy without affecting other contributors.
+  **Note:** `.mcp.json` is gitignored. You can customize your local copy without affecting other contributors.
   
 
 **Start working**
@@ -1214,11 +1233,54 @@ Copy the example MCP configuration to enable project-level MCP servers:
   claude
   ```
 
-  The project includes built-in skills (`/api-doc`, `/new-endpoint`, `/precheck`, `/migration`) and subagents (`security-reviewer`, `docs-reviewer`) in the `.claude/` directory. These are available automatically.
+  The project includes built-in skills, subagents, and hooks in the `.claude/` directory. These are available automatically.
 
-## Available automations
+## MCP servers
 
-### Skills
+The `.mcp.json.example` file configures these servers:
+
+| Server | Purpose | Setup |
+|--------|---------|-------|
+| [context7](https://github.com/upstash/context7) | Live documentation lookup for project dependencies (FastAPI, SQLAlchemy, React, MSAL, etc.) | Works out of the box |
+| [Playwright](https://github.com/anthropics/anthropic-mcp-playwright) | Browser automation for visual testing and E2E verification of frontend flows | Works out of the box |
+| [GitHub](https://github.com/anthropics/anthropic-mcp-github) | Structured access to issues, pull requests, and Actions status | Requires `GITHUB_PERSONAL_ACCESS_TOKEN` in `.mcp.json` |
+
+**context7:**
+
+Provides live documentation for any library in the project's dependency tree. Ask questions like "how does FastAPI dependency injection work?" and Claude will fetch current docs instead of relying on training data.
+
+  No configuration required.
+
+**Playwright:**
+
+Enables browser automation for testing frontend flows visually. Useful for verifying:
+  - The auto-provisioning progress dialog and key display
+  - Responsive layout across screen sizes
+  - Copy-to-clipboard behavior
+  - Animation and transition rendering
+
+  No configuration required — launches a headless browser on demand.
+
+**GitHub:**
+
+Provides structured access to the `jrmatherly/apollos-portal` repository without shell commands. Supports:
+  - Viewing and creating pull requests
+  - Reading and commenting on issues
+  - Checking CI/Actions status
+
+  Requires a GitHub Personal Access Token with `repo` scope:
+
+  ```json
+  "github": {
+    "command": "npx",
+    "args": ["-y", "@anthropic/mcp-github"],
+    "env": {
+      "GITHUB_PERSONAL_ACCESS_TOKEN": "ghp_your_token_here"
+    }
+  }
+  ```
+
+## Skills
 
 | Skill | Command | Purpose |
 |-------|---------|---------|
@@ -1226,20 +1288,26 @@ Copy the example MCP configuration to enable project-level MCP servers:
 | New endpoint | `/new-endpoint` | Scaffold a FastAPI endpoint with tests |
 | Pre-commit check | `/precheck` | Run full QA suite (tests, lint, types) |
 | Migration | `/migration` | Generate and apply Alembic migrations |
+| Generate test | `/gen-test` | Scaffold a Vitest + RTL test file for a frontend component |
+| Dependency check | `/deps-check` | Audit Python and Node dependencies for updates and vulnerabilities |
 
-### Subagents
+## Subagents
 
 | Agent | Purpose |
 |-------|---------|
 | `security-reviewer` | OWASP-focused security review (auth, CORS, injection, CSV) |
 | `docs-reviewer` | Cross-reference docs against code for accuracy |
+| `provisioning-tester` | Validate consistency across the provisioning pipeline (backend, frontend, tests, config, docs) |
 
-### Hooks
+## Hooks
 
 Hooks run automatically on file edits:
 
-- **PostToolUse**: Auto-formats Python (ruff) and TypeScript/MDX (biome) on save
-- **PreToolUse**: Blocks edits to `.env`, `teams.yaml`, and lock files
+| Hook | Trigger | Behavior |
+|------|---------|----------|
+| Auto-format | PostToolUse (Edit/Write) | Formats Python (ruff) and TypeScript/MDX (biome) on save |
+| Related test runner | PostToolUse (Edit/Write) | Runs co-located `.test.tsx` file when a source `.tsx` file is edited |
+| File protection | PreToolUse (Edit/Write) | Blocks edits to `.env`, `teams.yaml`, and lock files |
 
 ## Documentation workflow
 
