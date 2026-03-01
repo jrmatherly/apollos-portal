@@ -44,6 +44,7 @@ export interface ProvisionResponse {
 export interface KeyListItem {
   id: string;
   litellm_key_alias: string;
+  key_preview: string | null;
   team_id: string;
   team_alias: string;
   status: "active" | "expiring_soon" | "expired" | "revoked" | "rotated";

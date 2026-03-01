@@ -21,6 +21,7 @@ class ProvisionedKey(Base):
     user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("provisioned_users.id"), nullable=False)
     litellm_key_id: Mapped[str | None] = mapped_column(String(255), nullable=True, unique=True)
     litellm_key_alias: Mapped[str] = mapped_column(String(255), nullable=False)
+    key_preview: Mapped[str | None] = mapped_column(String(20), nullable=True)
     team_id: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     team_alias: Mapped[str] = mapped_column(String(255), nullable=False)
     status: Mapped[str] = mapped_column(String(20), default="active", nullable=False, index=True)

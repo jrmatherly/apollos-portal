@@ -64,6 +64,39 @@ export function Dashboard() {
 
   const spendPct = totalBudget > 0 ? Math.round((totalSpend / totalBudget) * 100) : 0;
 
+  const expiryColor = useMemo(() => {
+    const days = nextExpiry?.days_until_expiry;
+    if (days == null)
+      return {
+        bg: "bg-surface-border/20",
+        border: "border-surface-border",
+        text: "text-text-secondary",
+      };
+    if (days <= 3)
+      return {
+        bg: "bg-red-500/10",
+        border: "border-red-500/20",
+        text: "text-red-400",
+      };
+    if (days <= 7)
+      return {
+        bg: "bg-orange-500/10",
+        border: "border-orange-500/20",
+        text: "text-orange-400",
+      };
+    if (days <= 14)
+      return {
+        bg: "bg-yellow-500/10",
+        border: "border-yellow-500/20",
+        text: "text-yellow-400",
+      };
+    return {
+      bg: "bg-emerald-500/10",
+      border: "border-emerald-500/20",
+      text: "text-emerald-400",
+    };
+  }, [nextExpiry]);
+
   const chartColors = ["var(--primary)", "var(--secondary)", "var(--warning)", "#a855f7"];
 
   return (
@@ -84,12 +117,6 @@ export function Dashboard() {
         <div className="bg-surface border border-surface-border rounded-lg p-5 flex flex-col justify-between">
           <div className="flex justify-between items-start">
             <span className="text-sm font-medium text-text-secondary">Active Keys</span>
-            <div className="flex items-center gap-1.5 bg-secondary/10 px-2 py-1 rounded-full border border-secondary/20">
-              <span className="w-2 h-2 bg-secondary rounded-full animate-pulse" />
-              <span className="text-[10px] uppercase font-bold text-secondary tracking-wider">
-                Live
-              </span>
-            </div>
           </div>
           <div className="mt-4">
             {isLoading ? (
@@ -167,7 +194,9 @@ export function Dashboard() {
             <div className="h-9 bg-surface-border/20 rounded animate-pulse w-24" />
           ) : nextExpiry ? (
             <div className="mt-1">
-              <div className="inline-flex items-center px-3 py-1 rounded-md bg-warning/10 border border-warning/20 text-warning mb-2">
+              <div
+                className={`inline-flex items-center px-3 py-1 rounded-md ${expiryColor.bg} border ${expiryColor.border} ${expiryColor.text} mb-2`}
+              >
                 <span className="text-lg font-bold font-mono">{nextExpiry.days_until_expiry}d</span>
               </div>
               <p className="text-xs text-text-secondary">

@@ -298,6 +298,9 @@ export function ApiKeys() {
                         onSort={handleSort}
                       />
                     ) : null}
+                    <th className="px-6 py-3 text-[11px] font-bold text-text-secondary uppercase tracking-widest whitespace-nowrap">
+                      Secret Key
+                    </th>
                     {visibleColumns.team ? (
                       <SortableHeader
                         column="team"
@@ -357,6 +360,9 @@ export function ApiKeys() {
                           {item.litellm_key_alias}
                         </td>
                       ) : null}
+                      <td className="px-6 py-4 text-xs font-mono text-text-secondary whitespace-nowrap">
+                        {item.key_preview ?? "—"}
+                      </td>
                       {visibleColumns.team ? (
                         <td className="px-6 py-4 text-sm text-text-secondary whitespace-nowrap">
                           {item.team_alias}

@@ -42,6 +42,7 @@ describe("useKeys", () => {
         {
           id: "key-1",
           litellm_key_alias: "test-key",
+          key_preview: "sk-...Ab1z",
           team_id: "team-1",
           team_alias: "Test Team",
           status: "active",

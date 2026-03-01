@@ -1749,6 +1749,17 @@
             "type": "string",
             "title": "Litellm Key Alias"
           },
+          "key_preview": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Key Preview"
+          },
           "team_id": {
             "type": "string",
             "title": "Team Id"

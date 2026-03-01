@@ -28,6 +28,16 @@ from app.services.audit import (
 from app.services.litellm_client import LiteLLMClient
 from app.utils import slugify
 
+log = structlog.stdlib.get_logger(__name__)
+
+
+def _make_key_preview(raw_key: str) -> str | None:
+    """Build a masked preview like ``sk-...Ab1z`` from a raw API key."""
+    if not raw_key or len(raw_key) < 8:
+        return None
+    return f"{raw_key[:3]}...{raw_key[-4:]}"
+
+
 logger = structlog.stdlib.get_logger(__name__)
 
 
@@ -62,6 +72,7 @@ def _to_list_item(k: ProvisionedKey) -> KeyListItem:
     return KeyListItem(
         id=k.id,
         litellm_key_alias=k.litellm_key_alias,
+        key_preview=k.key_preview,
         team_id=k.team_id,
         team_alias=k.team_alias,
         status=_compute_status(k, now),
@@ -149,10 +160,12 @@ async def create_key(
         key_alias=key_alias,
     )
 
+    raw_key = key_resp.get("key", "")
     db_key = ProvisionedKey(
         user_id=db_user.id,
         litellm_key_id=key_resp.get("token") or key_resp.get("key_name"),
         litellm_key_alias=key_alias,
+        key_preview=_make_key_preview(raw_key),
         team_id=team_id,
         team_alias=member.team_alias,
         portal_expires_at=expires_at,
@@ -173,7 +186,7 @@ async def create_key(
 
     return KeyCreateResponse(
         key_id=db_key.id,
-        key=key_resp.get("key", ""),
+        key=raw_key,
         key_alias=key_alias,
         team_alias=member.team_alias,
         portal_expires_at=expires_at,
@@ -234,10 +247,12 @@ async def rotate_key(
         key_alias=new_key_alias,
     )
 
+    raw_key = key_resp.get("key", "")
     new_key = ProvisionedKey(
         user_id=db_user.id,
         litellm_key_id=key_resp.get("token") or key_resp.get("key_name"),
         litellm_key_alias=new_key_alias,
+        key_preview=_make_key_preview(raw_key),
         team_id=old_key.team_id,
         team_alias=old_key.team_alias,
         portal_expires_at=expires_at,
@@ -264,7 +279,7 @@ async def rotate_key(
     return KeyRotateResponse(
         old_key_id=old_key.id,
         new_key_id=new_key.id,
-        new_key=key_resp.get("key", ""),
+        new_key=raw_key,
         new_key_alias=new_key_alias,
         portal_expires_at=expires_at,
     )

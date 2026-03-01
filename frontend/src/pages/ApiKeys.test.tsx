@@ -67,6 +67,7 @@ describe("ApiKeys", () => {
         {
           id: "key-1",
           litellm_key_alias: "eng-production-key",
+          key_preview: "sk-...My2w",
           team_id: "team-1",
           team_alias: "Engineering",
           status: "active",
@@ -97,6 +98,7 @@ describe("ApiKeys", () => {
         {
           id: "key-1",
           litellm_key_alias: "test-key",
+          key_preview: "sk-...Xy9q",
           team_id: "team-1",
           team_alias: "Team",
           status: "active",
@@ -125,6 +127,7 @@ describe("ApiKeys", () => {
         {
           id: "key-2",
           litellm_key_alias: "old-key",
+          key_preview: null,
           team_id: "team-1",
           team_alias: "Team",
           status: "revoked",

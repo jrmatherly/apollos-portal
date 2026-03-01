@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field
 class KeyListItem(BaseModel):
     id: uuid.UUID
     litellm_key_alias: str
+    key_preview: str | None = None
     team_id: str
     team_alias: str
     status: str  # "active", "expiring_soon", "expired", "revoked", "rotated"

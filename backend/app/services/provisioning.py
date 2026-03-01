@@ -249,10 +249,12 @@ async def provision_user(
             key_alias=key_alias,
         )
 
+        raw_key = key_resp.get("key", "")
         db_key = ProvisionedKey(
             user_id=db_user.id,
             litellm_key_id=key_resp.get("token") or key_resp.get("key_name"),
             litellm_key_alias=key_alias,
+            key_preview=f"{raw_key[:3]}...{raw_key[-4:]}" if len(raw_key) >= 8 else None,
             team_id=team_cfg.entra_group_id,
             team_alias=team_cfg.team_alias,
             portal_expires_at=expires_at,
