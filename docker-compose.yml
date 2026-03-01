@@ -40,6 +40,7 @@ services:
       - "8000:8000"
     environment:
       DATABASE_URL: ${DATABASE_URL:?Set DATABASE_URL in .env or environment}
+      TEAMS_CONFIG_PATH: ${TEAMS_CONFIG_PATH:-backend/teams.yaml}
     env_file:
       - ./backend/.env
     depends_on:

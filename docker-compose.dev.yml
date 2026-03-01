@@ -47,7 +47,7 @@ services:
     environment:
       DATABASE_URL: postgresql+asyncpg://portal:portal@db:5432/apollos_portal
       UV_LINK_MODE: copy
-      TEAMS_CONFIG_PATH: backend/teams.yaml
+      TEAMS_CONFIG_PATH: ${TEAMS_CONFIG_PATH:-backend/teams.yaml}
     env_file:
       - ./backend/.env
     volumes:
