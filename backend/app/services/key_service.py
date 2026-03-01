@@ -31,7 +31,6 @@ from app.utils import slugify
 logger = structlog.stdlib.get_logger(__name__)
 
 
-
 def _normalize_expires(key: ProvisionedKey) -> datetime:
     if key.portal_expires_at.tzinfo is None:
         return key.portal_expires_at.replace(tzinfo=UTC)

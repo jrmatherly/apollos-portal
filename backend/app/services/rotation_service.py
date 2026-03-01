@@ -20,7 +20,6 @@ from app.utils import slugify
 logger = structlog.stdlib.get_logger(__name__)
 
 
-
 async def _auto_rotate_key(
     session: AsyncSession,
     settings: Settings,
