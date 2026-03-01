@@ -19,6 +19,7 @@ When a task is completed, run these checks before committing:
 - SQLAlchemy forward refs need `from __future__ import annotations` + `TYPE_CHECKING`
 - `vite-env.d.ts` must exist or `import.meta.env` TypeScript errors appear
 - CORS must use `get_settings().portal_base_url`, not hardcoded localhost
+- After `npm install` in frontend, run `npx biome format --write .` — new packages can cause formatting drift across many files
 - Ruff auto-fix (`--fix`) handles UP037 (unnecessary quotes with future annotations) and I001 (import sort)
 - `ruff format --check` and `ruff check` are independent — CI runs both, passing one doesn't guarantee the other
 - `asyncio.get_running_loop()` not `get_event_loop()` in async functions (deprecated in 3.12+)

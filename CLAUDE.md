@@ -16,6 +16,7 @@
 - Backend lint fix: `uv run --package apollos-portal-backend ruff check --fix backend/`
 - Backend format check: `uv run --package apollos-portal-backend ruff format --check backend/`
 - CLI lint: `uv run --package apollos-cli ruff check cli/`
+- Frontend CI check: `cd frontend && npx biome ci .` (format + lint combined, matches CI pipeline)
 - Frontend lint: `cd frontend && npx biome check .`
 - Frontend format: `cd frontend && npx biome format --write .`
 - Frontend type check: `cd frontend && npx tsc --noEmit`
@@ -38,6 +39,7 @@
 - Frontend env vars use `VITE_` prefix, accessed via `import.meta.env`
 - `frontend/src/vite-env.d.ts` must exist for `import.meta.env` TypeScript support
 - React 19 does NOT bundle type definitions — `@types/react` and `@types/react-dom` are required devDependencies
+- After `npm install` in frontend, always run `npx biome format --write .` — new packages can cause formatting drift across many files
 - All Python packages pinned to latest verified versions (use `uv lock --upgrade`)
 - `.scratchpad/` is gitignored — never stage or commit these files
 - `backend/teams.yaml` is gitignored — use `teams.yaml.example` as template

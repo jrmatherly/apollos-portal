@@ -13,6 +13,7 @@
 - `uv lock --upgrade` — upgrade all deps to latest
 
 ## Frontend (in frontend/)
+- `npx biome ci .` — combined format + lint check (matches CI pipeline, fails on formatting drift)
 - `npx biome check .` — lint TypeScript/TSX/JSX code
 - `npx biome format --write .` — format TypeScript/TSX/JSX code
 - `npx tsc --noEmit` — TypeScript type check
