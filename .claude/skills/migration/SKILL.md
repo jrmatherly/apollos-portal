@@ -1,7 +1,7 @@
 ---
 name: migration
-description: Generate and apply an Alembic database migration
-disable-model-invocation: true
+description: Generate and apply an Alembic database migration. Use when adding a table, changing a column, or running "create migration". Trigger phrases include "new migration", "add column", "schema change".
+compatibility: Designed for Apollos Portal backend (FastAPI + SQLAlchemy + Alembic + uv workspace)
 ---
 
 # Alembic Migration

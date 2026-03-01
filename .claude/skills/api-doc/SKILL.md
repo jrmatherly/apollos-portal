@@ -1,7 +1,6 @@
 ---
 name: api-doc
-description: Sync API reference documentation with actual FastAPI endpoint routes
-disable-model-invocation: true
+description: Sync API reference documentation with actual FastAPI endpoint routes. Use when endpoints have been added, removed, or changed and docs need updating. Trigger phrases include "are my docs in sync", "update API docs", "sync endpoints".
 ---
 
 # Sync API documentation

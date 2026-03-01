@@ -1,6 +1,7 @@
 ---
 name: precheck
-description: Run full pre-commit validation (backend tests, lint, frontend type check)
+description: Run full pre-commit validation (backend tests, lint, frontend type check). Use before committing or creating a PR. Trigger phrases include "run checks", "precheck", "validate before commit", "QA gate".
+compatibility: Designed for Apollos Portal (uv + biome + ruff workspace)
 ---
 
 # Pre-commit Validation

@@ -1,7 +1,7 @@
 ---
 name: new-endpoint
-description: Scaffold a new FastAPI endpoint with response model, test, and docs page
-disable-model-invocation: true
+description: Scaffold a new FastAPI endpoint with response model, test, and docs page. Use when adding a new API route to the backend. Trigger phrases include "add endpoint", "create route", "new API".
+compatibility: Designed for Apollos Portal backend (FastAPI + SQLAlchemy + uv workspace)
 ---
 
 # Scaffold a new API endpoint

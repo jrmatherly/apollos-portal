@@ -22,7 +22,8 @@
       "recommended": true,
       "correctness": {
         "noUnusedImports": "error",
-        "noUnusedVariables": "error"
+        "noUnusedVariables": "error",
+        "noNestedComponentDefinitions": "error"
       },
       "suspicious": {
         "noExplicitAny": "warn",
@@ -32,10 +33,25 @@
         "useConst": "error",
         "noNonNullAssertion": "warn",
         "useImportType": "error"
+      },
+      "performance": {
+        "noAwaitInLoops": "error"
+      },
+      "security": {
+        "noSecrets": {
+          "level": "warn",
+          "options": {
+            "entropyThreshold": 45
+          }
+        }
+      },
+      "nursery": {
+        "noLeakedRender": "warn"
       }
     },
     "domains": {
-      "react": "recommended"
+      "react": "recommended",
+      "project": "recommended"
     }
   },
   "assist": {
@@ -60,6 +76,9 @@
     "parser": {
       "cssModules": false,
       "tailwindDirectives": true
+    },
+    "linter": {
+      "enabled": true
     }
   },
   "json": {

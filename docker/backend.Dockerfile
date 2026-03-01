@@ -3,9 +3,10 @@ FROM python:3.12-slim AS builder
 
 WORKDIR /app
 
-COPY --from=ghcr.io/astral-sh/uv:0.10.6 /uv /usr/local/bin/uv
+COPY --from=ghcr.io/astral-sh/uv:0.10.7 /uv /usr/local/bin/uv
 
-ENV UV_LINK_MODE=copy
+ENV UV_LINK_MODE=copy \
+    UV_COMPILE_BYTECODE=1
 
 # Copy workspace root files for dependency resolution
 COPY pyproject.toml uv.lock ./
@@ -13,7 +14,7 @@ COPY backend/pyproject.toml backend/pyproject.toml
 
 # Install dependencies (cached layer)
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --no-dev --no-install-project --package apollos-portal-backend
+    uv sync --frozen --no-dev --no-install-workspace --package apollos-portal-backend
 
 # Copy backend source
 COPY backend/ backend/
@@ -31,7 +32,7 @@ ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1
 
 # uv is needed for dev mode (docker-compose command override uses `uv run`)
-COPY --from=ghcr.io/astral-sh/uv:0.10.6 /uv /usr/local/bin/uv
+COPY --from=ghcr.io/astral-sh/uv:0.10.7 /uv /usr/local/bin/uv
 
 # Copy workspace root files (needed for uv workspace resolution)
 COPY pyproject.toml uv.lock ./

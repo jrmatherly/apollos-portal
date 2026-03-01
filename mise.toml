@@ -25,7 +25,7 @@ run = "uv run alembic upgrade head"
 [tasks."migrate:generate"]
 description = "Generate a new migration"
 dir = "backend"
-run = "uv run alembic revision --autogenerate -m \"$1\""
+run = "uv run alembic revision --autogenerate -m \"{{ arg(name='message', help='Migration description') }}\""
 
 [tasks."lint:backend"]
 description = "Lint backend Python code"
@@ -90,7 +90,7 @@ run = "uv run pytest -v"
 
 [tasks.qa]
 description = "Full quality gate (checks + tests)"
-depends = ["check", "test"]
+depends = ["check:backend", "check:cli", "check:frontend", "check:docs", "test"]
 
 [tasks."docker:up"]
 description = "Start Docker services"
@@ -102,6 +102,7 @@ run = "docker compose down"
 
 [tasks."docker:reset"]
 description = "Reset Docker services and volumes"
+confirm = "This will destroy all volumes. Continue?"
 run = "docker compose down -v && docker compose up -d"
 
 [tasks."docker:docs"]
@@ -112,10 +113,14 @@ run = "docker compose up -d docs"
 description = "Regenerate OpenAPI spec from FastAPI app"
 dir = "backend"
 run = 'uv run python -c "import json; from app.main import app; json.dump(app.openapi(), open(\"../docs/api-reference/openapi.json\", \"w\"), indent=2)"'
+sources = ["app/main.py", "app/api/**/*.py", "app/schemas/**/*.py"]
+outputs = ["../docs/api-reference/openapi.json"]
 
 [tasks."docs:llms"]
 description = "Regenerate llms.txt and llms-full.txt from docs"
 run = "python3 scripts/generate_llms.py"
+sources = ["docs/**/*.mdx", "docs/docs.json"]
+outputs = ["docs/llms.txt", "docs/llms-full.txt"]
 
 [tasks."db:shell"]
 description = "Open psql shell"
