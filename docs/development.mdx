@@ -18,10 +18,14 @@ The fastest way to run the full stack locally:
 ```bash
 git clone https://github.com/jrmatherly/apollos-portal.git
 cd apollos-portal
-docker compose -f docker-compose.dev.yml up
+mise run dev
 ```
 
-This starts PostgreSQL, the backend API (with hot reload), and the frontend (with HMR). The portal is available at `http://localhost:5173`.
+This starts PostgreSQL, the backend API (with hot reload), the frontend (with HMR), and the docs preview server. The portal is available at `http://localhost:3000`, the API at `http://localhost:8000`, and docs at `http://localhost:3001`.
+
+<Tip>
+  `mise run dev` automatically rebuilds Docker images when Dockerfiles change. You can also run `docker compose -f docker-compose.dev.yml up --build` directly.
+</Tip>
 
 ## Running services individually
 
@@ -44,7 +48,7 @@ npm install
 npm run dev
 ```
 
-The frontend dev server starts at `http://localhost:5173` with hot module replacement.
+The frontend dev server starts at `http://localhost:3000` with hot module replacement.
 
 ### CLI
 

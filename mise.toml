@@ -1,6 +1,6 @@
 [tasks.dev]
 description = "Start all development services"
-run = "docker compose -f docker-compose.dev.yml up"
+run = "docker compose -f docker-compose.dev.yml up --build"
 
 [tasks."dev:backend"]
 description = "Start backend only (requires DB)"
@@ -103,7 +103,7 @@ run = "docker compose down"
 [tasks."docker:reset"]
 description = "Reset Docker services and volumes (dev)"
 confirm = "This will destroy all volumes. Continue?"
-run = "docker compose -f docker-compose.dev.yml down -v && docker compose -f docker-compose.dev.yml up -d"
+run = "docker compose -f docker-compose.dev.yml down -v && docker compose -f docker-compose.dev.yml up -d --build"
 
 [tasks."docker:docs"]
 description = "Start docs container"
@@ -111,7 +111,7 @@ run = "docker compose up -d docs"
 
 [tasks."docker:dev"]
 description = "Start development services (detached)"
-run = "docker compose -f docker-compose.dev.yml up -d"
+run = "docker compose -f docker-compose.dev.yml up -d --build"
 
 [tasks."docs:openapi"]
 description = "Regenerate OpenAPI spec from FastAPI app"
