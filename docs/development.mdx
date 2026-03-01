@@ -90,6 +90,15 @@ VITE_AZURE_TENANT_ID=your-tenant-id
 # Backend tests (from project root)
 uv run --package apollos-portal-backend pytest -v
 
+# Frontend tests
+cd frontend && npx vitest run
+
+# Frontend tests in watch mode
+cd frontend && npx vitest
+
+# Frontend test coverage
+cd frontend && npx vitest run --coverage
+
 # Backend linting
 uv run --package apollos-portal-backend ruff check backend/
 
@@ -99,18 +108,23 @@ cd frontend && npx tsc --noEmit
 # Frontend linting
 cd frontend && npx biome check .
 
+# Run all tests (backend + frontend)
+mise run test
+
 # Run all checks at once
 mise run qa
 ```
 
+Frontend tests use [Vitest](https://vitest.dev/) with [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/) and [MSW](https://mswjs.io/) for API mocking. Test utilities are in `frontend/src/test/`.
+
 ## Database migrations
 
-The backend uses Alembic for database migrations:
+When running with Docker Compose, migrations run automatically via a dedicated `migrate` service before the backend starts. You only need to run migrations manually when developing locally without Docker.
 
 ```bash
 cd backend
 
-# Apply all migrations
+# Apply all migrations (local development only)
 uv run alembic upgrade head
 
 # Create a new migration
@@ -139,7 +153,8 @@ apollos-portal/
 │       ├── contexts/   # React contexts (AuthContext)
 │       ├── hooks/      # Custom hooks (useKeys, useUsage, etc.)
 │       ├── pages/      # Route pages (Dashboard, ApiKeys, Teams, etc.)
-│       └── lib/        # API client, MSAL config
+│       ├── lib/        # API client, MSAL config
+│       └── test/       # Test utilities, mocks (MSW, MSAL), render helpers
 ├── cli/               # Click CLI
 ├── docker/                # Dockerfiles
 ├── docs/                  # This documentation site (Mintlify)

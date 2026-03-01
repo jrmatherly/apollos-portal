@@ -48,6 +48,7 @@ jobs:
           filters: |
             backend:
               - 'backend/**'
+              - '!backend/tests/**'
               - 'pyproject.toml'
               - 'uv.lock'
               - 'docker/backend.Dockerfile'
@@ -55,6 +56,9 @@ jobs:
               - 'docker-compose.dev.yml'
             frontend:
               - 'frontend/**'
+              - '!frontend/src/**/*.test.ts'
+              - '!frontend/src/**/*.test.tsx'
+              - '!frontend/src/test/**'
               - 'docker/frontend.Dockerfile'
               - 'docker-compose.yml'
               - 'docker-compose.dev.yml'

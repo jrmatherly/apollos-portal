@@ -20,6 +20,21 @@ services:
       timeout: 5s
       retries: 5
 
+  migrate:
+    build:
+      context: .
+      dockerfile: docker/backend.Dockerfile
+    container_name: apollos-portal-migrate
+    environment:
+      DATABASE_URL: postgresql+asyncpg://portal:portal@db:5432/apollos_portal
+    volumes:
+      - ./backend:/app/backend
+    depends_on:
+      db:
+        condition: service_healthy
+    command: ["alembic", "-c", "backend/alembic.ini", "upgrade", "head"]
+    restart: "no"
+
   backend:
     build:
       context: .
@@ -40,8 +55,8 @@ services:
       - ./uv.lock:/app/uv.lock:ro
       - /app/.venv
     depends_on:
-      db:
-        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     command: uv run --frozen uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload --app-dir backend
 
   frontend:

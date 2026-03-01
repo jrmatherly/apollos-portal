@@ -25,8 +25,8 @@ apollos-portal/
 ├── cli/              # CLI with device-code auth (Python 3.12)
 ├── docs/             # Mintlify documentation site
 ├── docker/               # Dockerfiles
-├── docker-compose.yml    # Production (required env vars, no source mounts)
-├── docker-compose.dev.yml # Development (bind mounts, hot reload)
+├── docker-compose.yml    # Production (GHCR images, migrate service)
+├── docker-compose.dev.yml # Development (local builds, bind mounts, hot reload)
 └── mise.toml             # Task runner
 ```
 
@@ -39,7 +39,7 @@ apollos-portal/
 | CLI | Click, MSAL Python, Rich |
 | Database | PostgreSQL 18 |
 | Auth | Microsoft Entra ID (PKCE redirect + client credentials + device-code) |
-| Tooling | uv (workspace), Ruff (lint/format), Biome v2 (frontend lint/format) |
+| Tooling | uv (workspace), Ruff (lint/format), Biome v2 (frontend lint/format), Vitest (frontend tests) |
 | Docs | Mintlify |
 
 ## Prerequisites
@@ -73,10 +73,11 @@ cp frontend/.env.example frontend/.env
 ### 2. Start with Docker Compose (development)
 
 ```bash
-docker compose -f docker-compose.dev.yml up
+mise run dev
+# or: docker compose -f docker-compose.dev.yml up --build
 ```
 
-This starts PostgreSQL 18, the backend (port 8000) with hot reload, and the frontend (port 3000) with HMR.
+This starts PostgreSQL 18, runs database migrations automatically, then starts the backend (port 8000) with hot reload and the frontend (port 3000) with HMR.
 
 ### 3. Or run locally
 
@@ -111,16 +112,16 @@ uv run apollos whoami
 ### Task runner (mise)
 
 ```bash
-mise run dev              # Start all dev services (docker-compose.dev.yml)
+mise run dev              # Start all dev services with rebuild (docker-compose.dev.yml)
 mise run dev:backend      # Backend only with hot reload
 mise run dev:frontend     # Frontend only
 mise run dev:docs         # Mintlify docs preview server
-mise run test             # Run backend tests
+mise run test             # Run all tests (backend + frontend)
 mise run lint             # Ruff (backend + cli) + Biome (frontend)
 mise run format           # Format all code (Ruff + Biome)
 mise run check            # Read-only lint + format + typecheck (CI equivalent)
 mise run qa               # Full quality gate (check + test)
-mise run migrate          # Run database migrations
+mise run migrate          # Run database migrations (local only; Docker handles this automatically)
 mise run migrate:generate # Generate a new migration
 mise run db:shell         # Open psql shell
 mise run docker:reset     # Reset dev Docker services and volumes
@@ -129,8 +130,11 @@ mise run docker:reset     # Reset dev Docker services and volumes
 ### Without mise
 
 ```bash
-# Tests
+# Backend tests
 cd backend && uv run pytest -v
+
+# Frontend tests
+cd frontend && npx vitest run
 
 # Lint (Python — workspace-level)
 uv run --package apollos-portal-backend ruff check backend/

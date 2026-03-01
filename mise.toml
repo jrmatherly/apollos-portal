@@ -83,10 +83,19 @@ run = "mint validate && mint broken-links"
 description = "Run all checks (read-only)"
 depends = ["check:backend", "check:cli", "check:frontend", "check:docs"]
 
-[tasks.test]
+[tasks."test:backend"]
 description = "Run backend tests"
 dir = "backend"
 run = "uv run pytest -v"
+
+[tasks."test:frontend"]
+description = "Run frontend tests"
+dir = "frontend"
+run = "npx vitest run"
+
+[tasks.test]
+description = "Run all tests"
+depends = ["test:backend", "test:frontend"]
 
 [tasks.qa]
 description = "Full quality gate (checks + tests)"

@@ -10,6 +10,7 @@
 - **Naming**: snake_case for functions/variables, PascalCase for classes
 - **Imports**: Sorted by ruff (isort-compatible), stdlib → third-party → local
 - **Tests**: pytest with pytest-asyncio (strict mode), httpx ASGITransport for endpoint tests
+- **Test mocking**: `session.begin_nested()` uses `MagicMock(return_value=async_cm)`, not `AsyncMock`
 
 ## TypeScript (Frontend)
 - **Framework**: React 19 with functional components and hooks
@@ -21,6 +22,10 @@
 - **Auth**: MSAL browser v5, PKCE redirect flow, `useAuth()` hook from `AuthContext`
 - **Routing**: React Router v7 with `ProtectedRoute` wrapper
 - **Lint/Format**: Biome 2.4.4 (`npx biome check .` for lint, `npx biome format --write .` for format) + `tsc --noEmit` for type checking
+- **Tests**: Vitest 4 (globals mode, jsdom), React Testing Library 16.3+, MSW 2.12+ for API mocking
+- **Test utilities**: `src/test/setup.ts` (MSW lifecycle + jest-dom), `src/test/render.tsx` (QueryClient + MemoryRouter wrapper), `src/test/mocks/` (MSAL, auth, MSW handlers)
+- **Test patterns**: Mock MSAL via `vi.mock("../lib/msal")` with dynamic import; mock `useAuth` for component tests (Strategy A); use MSW for API layer tests
+- **Biome override**: `useArrowFunction` rule disabled for `*.test.{ts,tsx}` files
 
 ## Git
 - `.scratchpad/` is gitignored — never stage or commit
@@ -29,8 +34,13 @@
 - Co-author line: `Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>`
 
 ## Docker
-- Backend context: `./backend`, Frontend context: `./frontend`
+- Backend context: `.` (root), Frontend context: `./frontend`
 - `.dockerignore` files in both `backend/` and `frontend/`
 - PostgreSQL 18 with explicit PGDATA, SCRAM-SHA-256 auth
-- Frontend: nginx 1.28 with security headers (X-Frame-Options DENY, X-Content-Type-Options nosniff, Referrer-Policy, Permissions-Policy)
+- Frontend Dockerfile: 3-stage build (`deps` → `builder` → runtime nginx). Dev compose targets `deps` stage for Node.js access
+- Frontend runtime: nginx 1.29-alpine with security headers (X-Frame-Options DENY, X-Content-Type-Options nosniff, Referrer-Policy, Permissions-Policy)
 - Backend: runs as non-root `appuser` via `useradd` + `USER appuser`
+- `uv run --frozen` in Docker containers — prevents lockfile writes into read-only mounts
+- Migrations: dedicated `migrate` one-shot service using `service_completed_successfully` dependency condition; backend waits for migrations to complete before starting
+- Production: GHCR images (`ghcr.io/jrmatherly/apollos-portal/{backend,frontend,docs}:latest`); dev: local builds with `--build` flag
+- `TEAMS_CONFIG_PATH: backend/teams.yaml` env var in dev compose — maps bind-mounted path relative to WORKDIR

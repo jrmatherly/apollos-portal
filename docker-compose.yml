@@ -18,6 +18,19 @@ services:
       timeout: 5s
       retries: 5
 
+  migrate:
+    image: ghcr.io/jrmatherly/apollos-portal/backend:latest
+    container_name: apollos-portal-migrate
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?Set DATABASE_URL in .env or environment}
+    env_file:
+      - ./backend/.env
+    depends_on:
+      db:
+        condition: service_healthy
+    command: ["alembic", "-c", "backend/alembic.ini", "upgrade", "head"]
+    restart: "no"
+
   backend:
     image: ghcr.io/jrmatherly/apollos-portal/backend:latest
     container_name: apollos-portal-backend
@@ -29,8 +42,8 @@ services:
     env_file:
       - ./backend/.env
     depends_on:
-      db:
-        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
 
   frontend:
     image: ghcr.io/jrmatherly/apollos-portal/frontend:latest

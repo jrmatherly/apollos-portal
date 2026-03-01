@@ -48,18 +48,17 @@ class TestCurrentUser:
 
 class TestGetTokenClaims:
     @pytest.mark.asyncio(loop_scope="function")
-    async def test_extracts_roles_and_aud(self):
-        """Build a fake JWT with roles and aud in payload and verify extraction."""
+    async def test_extracts_roles(self):
+        """Build a fake JWT with roles in payload and verify extraction."""
         header = base64.urlsafe_b64encode(json.dumps({"alg": "RS256"}).encode()).rstrip(b"=")
         payload = base64.urlsafe_b64encode(
-            json.dumps({"roles": ["Portal.User", "Portal.Admin"], "aud": "my-client-id"}).encode()
+            json.dumps({"roles": ["Portal.User", "Portal.Admin"], "aud": "graph-api"}).encode()
         ).rstrip(b"=")
         signature = base64.urlsafe_b64encode(b"fakesig").rstrip(b"=")
         token = f"{header.decode()}.{payload.decode()}.{signature.decode()}"
 
         claims = await _get_token_claims(token)
         assert claims["roles"] == ["Portal.User", "Portal.Admin"]
-        assert claims["aud"] == "my-client-id"
 
     @pytest.mark.asyncio(loop_scope="function")
     async def test_no_roles_claim(self):
@@ -71,11 +70,9 @@ class TestGetTokenClaims:
 
         claims = await _get_token_claims(token)
         assert claims["roles"] == []
-        assert claims["aud"] == ""
 
     @pytest.mark.asyncio(loop_scope="function")
     async def test_malformed_token(self):
         """Malformed token returns empty defaults instead of crashing."""
         claims = await _get_token_claims("not-a-jwt")
         assert claims["roles"] == []
-        assert claims["aud"] == ""

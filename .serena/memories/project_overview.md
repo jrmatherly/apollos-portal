@@ -13,10 +13,11 @@ All 6 phases (0–5) are **complete** as of Feb 28, 2026. All TODO items resolve
 - **Phase 4**: Key lifecycle automation (email notifications, rotation/deprovisioning/reconciliation cron jobs)
 - **Phase 5**: Admin features & hardening (admin dashboard, rate limiting, structured logging, health endpoints, input validation)
 - **TODO remediation (PR #4)**: 11 code review items, test coverage expansion (109→149 tests), frontend UX improvements
-- **Codebase review (PR #5)**: Security hardening (JWT aud verification, nginx headers, non-root Docker), async fixes, `is_active` enforcement, test expansion (149→170 tests)
+- **Codebase review (PR #5)**: Security hardening (nginx headers, non-root Docker), async fixes, `is_active` enforcement, test expansion (149→170 tests)
 - **Backend remediation (Mar 1)**: MED-B1 (deprovision warning log), MED-B8 (expiry boundary fix), 6 auth boundary tests (170→178 tests)
+- **Frontend test infrastructure (Mar 1)**: Vitest 4 + React Testing Library 16 + MSW 2 — 50 tests across 10 files (utils, API client, hooks, components, pages), coverage thresholds enforced (35/40/30/35%), CI workflow updated
 
-Remaining: infrastructure known limitations (dev-only), frontend test infra (LOW). See `.scratchpad/TODO.md`.
+Remaining: infrastructure known limitations (dev-only). See `.scratchpad/TODO.md`.
 
 ## Architecture
 ```
@@ -31,11 +32,12 @@ apollos-portal/
 │   ├── alembic/       # Database migrations
 │   └── tests/         # 178 pytest tests (21 test files, ~0.6s)
 ├── frontend/         # React 19 + Vite 7 SPA (Node 24, TypeScript 5.9)
+│   └── src/test/     # 50 vitest tests (10 test files, ~1.5s) — RTL + MSW mocks
 ├── cli/              # Click CLI with MSAL device-code auth (Python 3.12, uv)
 ├── docs/             # Mintlify documentation site (15 MDX pages)
-├── docker/           # Dockerfiles (backend.Dockerfile, frontend.Dockerfile, docs.Dockerfile)
-├── docker-compose.yml     # Production (required env vars, no source mounts)
-├── docker-compose.dev.yml # Development (bind mounts, hot reload, hardcoded creds)
+├── docker/           # Dockerfiles (backend.Dockerfile, frontend.Dockerfile [3-stage: deps/builder/runtime], docs.Dockerfile)
+├── docker-compose.yml     # Production (GHCR images, migrate service, required env vars, no source mounts)
+├── docker-compose.dev.yml # Development (local builds, migrate service, bind mounts, hot reload, hardcoded creds)
 ├── mise.toml         # Task runner (dev, test, lint, format, migrate, docker, qa)
 ├── CLAUDE.md         # Project conventions and commands
 └── .scratchpad/      # Planning docs (NOT tracked in git)
@@ -51,6 +53,7 @@ apollos-portal/
 ## Tech Stack (Feb 2026)
 - **Backend**: FastAPI 0.133+, SQLAlchemy 2.0.47+, Alembic, MSAL 1.35+, Microsoft Graph SDK 1.55+, Pydantic 2.12+, asyncpg, aiosmtplib, APScheduler 3.x, structlog, slowapi
 - **Frontend**: React 19.2+, Vite 7.3+, TypeScript 5.9+, Tailwind CSS 4, @azure/msal-browser 5.3+, Lucide React, React Router 7, Recharts
+- **Frontend testing**: Vitest 4.0+, @testing-library/react 16.3+, MSW 2.12+, @vitest/coverage-v8
 - **CLI**: Click 8.3+, MSAL 1.35+, httpx 0.28+, Rich 14.3+
 - **Database**: PostgreSQL 18 (SCRAM-SHA-256 auth, explicit PGDATA)
 - **Auth**: Microsoft Entra ID (PKCE redirect for frontend, client credentials for backend, device-code for CLI)

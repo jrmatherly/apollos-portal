@@ -2,12 +2,13 @@
 
 When a task is completed, run these checks before committing:
 
-1. **Run all checks**: `mise run qa` (or manually run steps 2-6)
+1. **Run all checks**: `mise run qa` (or manually run steps 2-7)
 2. **Backend tests**: `cd backend && uv run pytest -v`
-3. **Backend lint**: `cd backend && uv run ruff check .` (auto-fix with `--fix`)
-4. **Backend format**: `cd backend && uv run ruff format --check .` (fix with `ruff format .`)
-5. **Frontend lint**: `cd frontend && npx biome check .`
-6. **Frontend types**: `cd frontend && npx tsc --noEmit`
+3. **Frontend tests**: `cd frontend && npx vitest run`
+4. **Backend lint**: `cd backend && uv run ruff check .` (auto-fix with `--fix`)
+5. **Backend format**: `cd backend && uv run ruff format --check .` (fix with `ruff format .`)
+6. **Frontend lint**: `cd frontend && npx biome check .`
+7. **Frontend types**: `cd frontend && npx tsc --noEmit`
 7. **Check git status**: Ensure no unintended files are staged
 8. **Verify .scratchpad/ excluded**: Never commit .scratchpad/ files
 9. **Verify teams.yaml excluded**: Never commit backend/teams.yaml

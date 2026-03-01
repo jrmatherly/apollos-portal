@@ -5,6 +5,11 @@ node_modules/
 dist/
 build/
 
+# === Tests ===
+src/test/
+src/**/*.test.ts
+src/**/*.test.tsx
+
 # === Environment & secrets ===
 .env
 .env.local

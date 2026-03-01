@@ -30,23 +30,27 @@
 - `uv run apollos me` — fetch profile from backend
 
 ## Docker
-- `docker compose -f docker-compose.dev.yml up` — start all dev services (db, backend, frontend with hot reload)
+- `docker compose -f docker-compose.dev.yml up --build` — start all dev services (db, migrate, backend, frontend with hot reload)
 - `docker compose -f docker-compose.dev.yml up -d db` — start just PostgreSQL (dev)
 - `docker compose -f docker-compose.dev.yml down -v` — stop dev services and remove volumes
 - `docker compose -f docker-compose.dev.yml exec db psql -U portal -d apollos_portal` — psql shell
-- `docker compose up` — start production services (requires `POSTGRES_PASSWORD` and `DATABASE_URL` env vars)
+- `docker compose pull && docker compose up -d` — start production services (pulls GHCR images, requires `POSTGRES_PASSWORD` and `DATABASE_URL` env vars)
+- Migrations run automatically via the `migrate` one-shot service before backend starts (both dev and prod)
 
 ## mise (task runner)
-- `mise run dev` — start all dev services (docker-compose.dev.yml)
-- `mise run test` — backend pytest
+- `mise run dev` — start all dev services with `--build` (docker-compose.dev.yml)
+- `mise run test` — run all tests (backend pytest + frontend vitest)
+- `mise run test:backend` — backend pytest only
+- `mise run test:frontend` — frontend vitest only
 - `mise run lint` — ruff (backend + CLI) + biome (frontend)
 - `mise run format` — ruff format + biome format
-- `mise run migrate` — alembic upgrade head
+- `mise run migrate` — alembic upgrade head (local only; Docker uses migrate service)
 - `mise run check` — read-only lint + format + typecheck (CI equivalent, no writes)
 - `mise run check:docs` — docs validation (mint validate + broken-links)
 - `mise run qa` — full quality gate (check + test — run before committing)
-- `mise run docker:reset` — reset dev Docker services and volumes
-- `mise run docker:dev` — start dev services (detached)
+- `mise run docker:reset` — reset dev Docker services and volumes (with `--build`)
+- `mise run docker:dev` — start dev services detached (with `--build`)
+- `mise run docker:up` — start production services (`docker compose pull && docker compose up -d`)
 - `mise run docs:openapi` — regenerate OpenAPI spec from FastAPI app (run after endpoint changes; skips if sources unchanged)
 - `mise run docs:llms` — regenerate llms.txt/llms-full.txt from docs (skips if sources unchanged)
 

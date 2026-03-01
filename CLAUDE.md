@@ -16,6 +16,9 @@
 - Backend lint fix: `uv run --package apollos-portal-backend ruff check --fix backend/`
 - Backend format check: `uv run --package apollos-portal-backend ruff format --check backend/`
 - CLI lint: `uv run --package apollos-cli ruff check cli/`
+- Frontend tests: `cd frontend && npx vitest run` (or `mise run test:frontend`)
+- Frontend test watch: `cd frontend && npx vitest`
+- Frontend coverage: `cd frontend && npx vitest run --coverage`
 - Frontend CI check: `cd frontend && npx biome ci .` (format + lint combined, matches CI pipeline)
 - Frontend lint: `cd frontend && npx biome check .`
 - Frontend format: `cd frontend && npx biome format --write .`
@@ -24,9 +27,9 @@
 - CLI help: `cd cli && uv run apollos --help`
 - Docs dev: `cd docs && mint dev` (or `mise run dev:docs`)
 - Docs validate: `cd docs && mint validate && mint broken-links` (or `mise run check:docs`)
-- Dev services: `docker compose -f docker-compose.dev.yml up` (or `mise run dev`)
-- Prod services: `docker compose up` (requires `POSTGRES_PASSWORD` and `DATABASE_URL` env vars)
-- DB migrations: `cd backend && uv run alembic upgrade head`
+- Dev services: `docker compose -f docker-compose.dev.yml up --build` (or `mise run dev`)
+- Prod services: `docker compose pull && docker compose up -d` (or `mise run docker:up`; requires `POSTGRES_PASSWORD` and `DATABASE_URL` env vars)
+- DB migrations: `cd backend && uv run alembic upgrade head` (local only; Docker Compose runs migrations automatically via `migrate` service)
 - Upgrade Python deps: `uv lock --upgrade`
 - Check outdated Node deps: `cd frontend && npm outdated`
 - Regenerate OpenAPI spec: `mise run docs:openapi` (run after any endpoint change)
@@ -58,7 +61,7 @@
 - Shared utilities: `backend/app/utils.py` contains `slugify()` — imported by key_service, provisioning, and rotation_service
 - Entra ID group resolution: NEVER use JWT `groups` claim (200-group overage limit silently breaks) — always use Graph API `/users/{oid}/memberOf` with client credentials
 - Token validation: v1 validates by calling Graph `/me` with user's bearer token (not local JWKS) — see `backend/app/core/auth.py`
-- `_get_token_claims()` in auth.py returns both `roles` and `aud` from JWT payload — JWT `aud` verified against `azure_client_id` for defense-in-depth
+- `_get_token_claims()` in auth.py extracts `roles` from the JWT payload — v1 auth uses a Graph-scoped token so `aud` is Graph's app ID, not our client ID
 - `is_active` check required on ALL user-facing endpoints that query `ProvisionedUser` — not just key_service
 - `asyncio.get_running_loop()` in async functions — never `get_event_loop()` (deprecated, warns in 3.12+)
 - Docker security: frontend nginx adds X-Frame-Options DENY, X-Content-Type-Options, Referrer-Policy, Permissions-Policy; backend runs as non-root `appuser`
@@ -79,13 +82,20 @@
 - `docs/skill.md` — AI agent instruction file for docs contributions
 - All three are auto-generated (`mise run docs:llms`) and self-hosted via `mint dev`, not Mintlify cloud
 - Docker: `docker/docs.Dockerfile` runs `mint dev` on port 3000 (mapped to 3001 in both compose files)
-- Docker Compose: `docker-compose.yml` = production (no source mounts, required env vars); `docker-compose.dev.yml` = development (bind mounts, hot reload, hardcoded dev credentials)
+- Docker Compose: `docker-compose.yml` = production (GHCR images, no source mounts, required env vars); `docker-compose.dev.yml` = development (local builds, bind mounts, hot reload, hardcoded dev credentials)
+- Both compose files include a `migrate` one-shot service (`restart: "no"`) that runs `alembic upgrade head` before the backend starts (uses `service_completed_successfully` dependency condition)
+- Frontend Dockerfile uses 3 stages: `deps` (Node + npm ci), `builder` (+ build), runtime (nginx); dev compose targets `deps` stage
+- Use `uv run --frozen` in Docker containers to prevent lockfile write errors on read-only mounts
+- `TEAMS_CONFIG_PATH: backend/teams.yaml` env var needed in dev compose (bind mount places file at `/app/backend/teams.yaml` not `/app/teams.yaml`)
 
 ## Testing
 - Backend: pytest with pytest-asyncio (strict mode), httpx ASGITransport for endpoint tests
 - Mock `session.begin_nested()`: use `MagicMock(return_value=async_cm)` — `AsyncMock` returns a coroutine, not an async context manager
 - Test fakes in `conftest.py`: `FakeProvisionedKey`, `FakeProvisionedUser`, `FakeTeamMembership` — keep fields in sync with ORM models
-- Frontend: `tsc --noEmit` + `biome ci .` (no test runner yet)
+- Frontend: Vitest 4 + React Testing Library 16 + MSW 2 (jsdom environment)
+- Frontend test utilities: `src/test/render.tsx` (renderWithProviders), `src/test/mocks/` (MSAL, auth, MSW handlers)
+- Frontend mock strategy: mock `useAuth` directly for component tests (Strategy A); mock MSAL + real AuthProvider for auth-flow tests (Strategy B)
+- Frontend coverage thresholds: 35% statements, 40% branches, 30% functions, 35% lines (ratchet up as coverage grows)
 - Run before committing: `mise run qa` (runs all checks + tests)
 - Pydantic `string_too_long` is the error type for `Field(max_length=...)` — not `max_length`
 - Use `Literal[30, 60, 90, 180]` (not `ge/le` range) when business logic restricts to specific values

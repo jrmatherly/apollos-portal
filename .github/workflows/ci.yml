@@ -93,7 +93,7 @@ jobs:
         run: uv run pytest -v
 
   frontend:
-    name: Frontend (typecheck + Biome)
+    name: Frontend (test + typecheck + Biome)
     needs: changes
     if: needs.changes.outputs.frontend == 'true'
     runs-on: ubuntu-latest
@@ -117,6 +117,9 @@ jobs:
 
       - name: Type check
         run: npx tsc --noEmit
+
+      - name: Test
+        run: npx vitest run
 
   cli:
     name: CLI (install + verify)

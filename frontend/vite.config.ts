@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 import path from "node:path";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
@@ -28,6 +29,28 @@ export default defineConfig({
       "/api": {
         target: process.env.VITE_API_BASE_URL || "http://localhost:8000",
         changeOrigin: true,
+      },
+    },
+  },
+  test: {
+    globals: true,
+    environment: "jsdom",
+    setupFiles: ["./src/test/setup.ts"],
+    include: ["src/**/*.test.{ts,tsx}"],
+    coverage: {
+      provider: "v8",
+      include: ["src/**/*.{ts,tsx}"],
+      exclude: [
+        "src/test/**",
+        "src/vite-env.d.ts",
+        "src/main.tsx",
+        "src/**/*.test.{ts,tsx}",
+      ],
+      thresholds: {
+        statements: 35,
+        branches: 40,
+        functions: 30,
+        lines: 35,
       },
     },
   },

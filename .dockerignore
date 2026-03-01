@@ -34,6 +34,12 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 
+# Tests (not needed in production images)
+backend/tests/
+frontend/src/test/
+frontend/src/**/*.test.ts
+frontend/src/**/*.test.tsx
+
 # Runtime
 *.log
 

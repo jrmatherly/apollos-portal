@@ -79,8 +79,12 @@ async def _validate_token(token: str, settings: Settings) -> dict[str, Any]:
 async def _get_token_claims(token: str) -> dict[str, Any]:
     """Extract claims from the token by decoding JWT payload (without full validation).
 
-    The token has already been validated by Graph API call.
-    We read the 'roles' claim for admin role checks and 'aud' for audience verification.
+    The token has already been validated by the Graph API /me call.
+    We read the 'roles' claim for admin role checks.
+
+    Note: The v1 auth pattern validates tokens by calling Graph /me, which
+    requires the token to be a Graph access token (aud = Graph app ID).
+    Audience verification is implicit — Graph rejects tokens not meant for it.
     """
     import base64
     import json
@@ -91,9 +95,9 @@ async def _get_token_claims(token: str) -> dict[str, Any]:
         # Add padding
         payload += "=" * (4 - len(payload) % 4)
         claims = json.loads(base64.urlsafe_b64decode(payload))
-        return {"roles": claims.get("roles", []), "aud": claims.get("aud", "")}
+        return {"roles": claims.get("roles", [])}
     except Exception:
-        return {"roles": [], "aud": ""}
+        return {"roles": []}
 
 
 class CurrentUser:
@@ -122,17 +126,8 @@ async def get_current_user(
     # Validate token via Graph API /me call
     claims = await _validate_token(token, settings)
 
-    # Extract roles and audience from JWT (already validated)
+    # Extract roles from JWT (token already validated by Graph /me call above)
     token_claims = await _get_token_claims(token)
-
-    # Verify audience claim matches our application
-    aud = token_claims["aud"]
-    if aud != settings.azure_client_id:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token not intended for this application",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
 
     return CurrentUser(
         oid=claims["oid"],
