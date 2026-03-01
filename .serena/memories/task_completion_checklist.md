@@ -8,10 +8,10 @@ When a task is completed, run these checks before committing:
 4. **Backend format**: `cd backend && uv run ruff format --check .` (fix with `ruff format .`)
 5. **Frontend lint**: `cd frontend && npx biome check .`
 6. **Frontend types**: `cd frontend && npx tsc --noEmit`
-6. **Check git status**: Ensure no unintended files are staged
-5. **Verify .scratchpad/ excluded**: Never commit .scratchpad/ files
-6. **Verify teams.yaml excluded**: Never commit backend/teams.yaml
-7. **Check branding**: Search for "NEXUS AI" or other non-"Apollos AI" strings
+7. **Check git status**: Ensure no unintended files are staged
+8. **Verify .scratchpad/ excluded**: Never commit .scratchpad/ files
+9. **Verify teams.yaml excluded**: Never commit backend/teams.yaml
+10. **Check branding**: Search for "NEXUS AI" or other non-"Apollos AI" strings
 
 ## Common Gotchas
 - FastAPI HTTPBearer returns 401 (not 403) for missing credentials in current versions
