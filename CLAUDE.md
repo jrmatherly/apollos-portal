@@ -98,7 +98,8 @@
 - Node 24, Python 3.12, uv workspace (root pyproject.toml)
 
 ## Claude Code Automations
-- Skills: `/api-doc` (sync endpoint docs), `/new-endpoint` (scaffold FastAPI endpoint)
+- MCP servers: `cp .mcp.json.example .mcp.json` — `.mcp.json` is gitignored, `.mcp.json.example` is checked in
+- Skills: `/api-doc` (sync endpoint docs), `/new-endpoint` (scaffold FastAPI endpoint), `/precheck` (QA suite), `/migration` (Alembic)
 - Agents: `security-reviewer` (OWASP review), `docs-reviewer` (cross-ref docs vs code)
 - Hooks auto-format Python (ruff) and TS/MDX (biome) on edit; block `.env`, `teams.yaml`, and lock files
 - Editing `.claude/settings.json` with the Edit tool fails on long escaped commands — use Write instead

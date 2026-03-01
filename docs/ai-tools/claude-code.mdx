@@ -1,14 +1,15 @@
 ---
 title: "Claude Code setup"
-description: "Configure Claude Code for your documentation workflow"
+description: "Configure Claude Code for the Apollos AI development workflow"
 icon: "asterisk"
 ---
 
-Set up Claude Code to help you write and maintain your Mintlify documentation.
+Set up Claude Code to work with the Apollos AI codebase, including MCP servers, skills, and documentation tools.
 
 ## Prerequisites
 
 - Active Claude subscription (Pro, Max, or API access)
+- Node.js 24+ (for MCP servers and frontend tooling)
 
 ## Setup
 
@@ -19,25 +20,59 @@ Set up Claude Code to help you write and maintain your Mintlify documentation.
   ```
 </Step>
 
-<Step title="Install the Mintlify skill">
-  In your docs directory, run:
+<Step title="Configure MCP servers">
+  Copy the example MCP configuration to enable project-level MCP servers:
 
   ```bash
-  npx skills add https://mintlify.com/docs
+  cp .mcp.json.example .mcp.json
   ```
 
-  This gives Claude Code Mintlify's component reference, writing standards,
-  and workflow guidance.
+  This configures [context7](https://github.com/upstash/context7) for live documentation lookup of project dependencies (FastAPI, SQLAlchemy, React, MSAL, etc.).
+
+  <Note>
+    `.mcp.json` is gitignored. You can add additional MCP servers to your local copy without affecting other contributors.
+  </Note>
 </Step>
 
-<Step title="Customize project instructions">
-  Edit `AGENTS.md` in your project root to add project-specific terminology,
-  style preferences, and content boundaries.
-</Step>
-
-<Step title="Start writing with Claude Code">
+<Step title="Start working">
   ```bash
   claude
   ```
+
+  The project includes built-in skills (`/api-doc`, `/new-endpoint`, `/precheck`, `/migration`) and subagents (`security-reviewer`, `docs-reviewer`) in the `.claude/` directory. These are available automatically.
 </Step>
 </Steps>
+
+## Available automations
+
+### Skills
+
+| Skill | Command | Purpose |
+|-------|---------|---------|
+| API doc sync | `/api-doc` | Sync endpoint docs with backend routes |
+| New endpoint | `/new-endpoint` | Scaffold a FastAPI endpoint with tests |
+| Pre-commit check | `/precheck` | Run full QA suite (tests, lint, types) |
+| Migration | `/migration` | Generate and apply Alembic migrations |
+
+### Subagents
+
+| Agent | Purpose |
+|-------|---------|
+| `security-reviewer` | OWASP-focused security review (auth, CORS, injection, CSV) |
+| `docs-reviewer` | Cross-reference docs against code for accuracy |
+
+### Hooks
+
+Hooks run automatically on file edits:
+
+- **PostToolUse**: Auto-formats Python (ruff) and TypeScript/MDX (biome) on save
+- **PreToolUse**: Blocks edits to `.env`, `teams.yaml`, and lock files
+
+## Documentation workflow
+
+To contribute to this documentation site using Claude Code:
+
+1. Install the [Mintlify skill](https://mintlify.com/docs/mcp) for component reference and writing standards
+2. Read `docs/AGENTS.md` for project-specific terminology and style guide
+3. Preview changes with `cd docs && mint dev`
+4. Validate before committing with `cd docs && mint validate && mint broken-links`
