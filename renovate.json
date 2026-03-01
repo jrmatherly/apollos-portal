@@ -61,7 +61,7 @@
     },
     {
       "description": "Ignore self-published GHCR images — pinning latest is counterproductive",
-      "matchPackagePatterns": ["^ghcr\\.io/jrmatherly/apollos-portal/"],
+      "matchPackageNames": ["/^ghcr\\.io\\/jrmatherly\\/apollos-portal\\//"],
       "enabled": false
     },
     {
