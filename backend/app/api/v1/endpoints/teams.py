@@ -9,7 +9,7 @@ from app.core.database import get_session
 from app.core.rate_limit import limiter
 from app.core.teams import TeamsConfig
 from app.models.provisioned_user import ProvisionedUser
-from app.schemas.common import TeamsResponse, TeamSummary
+from app.schemas.common import TeamMember, TeamsResponse, TeamSummary
 from app.services.litellm_client import LiteLLMClient, get_litellm_client, get_teams_config
 
 logger = structlog.stdlib.get_logger(__name__)
@@ -46,12 +46,19 @@ async def get_teams(
         # Try to get spend data from LiteLLM
         spend = None
         member_count = None
+        team_members: list[TeamMember] = []
         try:
             team_info = await litellm.get_team(membership.team_id)
             if team_info:
-                spend = team_info.get("spend")
-                members = team_info.get("members_with_roles") or team_info.get("members") or []
-                member_count = len(members)
+                # LiteLLM nests team data under "team_info" key
+                inner = team_info.get("team_info") or team_info
+                spend = inner.get("spend")
+                raw_members = inner.get("members_with_roles") or inner.get("members") or []
+                for m in raw_members:
+                    uid = m.get("user_id", "")
+                    if uid != "default_user_id":
+                        team_members.append(TeamMember(user_id=uid, role=m.get("role", "user")))
+                member_count = len(team_members)
         except Exception:
             logger.exception("Failed to fetch team info from LiteLLM for team %s", membership.team_id)
 
@@ -64,6 +71,7 @@ async def get_teams(
                 budget_duration=team_cfg.budget_duration if team_cfg else "30d",
                 spend=spend,
                 member_count=member_count,
+                members=team_members,
             )
         )
 

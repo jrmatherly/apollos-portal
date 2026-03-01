@@ -1912,6 +1912,17 @@
               }
             ],
             "title": "Model Info"
+          },
+          "mode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mode"
           }
         },
         "type": "object",
@@ -2010,6 +2021,24 @@
         ],
         "title": "ProvisionStatusResponse"
       },
+      "TeamMember": {
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "title": "User Id"
+          },
+          "role": {
+            "type": "string",
+            "title": "Role",
+            "default": "user"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user_id"
+        ],
+        "title": "TeamMember"
+      },
       "TeamProvisionDetail": {
         "properties": {
           "team_id": {
@@ -2082,6 +2111,14 @@
               }
             ],
             "title": "Member Count"
+          },
+          "members": {
+            "items": {
+              "$ref": "#/components/schemas/TeamMember"
+            },
+            "type": "array",
+            "title": "Members",
+            "default": []
           }
         },
         "type": "object",

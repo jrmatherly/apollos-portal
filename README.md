@@ -186,6 +186,13 @@ teams:
     budget_duration: "30d"
     team_member_budget: 25
 
+  - entra_group_id: "your-fallback-group-id"
+    team_alias: "All AI Users"
+    models: ["gpt-5-mini"]
+    max_budget: 50
+    budget_duration: "30d"
+    is_default: true  # Suppressed when user qualifies for a non-default team
+
 required_groups: []  # Optional gate groups
 ```
 

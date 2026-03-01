@@ -89,8 +89,9 @@ When a user signs in, the provisioning endpoint:
 
 1. Resolves the user's Entra ID security group memberships via Microsoft Graph
 2. Matches those groups against the `teams.yaml` configuration
-3. Creates or updates LiteLLM team memberships for matched groups
-4. Returns the user's teams with their model access and budget information
+3. Filters out default teams if the user qualifies for any non-default team
+4. Creates or updates LiteLLM team memberships for the remaining matched groups
+5. Returns the user's teams with their model access and budget information
 
 Users are automatically added to or removed from teams based on their current security group memberships. Changes in Entra ID are reflected the next time the user signs in.
 
@@ -98,6 +99,7 @@ Users are automatically added to or removed from teams based on their current se
 
 In the portal, go to **Teams** in the sidebar to see:
 
-- Teams you belong to
+- Teams you belong to with an **Active** status badge
+- Team member count — click to see the full member list with roles
 - Available models per team
-- Current budget usage and limits
+- Current budget usage and limits with a visual progress bar

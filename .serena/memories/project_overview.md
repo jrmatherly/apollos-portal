@@ -16,6 +16,7 @@ All 6 phases (0–5) are **complete** as of Feb 28, 2026. All TODO items resolve
 - **Codebase review (PR #5)**: Security hardening (nginx headers, non-root Docker), async fixes, `is_active` enforcement, test expansion (149→170 tests)
 - **Backend remediation (Mar 1)**: MED-B1 (deprovision warning log), MED-B8 (expiry boundary fix), 6 auth boundary tests (170→178 tests)
 - **Frontend test infrastructure (Mar 1)**: Vitest 4 + React Testing Library 16 + MSW 2 — 50 tests across 10 files (utils, API client, hooks, components, pages), coverage thresholds enforced (35/40/30/35%), CI workflow updated
+- **Default team suppression + model grouping (Mar 1)**: `is_default` flag on TeamConfig for fallback team suppression, model grouping by mode (chat/embedding) on Models page, clickable team member count with animated dialog showing member emails and roles, `default_user_id` service account filtering, LiteLLM nested `team_info` response handling fix (178→182 backend tests)
 
 Remaining: infrastructure known limitations (dev-only). See `.scratchpad/TODO.md`.
 
@@ -30,7 +31,7 @@ apollos-portal/
 │   │   ├── services/          # 9 services (provisioning, key, admin, rotation, reconciliation, notification, email, deprovisioning, litellm_client) + audit
 │   │   └── templates/email/   # Jinja2 email templates (5 templates)
 │   ├── alembic/       # Database migrations
-│   └── tests/         # 178 pytest tests (21 test files, ~0.6s)
+│   └── tests/         # 182 pytest tests (22 test files, ~0.6s)
 ├── frontend/         # React 19 + Vite 7 SPA (Node 24, TypeScript 5.9)
 │   └── src/test/     # 50 vitest tests (10 test files, ~1.5s) — RTL + MSW mocks
 ├── cli/              # Click CLI with MSAL device-code auth (Python 3.12, uv)

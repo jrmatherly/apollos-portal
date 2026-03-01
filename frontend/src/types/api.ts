@@ -85,6 +85,11 @@ export interface KeyRevokeResponse {
 
 // ---- Teams ----
 
+export interface TeamMember {
+  user_id: string;
+  role: string;
+}
+
 export interface TeamSummary {
   team_id: string;
   team_alias: string;
@@ -93,6 +98,7 @@ export interface TeamSummary {
   budget_duration: string;
   spend: number | null;
   member_count: number | null;
+  members: TeamMember[];
 }
 
 export interface TeamsResponse {

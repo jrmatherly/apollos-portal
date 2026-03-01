@@ -1,5 +1,8 @@
-import { Loader2, Users } from "lucide-react";
+import { Loader2, Users, X } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import { useEffect, useRef, useState } from "react";
 import { useTeams } from "../hooks/useTeams";
+import type { TeamMember } from "../types/api";
 
 function getBudgetColor(pct: number): {
   text: string;
@@ -11,8 +14,93 @@ function getBudgetColor(pct: number): {
   return { text: "text-secondary", bar: "bg-secondary", label: "Healthy" };
 }
 
+function MembersDialog({
+  open,
+  teamAlias,
+  members,
+  onClose,
+}: {
+  open: boolean;
+  teamAlias: string;
+  members: TeamMember[];
+  onClose: () => void;
+}) {
+  const dialogRef = useRef<HTMLDialogElement>(null);
+
+  useEffect(() => {
+    const el = dialogRef.current;
+    if (!el) return;
+    if (open && !el.open) el.showModal();
+    if (!open && el.open) el.close();
+  }, [open]);
+
+  return (
+    <AnimatePresence>
+      {open ? (
+        <dialog
+          ref={dialogRef}
+          onCancel={onClose}
+          className="fixed inset-0 z-50 m-auto bg-transparent backdrop:bg-black/50"
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.15 }}
+            className="w-full max-w-sm rounded-xl border border-border bg-surface p-6 shadow-lg"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-text-primary">{teamAlias}</h3>
+              <button
+                type="button"
+                onClick={onClose}
+                className="rounded-lg p-1 text-text-secondary hover:bg-surface-hover transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <p className="text-xs font-bold uppercase tracking-widest text-text-secondary mb-3">
+              {members.length} Member{members.length !== 1 ? "s" : ""}
+            </p>
+            {members.length === 0 ? (
+              <p className="text-sm text-text-secondary py-4 text-center">No members found</p>
+            ) : (
+              <ul className="space-y-2 max-h-64 overflow-y-auto">
+                {members.map((m) => (
+                  <li
+                    key={m.user_id}
+                    className="flex items-center justify-between rounded-lg bg-surface-border/20 px-3 py-2"
+                  >
+                    <span className="text-sm text-text-primary truncate">{m.user_id}</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-text-secondary ml-2 shrink-0">
+                      {m.role}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <div className="mt-4 flex justify-end">
+              <button
+                type="button"
+                onClick={onClose}
+                className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-secondary hover:bg-surface-hover transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </motion.div>
+        </dialog>
+      ) : null}
+    </AnimatePresence>
+  );
+}
+
 export function Teams() {
   const { data, isLoading, error } = useTeams();
+  const [membersModal, setMembersModal] = useState<{
+    teamAlias: string;
+    members: TeamMember[];
+  } | null>(null);
 
   if (isLoading) {
     return (
@@ -68,16 +156,26 @@ export function Teams() {
                   <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
                     <Users className="w-6 h-6" />
                   </div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider bg-surface-border/50 px-2 py-1 rounded text-text-secondary">
+                  <span className="text-[10px] font-bold uppercase tracking-wider bg-emerald-500/15 px-2 py-1 rounded text-emerald-400">
                     Active
                   </span>
                 </div>
                 <h3 className="text-lg font-bold mb-1 text-text-primary">{team.team_alias}</h3>
                 {team.member_count != null && (
-                  <p className="text-sm text-text-secondary mb-6">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setMembersModal({
+                        teamAlias: team.team_alias,
+                        members: team.members,
+                      })
+                    }
+                    className="text-sm text-text-secondary mb-6 text-left hover:text-primary transition-colors cursor-pointer inline-flex items-center gap-1 w-fit"
+                  >
+                    <Users className="w-3.5 h-3.5" />
                     {team.member_count} Member
                     {team.member_count !== 1 ? "s" : ""}
-                  </p>
+                  </button>
                 )}
 
                 {team.max_budget > 0 && (
@@ -123,6 +221,13 @@ export function Teams() {
           })}
         </div>
       )}
+
+      <MembersDialog
+        open={membersModal !== null}
+        teamAlias={membersModal?.teamAlias ?? ""}
+        members={membersModal?.members ?? []}
+        onClose={() => setMembersModal(null)}
+      />
     </div>
   );
 }

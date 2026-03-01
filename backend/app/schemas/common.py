@@ -5,6 +5,11 @@ from typing import Any
 from pydantic import BaseModel
 
 
+class TeamMember(BaseModel):
+    user_id: str
+    role: str = "user"
+
+
 class TeamSummary(BaseModel):
     team_id: str
     team_alias: str
@@ -13,6 +18,7 @@ class TeamSummary(BaseModel):
     budget_duration: str = "30d"
     spend: float | None = None
     member_count: int | None = None
+    members: list[TeamMember] = []
 
 
 class TeamsResponse(BaseModel):

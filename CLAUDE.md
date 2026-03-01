@@ -48,7 +48,7 @@
 - After `npm install` in frontend, always run `npx biome format --write .` — new packages can cause formatting drift across many files
 - All Python packages pinned to latest verified versions (use `uv lock --upgrade`)
 - `.scratchpad/` is gitignored — never stage or commit these files
-- `backend/teams.yaml` is gitignored — use `teams.yaml.example` as template
+- `backend/teams.yaml` is gitignored — use `teams.yaml.example` as template; `is_default: true` marks fallback teams suppressed when user qualifies for non-default teams
 - SQLAlchemy async: always use `selectinload()` for relationship access — lazy loading causes silent `MissingGreenlet` crashes
 - Background/cron jobs use `async_session_factory()` directly (not FastAPI's `Depends(get_session)`) with fresh clients per run
 - Deprovisioning uses `block_key` (preserves spend history); rotation uses `delete_key` (key is expired)
@@ -68,6 +68,9 @@
 - React ErrorBoundary requires class component (React 19 has no hooks equivalent)
 - MSAL browser init: module-level singleton promise pattern prevents double-init in React Strict Mode
 - Graph API pagination: always follow `@odata.nextLink` pages; use `$top=999` to minimize round trips — see `backend/app/core/graph.py`
+- LiteLLM `/team/info` response nests team data under `team_info` key — access `resp["team_info"]["members_with_roles"]`, not `resp["members_with_roles"]`
+- LiteLLM `members_with_roles` includes a `default_user_id` service account — always filter it out of user-facing member counts and lists
+- Models endpoint extracts `mode` from `model_info.mode` (values: `chat`, `embedding`, etc.) — frontend groups models by mode
 
 ## Documentation (docs/)
 - Built with Mintlify — no `mint build` command exists; `mint dev` is the only serve option
