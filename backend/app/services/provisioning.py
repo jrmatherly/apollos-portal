@@ -248,6 +248,7 @@ async def provision_user(
                 team_id=team_cfg.entra_group_id,
                 models=team_cfg.models,
                 key_alias=key_alias,
+                duration=f"{db_user.default_key_duration_days}d",
             )
         except Exception:
             logger.exception(

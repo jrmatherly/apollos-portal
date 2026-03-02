@@ -169,6 +169,8 @@ class TestProvisionUser:
         mock_litellm_client.create_user.assert_called_once()
         mock_litellm_client.add_team_member.assert_called_once()
         mock_litellm_client.generate_key.assert_called_once()
+        gen_kwargs = mock_litellm_client.generate_key.call_args.kwargs
+        assert gen_kwargs["duration"] == "90d"
         session.commit.assert_called_once()
 
     @pytest.mark.asyncio(loop_scope="function")
