@@ -1,15 +1,4 @@
-import {
-  Box,
-  Brain,
-  Check,
-  CircuitBoard,
-  Code,
-  Copy,
-  Loader2,
-  Terminal,
-  X,
-  Zap,
-} from "lucide-react";
+import { Box, Brain, Check, CircuitBoard, Copy, Loader2, Terminal, X, Zap } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { Highlight, themes } from "prism-react-renderer";
 import { type MouseEvent, useEffect, useMemo, useRef, useState } from "react";
@@ -505,38 +494,284 @@ function ModelUsageDialog({
   );
 }
 
-const MODE_ICONS: Record<string, { Icon: typeof Brain; bg: string; text: string }> = {
-  chat: { Icon: Brain, bg: "bg-[#8b5cf6]/20", text: "text-[#8b5cf6]" },
-  embedding: { Icon: CircuitBoard, bg: "bg-primary/20", text: "text-primary" },
+const MODE_ICONS: Record<
+  string,
+  {
+    Icon: typeof Brain;
+    bg: string;
+    text: string;
+    badge: string;
+    badgeBg: string;
+  }
+> = {
+  chat: {
+    Icon: Brain,
+    bg: "bg-[#8b5cf6]/20",
+    text: "text-[#8b5cf6]",
+    badge: "Chat",
+    badgeBg: "bg-[#8b5cf6]/10 text-[#8b5cf6]",
+  },
+  embedding: {
+    Icon: CircuitBoard,
+    bg: "bg-primary/20",
+    text: "text-primary",
+    badge: "Embedding",
+    badgeBg: "bg-primary/10 text-primary",
+  },
   image_generation: {
     Icon: Zap,
     bg: "bg-orange-500/20",
     text: "text-orange-400",
+    badge: "Image",
+    badgeBg: "bg-orange-500/10 text-orange-400",
   },
   audio_transcription: {
     Icon: Terminal,
     bg: "bg-secondary/20",
     text: "text-secondary",
+    badge: "Transcription",
+    badgeBg: "bg-secondary/10 text-secondary",
   },
-  audio_speech: { Icon: Terminal, bg: "bg-blue-400/20", text: "text-blue-400" },
-  other: { Icon: Box, bg: "bg-slate-500/20", text: "text-slate-400" },
+  audio_speech: {
+    Icon: Terminal,
+    bg: "bg-blue-400/20",
+    text: "text-blue-400",
+    badge: "Speech",
+    badgeBg: "bg-blue-400/10 text-blue-400",
+  },
+  other: {
+    Icon: Box,
+    bg: "bg-slate-500/20",
+    text: "text-slate-400",
+    badge: "Other",
+    badgeBg: "bg-slate-500/10 text-slate-400",
+  },
 };
+
+/** Known model descriptions keyed by substring match against model_name (lowercased). Order matters — more specific patterns first. */
+const MODEL_DESCRIPTIONS: [pattern: string, description: string][] = [
+  // OpenAI — GPT-5
+  ["gpt-5-nano", "Ultra-compact model optimized for edge deployment and minimal latency tasks."],
+  ["gpt-5-mini", "Efficient next-gen model balancing speed and intelligence for everyday tasks."],
+  ["gpt-5.2", "Latest iteration with enhanced reasoning and improved instruction-following."],
+  [
+    "gpt-5",
+    "Next-generation flagship model with breakthrough reasoning and multimodal capabilities.",
+  ],
+  // OpenAI — GPT-4
+  [
+    "gpt-4o-mini",
+    "Optimized for speed and efficiency, offering the best cost-to-performance ratio for simple tasks.",
+  ],
+  [
+    "gpt-4o",
+    "Most advanced multimodal model with high intelligence and native real-time audio/vision capabilities.",
+  ],
+  [
+    "gpt-4-turbo",
+    "High-capability model with vision understanding and broad knowledge at reduced cost.",
+  ],
+  [
+    "gpt-4.5",
+    "Enhanced model bridging GPT-4 and GPT-5 with improved creative and analytical tasks.",
+  ],
+  [
+    "gpt-4.1",
+    "Refined GPT-4 variant with improved coding, instruction-following, and long-context.",
+  ],
+  ["gpt-4", "Flagship reasoning model with broad knowledge and advanced instruction-following."],
+  // OpenAI — Other
+  [
+    "gpt-3.5",
+    "Fast and cost-effective model suitable for straightforward tasks and high-volume workloads.",
+  ],
+  ["o4-mini", "Compact reasoning model optimized for STEM tasks with fast response times."],
+  ["o3-mini", "Small reasoning model optimized for STEM tasks with adjustable thinking effort."],
+  ["o3", "Powerful reasoning model for complex multi-step problem solving across domains."],
+  ["o1-mini", "Fast reasoning model optimized for coding, math, and science tasks."],
+  ["o1", "Advanced reasoning model that thinks before responding for complex analytical tasks."],
+  // Anthropic
+  [
+    "claude-opus",
+    "Most capable Claude model for complex analysis, nuanced writing, and multi-step reasoning.",
+  ],
+  [
+    "claude-sonnet",
+    "Exceptional reasoning and coding performance, with human-like nuance and high reliability.",
+  ],
+  [
+    "claude-haiku",
+    "Fast and compact model ideal for near-instant responses and lightweight tasks.",
+  ],
+  [
+    "claude-3.5",
+    "High-performance model balancing speed and intelligence for production workloads.",
+  ],
+  [
+    "claude-3",
+    "Versatile model family offering a range of intelligence, speed, and cost trade-offs.",
+  ],
+  ["claude", "Anthropic's AI assistant model with strong reasoning and safety capabilities."],
+  // Google
+  ["gemini-2.5", "Google's latest model with enhanced multimodal reasoning and efficiency."],
+  ["gemini-2", "Google's next-generation multimodal model with improved reasoning and efficiency."],
+  [
+    "gemini-1.5-pro",
+    "Google's flagship multimodal model featuring an industry-leading 1M+ token context window.",
+  ],
+  [
+    "gemini-1.5-flash",
+    "Fast and efficient Google model optimized for high-throughput and lower-latency tasks.",
+  ],
+  ["gemini-pro", "Google's capable multimodal model for general reasoning and content generation."],
+  ["gemini", "Google's multimodal AI model with strong reasoning across text, code, and images."],
+  // Meta
+  [
+    "llama-4",
+    "Meta's latest open-weight model with state-of-the-art performance across benchmarks.",
+  ],
+  [
+    "llama-3.3",
+    "Meta's efficient open-weight model delivering strong performance at reduced compute cost.",
+  ],
+  [
+    "llama-3.1",
+    "Meta's open-source model with extended context and improved multilingual capabilities.",
+  ],
+  [
+    "llama-3",
+    "Meta's most capable open-source model, rivaling top proprietary models in performance.",
+  ],
+  ["llama", "Meta's open-weight large language model family for diverse AI applications."],
+  // Mistral
+  [
+    "mistral-large",
+    "Mistral's flagship model with top-tier reasoning and multilingual capabilities.",
+  ],
+  [
+    "mistral-medium",
+    "Balanced Mistral model for complex tasks requiring reasoning and instruction-following.",
+  ],
+  [
+    "mistral-small",
+    "Efficient Mistral model for low-latency tasks and cost-sensitive applications.",
+  ],
+  ["mixtral", "Sparse mixture-of-experts model delivering high quality at efficient compute cost."],
+  ["mistral", "Open-weight model offering strong performance for its size class."],
+  // Cohere
+  [
+    "command-r-plus",
+    "Cohere's advanced model optimized for RAG, tool use, and multi-step reasoning.",
+  ],
+  [
+    "command-r",
+    "Cohere's scalable model for retrieval-augmented generation and enterprise workflows.",
+  ],
+  ["command", "Cohere's generative model for text generation and business applications."],
+  // Embedding
+  [
+    "text-embedding-3-large",
+    "OpenAI's highest-dimension embedding model for maximum retrieval accuracy.",
+  ],
+  [
+    "text-embedding-3-small",
+    "Compact and efficient embedding model balancing performance and cost.",
+  ],
+  ["text-embedding-ada", "Foundational embedding model for semantic search and similarity tasks."],
+  ["embed", "Text embedding model for converting text into dense vector representations."],
+  // Image
+  [
+    "dall-e-3",
+    "Advanced image generation model producing highly detailed and accurate visuals from text.",
+  ],
+  ["dall-e", "OpenAI's image generation model for creating visuals from natural language prompts."],
+  // Audio
+  [
+    "whisper",
+    "Robust speech recognition model supporting multilingual transcription and translation.",
+  ],
+  ["tts", "Text-to-speech model generating natural-sounding audio from text input."],
+];
+
+/** Descriptive badge labels keyed by substring match (most specific first). */
+const MODEL_BADGES: [pattern: string, label: string, classes: string][] = [
+  // Nano/Mini/Small → Fast
+  ["nano", "Fast", "bg-blue-500/10 text-blue-400"],
+  ["mini", "Fast", "bg-blue-500/10 text-blue-400"],
+  ["small", "Fast", "bg-blue-500/10 text-blue-400"],
+  ["flash", "Fast", "bg-blue-500/10 text-blue-400"],
+  ["haiku", "Fast", "bg-blue-500/10 text-blue-400"],
+  // Reasoning models
+  ["o1", "Reasoning", "bg-amber-500/10 text-amber-400"],
+  ["o3", "Reasoning", "bg-amber-500/10 text-amber-400"],
+  ["o4", "Reasoning", "bg-amber-500/10 text-amber-400"],
+  // Open-weight
+  ["llama", "Open", "bg-slate-500/10 text-slate-400"],
+  ["mixtral", "Open", "bg-slate-500/10 text-slate-400"],
+  ["mistral", "Open", "bg-slate-500/10 text-slate-400"],
+  // Large/Pro/Opus → Advanced
+  ["opus", "Advanced", "bg-orange-500/10 text-orange-400"],
+  ["large", "Advanced", "bg-orange-500/10 text-orange-400"],
+  ["pro", "Advanced", "bg-orange-500/10 text-orange-400"],
+  // Embedding
+  ["embed", "Embedding", "bg-primary/10 text-primary"],
+  // Image
+  ["dall-e", "Creative", "bg-pink-500/10 text-pink-400"],
+  // Audio
+  ["whisper", "Audio", "bg-teal-500/10 text-teal-400"],
+  ["tts", "Audio", "bg-teal-500/10 text-teal-400"],
+];
+
+const MODE_FALLBACK_DESCRIPTIONS: Record<string, string> = {
+  chat: "Large language model available for chat completions and general reasoning tasks.",
+  embedding: "Embedding model for converting text into dense vector representations.",
+  image_generation: "Image generation model for creating visuals from text prompts.",
+  audio_transcription: "Audio transcription model for converting speech to text.",
+  audio_speech: "Text-to-speech model for generating audio from text input.",
+  responses: "Model available via the Responses API for structured generation.",
+  other: "Model available through the API proxy.",
+};
+
+function getModelDescription(modelName: string, mode: string | null): string {
+  const lower = modelName.toLowerCase();
+  for (const [pattern, desc] of MODEL_DESCRIPTIONS) {
+    if (lower.includes(pattern)) return desc;
+  }
+  return MODE_FALLBACK_DESCRIPTIONS[mode ?? "other"] ?? MODE_FALLBACK_DESCRIPTIONS.other;
+}
+
+function getModelBadge(
+  modelName: string,
+  mode: string | null,
+  modeStyle: { badge: string; badgeBg: string },
+): { label: string; classes: string } {
+  const lower = modelName.toLowerCase();
+  for (const [pattern, label, classes] of MODEL_BADGES) {
+    if (lower.includes(pattern)) return { label, classes };
+  }
+  // Fallback: default to "Stable" for chat, or the mode badge for others
+  if (mode === "chat" || mode == null)
+    return { label: "Stable", classes: "bg-green-500/10 text-green-400" };
+  return { label: modeStyle.badge, classes: modeStyle.badgeBg };
+}
+
+function formatTokenCount(tokens: number): string {
+  if (tokens >= 1_000_000) return `${(tokens / 1_000).toLocaleString()}k tokens`;
+  if (tokens >= 1_000) return `${Math.round(tokens / 1_000)}k tokens`;
+  return `${tokens.toLocaleString()} tokens`;
+}
 
 function ModelCard({ model, onClick }: { model: ModelInfo; onClick: () => void }) {
   const info = model.model_info ?? {};
   const maxTokens = info.max_tokens as number | undefined;
   const inputCostPerToken = info.input_cost_per_token as number | undefined;
-  const outputCostPerToken = info.output_cost_per_token as number | undefined;
   const modeStyle = MODE_ICONS[model.mode ?? "other"] ?? MODE_ICONS.other;
   const ModeIcon = modeStyle.Icon;
+  const badge = getModelBadge(model.model_name, model.mode, modeStyle);
 
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="bg-white/3 backdrop-blur-md border border-white/10 rounded-xl overflow-hidden flex flex-col hover:border-primary/40 transition-all group cursor-pointer text-left w-full"
-    >
-      <div className="p-6 flex-1 w-full flex flex-col gap-5">
+    <div className="bg-white/3 backdrop-blur-md border border-white/10 rounded-xl overflow-hidden flex flex-col hover:border-slate-700 transition-all group text-left w-full">
+      <div className="p-6 flex-1 w-full flex flex-col gap-6">
         <div className="flex justify-between items-start">
           <div className="flex gap-4 items-center">
             <div
@@ -545,18 +780,18 @@ function ModelCard({ model, onClick }: { model: ModelInfo; onClick: () => void }
               <ModeIcon className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-text-primary group-hover:text-primary transition-colors">
-                {model.model_name}
-              </h3>
-              {model.litellm_model_name ? (
-                <p className="text-text-secondary text-xs font-mono mt-0.5">
-                  {model.litellm_model_name}
-                </p>
-              ) : null}
+              <h3 className="text-lg font-bold text-text-primary">{model.model_name}</h3>
+              <span
+                className={`text-xs font-semibold px-2 py-0.5 rounded uppercase ${badge.classes}`}
+              >
+                {badge.label}
+              </span>
             </div>
           </div>
-          <Code className="w-4 h-4 text-text-secondary opacity-0 group-hover:opacity-100 transition-opacity shrink-0 mt-1" />
         </div>
+        <p className="text-sm text-text-secondary leading-relaxed">
+          {getModelDescription(model.model_name, model.mode)}
+        </p>
         <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/10">
           {maxTokens != null ? (
             <div>
@@ -564,7 +799,7 @@ function ModelCard({ model, onClick }: { model: ModelInfo; onClick: () => void }
                 Context Window
               </p>
               <p className="text-text-primary text-sm font-medium mt-0.5">
-                {maxTokens.toLocaleString()}
+                {formatTokenCount(maxTokens)}
               </p>
             </div>
           ) : null}
@@ -578,28 +813,44 @@ function ModelCard({ model, onClick }: { model: ModelInfo; onClick: () => void }
               </p>
             </div>
           ) : null}
-          {outputCostPerToken != null ? (
-            <div>
-              <p className="text-[10px] text-text-secondary uppercase font-bold tracking-wider">
-                Output Cost
-              </p>
-              <p className="text-text-primary text-sm font-medium font-mono mt-0.5">
-                ${(outputCostPerToken * 1_000_000).toFixed(2)} / 1M
-              </p>
-            </div>
-          ) : null}
+        </div>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={onClick}
+            className="flex-1 bg-white/5 hover:bg-white/10 text-white py-2 rounded-lg text-xs font-bold transition-colors"
+          >
+            Documentation
+          </button>
+          <button
+            type="button"
+            onClick={onClick}
+            className="flex-1 bg-primary/10 hover:bg-primary/20 text-primary py-2 rounded-lg text-xs font-bold transition-colors"
+          >
+            View Usage
+          </button>
         </div>
       </div>
-    </button>
+    </div>
   );
 }
 
 export function Models() {
   const { data, isLoading, error } = useModels();
   const [selectedModel, setSelectedModel] = useState<ModelInfo | null>(null);
+  const [activeMode, setActiveMode] = useState<string | null>(null);
 
   const models = data?.models ?? [];
   const groups = useMemo(() => groupModelsByMode(models), [models]);
+
+  // Default to first available mode once data loads
+  useEffect(() => {
+    if (groups.length > 0 && activeMode === null) {
+      setActiveMode(groups[0].mode);
+    }
+  }, [groups, activeMode]);
+
+  const activeGroup = groups.find((g) => g.mode === activeMode) ?? groups[0];
 
   if (isLoading) {
     return (
@@ -621,15 +872,11 @@ export function Models() {
   }
 
   return (
-    <div className="p-8 max-w-7xl mx-auto w-full space-y-8">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 text-emerald-400 font-mono text-xs font-bold uppercase tracking-widest">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            System Live
-          </div>
+    <div className="p-8 max-w-7xl mx-auto w-full">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
+        <div>
           <h1 className="text-4xl font-black tracking-tight text-text-primary">Model Directory</h1>
-          <p className="text-text-secondary max-w-2xl text-lg">
+          <p className="text-text-secondary mt-2 text-lg">
             Deploy and manage high-performance LLMs for your production environment.
           </p>
         </div>
@@ -642,22 +889,38 @@ export function Models() {
           <p className="text-sm mt-1">Models are assigned based on your team access.</p>
         </div>
       ) : (
-        <div className="space-y-10">
-          {groups.map((group) => (
-            <section key={group.mode}>
-              <h2 className="text-2xl font-bold text-text-primary mb-6">{group.label}</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {group.models.map((model) => (
-                  <ModelCard
-                    key={model.model_name}
-                    model={model}
-                    onClick={() => setSelectedModel(model)}
-                  />
-                ))}
-              </div>
-            </section>
-          ))}
-        </div>
+        <>
+          {/* Tab navigation */}
+          <div className="flex border-b border-white/10 mb-8">
+            {groups.map((group) => (
+              <button
+                key={group.mode}
+                type="button"
+                onClick={() => setActiveMode(group.mode)}
+                className={`px-8 py-4 text-sm font-medium transition-colors ${
+                  activeMode === group.mode
+                    ? "font-bold border-b-2 border-primary text-text-primary"
+                    : "text-text-secondary hover:text-text-primary"
+                }`}
+              >
+                {group.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Model grid */}
+          {activeGroup ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {activeGroup.models.map((model) => (
+                <ModelCard
+                  key={model.model_name}
+                  model={model}
+                  onClick={() => setSelectedModel(model)}
+                />
+              ))}
+            </div>
+          ) : null}
+        </>
       )}
 
       <ModelUsageDialog

@@ -38,9 +38,7 @@ export function ConfirmDialog({
       : "bg-primary hover:bg-primary/90 text-white";
 
   const iconColors =
-    confirmVariant === "danger"
-      ? "bg-red-500/10 text-red-400"
-      : "bg-primary/10 text-primary";
+    confirmVariant === "danger" ? "bg-red-500/10 text-red-400" : "bg-primary/10 text-primary";
 
   return (
     <AnimatePresence>
@@ -64,9 +62,7 @@ export function ConfirmDialog({
             </div>
             <h3 className="text-lg font-bold text-text-primary">{title}</h3>
             {description ? (
-              <p className="mt-2 text-sm text-text-secondary leading-relaxed">
-                {description}
-              </p>
+              <p className="mt-2 text-sm text-text-secondary leading-relaxed">{description}</p>
             ) : null}
             <div className="mt-6 flex justify-end gap-3">
               <button
