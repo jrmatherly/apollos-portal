@@ -46,6 +46,16 @@ services:
     depends_on:
       migrate:
         condition: service_completed_successfully
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'python -c "import urllib.request; urllib.request.urlopen(''http://localhost:8000/health'')"',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
 
   frontend:
     image: ghcr.io/jrmatherly/apollos-portal/frontend:latest
@@ -54,7 +64,14 @@ services:
     ports:
       - "3000:3000"
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/healthz"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
 
   docs:
     image: ghcr.io/jrmatherly/apollos-portal/docs:latest
@@ -62,6 +79,16 @@ services:
     restart: unless-stopped
     ports:
       - "3001:3000"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'node -e "require(''http'').get(''http://localhost:3000/'', r => { process.exit(r.statusCode === 200 ? 0 : 1) }).on(''error'', () => process.exit(1))"',
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
 
 volumes:
   portal_db_data:

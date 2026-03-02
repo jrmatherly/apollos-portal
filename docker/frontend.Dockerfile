@@ -29,6 +29,11 @@ RUN printf 'server {\n\
     add_header X-Content-Type-Options "nosniff" always;\n\
     add_header Referrer-Policy "strict-origin-when-cross-origin" always;\n\
     add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;\n\
+    location = /healthz {\n\
+    access_log off;\n\
+    add_header Content-Type text/plain;\n\
+    return 200 '\''ok'\'';\n\
+    }\n\
     location / {\n\
     try_files $uri $uri/ /index.html;\n\
     }\n\
