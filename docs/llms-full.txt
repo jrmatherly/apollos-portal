@@ -529,7 +529,7 @@ Each key has one of the following statuses:
 | `rotated` | Key was replaced by a newer key via rotation |
 | `revoked` | Key was manually revoked and permanently blocked |
 
-Keys expire automatically based on the `default_key_duration_days` setting configured for your account.
+Keys expire automatically based on the `default_key_duration_days` setting configured for your account. Expiry is enforced at two levels: the portal's rotation cron job processes expired keys on a schedule, and the LiteLLM proxy rejects requests with expired keys at authentication time. This means an expired key stops working immediately — even before the portal's background rotation job runs.
 
 ## Managing keys
 
