@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock
 
+import json
+
 import httpx
 import pytest
 from app.services.litellm_client import LiteLLMClient
@@ -89,6 +91,49 @@ async def test_generate_key():
         key_alias="test-key",
     )
     assert result["key"] == "sk-new-123"
+    await client.close()
+
+
+@pytest.mark.asyncio(loop_scope="function")
+async def test_generate_key_with_duration():
+    """Verify duration is included in the /key/generate request body."""
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert "/key/generate" in str(request.url)
+        body = json.loads(request.content)
+        assert body["duration"] == "90d"
+        return httpx.Response(200, json={"key": "sk-new-123", "token": "tok-new"})
+
+    client = _make_client(handler)
+    result = await client.generate_key(
+        user_id="user-1",
+        team_id="team-1",
+        models=["gpt-4"],
+        key_alias="test-key",
+        duration="90d",
+    )
+    assert result["key"] == "sk-new-123"
+    await client.close()
+
+
+@pytest.mark.asyncio(loop_scope="function")
+async def test_generate_key_without_duration():
+    """Verify duration is omitted from request body when not provided."""
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert "/key/generate" in str(request.url)
+        body = json.loads(request.content)
+        assert "duration" not in body
+        return httpx.Response(200, json={"key": "sk-new-456", "token": "tok-new2"})
+
+    client = _make_client(handler)
+    result = await client.generate_key(
+        user_id="user-1",
+        team_id="team-1",
+        models=["gpt-4"],
+        key_alias="test-key",
+    )
+    assert result["key"] == "sk-new-456"
     await client.close()
 
 
