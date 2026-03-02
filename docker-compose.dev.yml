@@ -153,6 +153,7 @@ services:
     # command:
     #  - "--config=/app/config.yaml"
     ##############################################
+    restart: unless-stopped
     ports:
       - "4000:4000" # Map the container port to the host, change the host port if necessary
     environment:
