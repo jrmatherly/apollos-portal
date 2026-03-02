@@ -137,5 +137,76 @@ services:
         - action: rebuild
           path: docs/package.json
 
+  ##########################################################################
+  #--------    OPTIONAL LITTELLM PROXY + MONITORING      --------          #
+  ##########################################################################
+  litellm:
+    # build:
+    #   context: .
+    #   args:
+    #     target: runtime
+    image: docker.litellm.ai/berriai/litellm:main-stable
+    #########################################
+    ## Uncomment these lines to start proxy with a config.yaml file ##
+    # volumes:
+    #  - ./config.yaml:/app/config.yaml
+    # command:
+    #  - "--config=/app/config.yaml"
+    ##############################################
+    ports:
+      - "4000:4000" # Map the container port to the host, change the host port if necessary
+    environment:
+      DATABASE_URL: ${LITELLM_DATABASE_URL:?Set LITELLM_DATABASE_URL in .env or environment}
+      # DATABASE_URL: "postgresql://llmproxy:dbpassword9090@db:5432/litellm"
+      STORE_MODEL_IN_DB: "True" # allows adding models to proxy via UI
+    env_file:
+      - .env # Load local .env file
+    depends_on:
+      - litellm_db # Indicates that this service depends on the 'db' service, ensuring 'db' starts first
+    healthcheck: # Defines the health check configuration for the container
+      test:
+        - CMD-SHELL
+        - python3 -c "import urllib.request; urllib.request.urlopen('http://localhost:4000/health/liveliness')" # Command to execute for health check
+      interval: 30s # Perform health check every 30 seconds
+      timeout: 10s # Health check command times out after 10 seconds
+      retries: 3 # Retry up to 3 times if health check fails
+      start_period: 40s # Wait 40 seconds after container start before beginning health checks
+
+  litellm_db:
+    image: postgres:18@sha256:69e8582b781cb44fa4557b98ed586fe68361e320d9b12f9707494335634f4f3d
+    container_name: litellm_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: llmproxy
+      POSTGRES_PASSWORD: ${LITELLM_POSTGRES_PASSWORD:?Set LITELLM_POSTGRES_PASSWORD in .env or environment}
+      POSTGRES_DB: litellm
+      POSTGRES_HOST_AUTH_METHOD: scram-sha-256
+      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256"
+      PGDATA: /var/lib/postgresql/18/docker
+    volumes:
+      - litellm_postgres_data:/var/lib/postgresql/18/docker
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d litellm -U llmproxy"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - prometheus_data:/prometheus
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=15d"
+    restart: always
+
 volumes:
   portal_db_data:
+  prometheus_data:
+    driver: local
+  litellm_postgres_data:
+    name: litellm_postgres_data
