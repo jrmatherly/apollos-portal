@@ -109,21 +109,22 @@ export function Settings() {
                   />
                   <div className="flex w-full items-center justify-between">
                     <div className="flex flex-col">
-                      <span className="text-sm font-bold text-text-primary">{d.label}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-bold text-text-primary">{d.label}</span>
+                        {d.badge ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[10px] font-bold uppercase tracking-wider">
+                            <ShieldCheck className="w-3 h-3" />
+                            {d.badge}
+                          </span>
+                        ) : null}
+                      </div>
                       <span className="text-xs text-text-secondary mt-1">{d.desc}</span>
                     </div>
-                    {d.badge ? (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[10px] font-bold uppercase tracking-wider">
-                        <ShieldCheck className="w-3 h-3" />
-                        {d.badge}
-                      </span>
-                    ) : (
-                      <div
-                        className={`size-5 rounded-full border-2 flex items-center justify-center transition-all ${isSelected ? "border-primary bg-primary" : "border-surface-border"}`}
-                      >
-                        {isSelected ? <div className="size-2 rounded-full bg-white" /> : null}
-                      </div>
-                    )}
+                    <div
+                      className={`size-5 shrink-0 rounded-full border-2 flex items-center justify-center transition-all ${isSelected ? "border-primary bg-primary" : "border-surface-border"}`}
+                    >
+                      {isSelected ? <div className="size-2 rounded-full bg-white" /> : null}
+                    </div>
                   </div>
                 </label>
               );

@@ -7,6 +7,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
 
 import pytest
+from app.core.teams import TeamConfig, TeamsConfig
 from app.services.key_service import (
     _compute_status,
     _days_until_expiry,
@@ -184,10 +185,17 @@ class TestCreateKeyDuration:
         current_user.email = "alice@example.com"
         current_user.oid = "oid-123"
 
-        await create_key(session, litellm, current_user, "team-1")
+        teams_config = TeamsConfig(
+            teams=[
+                TeamConfig(entra_group_id="team-1", team_alias="Engineering", models=["gpt-5", "gpt-5.2"]),
+            ]
+        )
+
+        await create_key(session, litellm, current_user, "team-1", teams_config)
 
         gen_kwargs = litellm.generate_key.call_args.kwargs
         assert gen_kwargs["duration"] == "90d"
+        assert gen_kwargs["models"] == ["gpt-5", "gpt-5.2"]
 
 
 class TestRotateKeyDuration:
@@ -241,7 +249,14 @@ class TestRotateKeyDuration:
         current_user.email = "alice@example.com"
         current_user.oid = "oid-123"
 
-        await rotate_key(session, litellm, current_user, str(key_id))
+        teams_config = TeamsConfig(
+            teams=[
+                TeamConfig(entra_group_id="team-1", team_alias="Engineering", models=["gpt-5", "gpt-5.2"]),
+            ]
+        )
+
+        await rotate_key(session, litellm, current_user, str(key_id), teams_config)
 
         gen_kwargs = litellm.generate_key.call_args.kwargs
         assert gen_kwargs["duration"] == "60d"
+        assert gen_kwargs["models"] == ["gpt-5", "gpt-5.2"]

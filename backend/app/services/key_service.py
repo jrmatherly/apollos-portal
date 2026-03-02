@@ -9,6 +9,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.auth import CurrentUser
+from app.core.teams import TeamsConfig
 from app.models.provisioned_key import ProvisionedKey
 from app.models.provisioned_user import ProvisionedUser
 from app.models.user_team_membership import UserTeamMembership
@@ -121,6 +122,7 @@ async def create_key(
     litellm: LiteLLMClient,
     user: CurrentUser,
     team_id: str,
+    teams_config: TeamsConfig,
 ) -> KeyCreateResponse:
     """Generate a new key for the user on a specific team."""
     db_user = await _get_db_user(session, user)
@@ -153,10 +155,13 @@ async def create_key(
 
     expires_at = datetime.now(UTC) + timedelta(days=db_user.default_key_duration_days)
 
+    team_cfg = teams_config.get_team_by_group_id(team_id)
+    team_models = team_cfg.models if team_cfg else []
+
     key_resp = await litellm.generate_key(
         user_id=db_user.litellm_user_id or user.email,
         team_id=team_id,
-        models=[],  # Inherit from team
+        models=team_models,
         key_alias=key_alias,
         duration=f"{db_user.default_key_duration_days}d",
     )
@@ -199,6 +204,7 @@ async def rotate_key(
     litellm: LiteLLMClient,
     user: CurrentUser,
     key_id: str,
+    teams_config: TeamsConfig,
 ) -> KeyRotateResponse:
     """Rotate a key: block old, generate new, link via rotated_from_id."""
     db_user = await _get_db_user(session, user)
@@ -241,10 +247,13 @@ async def rotate_key(
 
     expires_at = datetime.now(UTC) + timedelta(days=db_user.default_key_duration_days)
 
+    team_cfg = teams_config.get_team_by_group_id(old_key.team_id)
+    team_models = team_cfg.models if team_cfg else []
+
     key_resp = await litellm.generate_key(
         user_id=db_user.litellm_user_id or user.email,
         team_id=old_key.team_id,
-        models=[],
+        models=team_models,
         key_alias=new_key_alias,
         duration=f"{db_user.default_key_duration_days}d",
     )

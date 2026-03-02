@@ -100,6 +100,7 @@ class TestRunRotationJob:
         with (
             patch("app.services.rotation_service.async_session_factory", side_effect=mock_session_factory),
             patch("app.services.rotation_service.LiteLLMClient", return_value=mock_litellm),
+            patch("app.services.rotation_service.load_teams_config"),
             patch("app.services.rotation_service.send_email", new_callable=AsyncMock),
             patch("app.services.rotation_service.log_action", new_callable=AsyncMock),
         ):
@@ -162,6 +163,7 @@ class TestRunRotationJob:
         with (
             patch("app.services.rotation_service.async_session_factory", side_effect=mock_session_factory),
             patch("app.services.rotation_service.LiteLLMClient", return_value=mock_litellm),
+            patch("app.services.rotation_service.load_teams_config"),
             patch("app.services.rotation_service.send_email", new_callable=AsyncMock),
             patch("app.services.rotation_service.log_action", new_callable=AsyncMock),
         ):
@@ -189,6 +191,7 @@ class TestRunRotationJob:
         with (
             patch("app.services.rotation_service.async_session_factory", side_effect=mock_session_factory),
             patch("app.services.rotation_service.LiteLLMClient", return_value=mock_litellm),
+            patch("app.services.rotation_service.load_teams_config"),
         ):
             await run_rotation_job(settings)
 

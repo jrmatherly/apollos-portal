@@ -7,6 +7,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
 
 import pytest
+from app.core.teams import TeamConfig, TeamsConfig
 from app.services.rotation_service import _auto_rotate_key
 from app.utils import slugify
 
@@ -59,11 +60,17 @@ class TestAutoRotateKey:
         settings.smtp_host = ""
         settings.portal_base_url = "https://portal.example.com"
 
+        teams_config = TeamsConfig(
+            teams=[
+                TeamConfig(entra_group_id="team-1", team_alias="Engineering", models=["gpt-5", "gpt-5.2"]),
+            ]
+        )
+
         with (
             patch("app.services.rotation_service.send_email", new_callable=AsyncMock),
             patch("app.services.rotation_service.log_action", new_callable=AsyncMock),
         ):
-            await _auto_rotate_key(session, settings, litellm, key, user)
+            await _auto_rotate_key(session, settings, litellm, key, user, teams_config)
 
         # Old key deleted from LiteLLM
         litellm.delete_key.assert_called_once_with("tok-old-123")
@@ -78,6 +85,7 @@ class TestAutoRotateKey:
         assert gen_kwargs["team_id"] == "team-1"
         assert gen_kwargs["user_id"] == "litellm-user-1"
         assert gen_kwargs["duration"] == "90d"
+        assert gen_kwargs["models"] == ["gpt-5", "gpt-5.2"]
 
         session.commit.assert_called_once()
 
@@ -113,12 +121,14 @@ class TestAutoRotateKey:
         settings.smtp_host = ""
         settings.portal_base_url = "https://portal.example.com"
 
+        teams_config = TeamsConfig(teams=[])
+
         with (
             patch("app.services.rotation_service.send_email", new_callable=AsyncMock),
             patch("app.services.rotation_service.log_action", new_callable=AsyncMock),
         ):
             # Should NOT raise despite LiteLLM delete failure
-            await _auto_rotate_key(session, settings, litellm, key, user)
+            await _auto_rotate_key(session, settings, litellm, key, user, teams_config)
 
         # New key still generated
         litellm.generate_key.assert_called_once()

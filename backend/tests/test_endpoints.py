@@ -262,6 +262,7 @@ class TestKeysEndpoint:
         app.dependency_overrides[get_current_user] = _mock_user
         app.dependency_overrides[get_session] = _empty_session
         app.dependency_overrides[get_litellm_client] = lambda: AsyncMock()
+        app.dependency_overrides[get_teams_config] = lambda: TeamsConfig()
         yield
         app.dependency_overrides.clear()
 

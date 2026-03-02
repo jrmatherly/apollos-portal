@@ -10,6 +10,7 @@ from sqlalchemy.orm import selectinload
 
 from app.config import Settings
 from app.core.database import async_session_factory
+from app.core.teams import TeamsConfig, load_teams_config
 from app.models.provisioned_key import ProvisionedKey
 from app.models.provisioned_user import ProvisionedUser
 from app.services.audit import ACTION_KEY_AUTO_ROTATED, log_action
@@ -26,6 +27,7 @@ async def _auto_rotate_key(
     litellm: LiteLLMClient,
     key: ProvisionedKey,
     user: ProvisionedUser,
+    teams_config: TeamsConfig,
 ) -> None:
     """Delete old key in LiteLLM, mark rotated in DB, generate new key, notify user."""
     now = datetime.now(UTC)
@@ -61,10 +63,13 @@ async def _auto_rotate_key(
 
     expires_at = now + timedelta(days=user.default_key_duration_days)
 
+    team_cfg = teams_config.get_team_by_group_id(key.team_id)
+    team_models = team_cfg.models if team_cfg else []
+
     key_resp = await litellm.generate_key(
         user_id=user.litellm_user_id or user.email,
         team_id=key.team_id,
-        models=[],
+        models=team_models,
         key_alias=new_alias,
         duration=f"{user.default_key_duration_days}d",
     )
@@ -128,6 +133,7 @@ async def run_rotation_job(settings: Settings) -> None:
 
     # Fresh client per job run — isolates cron HTTP state from the request-path singleton
     litellm = LiteLLMClient(settings)
+    teams_config = load_teams_config(settings.teams_config_path)
 
     try:
         # Bulk-read expired active key IDs
@@ -161,7 +167,7 @@ async def run_rotation_job(settings: Settings) -> None:
                     user = key.user
                     if not user or not user.is_active:
                         continue
-                    await _auto_rotate_key(session, settings, litellm, key, user)
+                    await _auto_rotate_key(session, settings, litellm, key, user, teams_config)
                     rotated += 1
             except Exception:
                 logger.exception("Failed to auto-rotate key %s", key_id)

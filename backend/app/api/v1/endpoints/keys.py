@@ -4,9 +4,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.auth import CurrentUser, get_current_user
 from app.core.database import get_session
 from app.core.rate_limit import limiter
+from app.core.teams import TeamsConfig
 from app.schemas.keys import KeyCreateRequest, KeyCreateResponse, KeyListResponse, KeyRevokeResponse, KeyRotateResponse
 from app.services.key_service import create_key, list_user_keys, revoke_key, rotate_key
-from app.services.litellm_client import LiteLLMClient, get_litellm_client
+from app.services.litellm_client import LiteLLMClient, get_litellm_client, get_teams_config
 
 router = APIRouter()
 
@@ -33,10 +34,11 @@ async def generate_new_key(
     user: CurrentUser = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
     litellm: LiteLLMClient = Depends(get_litellm_client),
+    teams_config: TeamsConfig = Depends(get_teams_config),
 ):
     """Generate a new API key for the user on a specific team."""
     try:
-        return await create_key(session, litellm, user, body.team_id)
+        return await create_key(session, litellm, user, body.team_id, teams_config)
     except PermissionError as e:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e)) from None
 
@@ -49,10 +51,11 @@ async def rotate_existing_key(
     user: CurrentUser = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
     litellm: LiteLLMClient = Depends(get_litellm_client),
+    teams_config: TeamsConfig = Depends(get_teams_config),
 ):
     """Rotate a key: block old, generate new."""
     try:
-        return await rotate_key(session, litellm, user, key_id)
+        return await rotate_key(session, litellm, user, key_id, teams_config)
     except LookupError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from None
     except ValueError as e:

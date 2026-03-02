@@ -93,6 +93,8 @@ services:
     depends_on:
       backend:
         condition: service_healthy
+      litellm:
+        condition: service_healthy
     healthcheck:
       test:
         [
@@ -157,13 +159,13 @@ services:
     ports:
       - "4000:4000" # Map the container port to the host, change the host port if necessary
     environment:
-      DATABASE_URL: ${LITELLM_DATABASE_URL:?Set LITELLM_DATABASE_URL in .env or environment}
-      # DATABASE_URL: "postgresql://llmproxy:dbpassword9090@db:5432/litellm"
+      DATABASE_URL: ${LITELLM_DATABASE_URL:-postgresql://llmproxy:dbpassword9090@litellm_db:5432/litellm}
+      # DATABASE_URL: "postgresql://llmproxy:dbpassword9090@litellm_db:5432/litellm"
       STORE_MODEL_IN_DB: "True" # allows adding models to proxy via UI
     env_file:
       - ./backend/.env # Load local .env file
     depends_on:
-      - litellm_db # Indicates that this service depends on the 'db' service, ensuring 'db' starts first
+      - litellm_db # Indicates that this service depends on the 'litellm_db' service, ensuring 'litellm_db' starts first
     healthcheck: # Defines the health check configuration for the container
       test:
         - CMD-SHELL
@@ -179,7 +181,7 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: llmproxy
-      POSTGRES_PASSWORD: ${LITELLM_POSTGRES_PASSWORD:?Set LITELLM_POSTGRES_PASSWORD in .env or environment}
+      POSTGRES_PASSWORD: ${LITELLM_POSTGRES_PASSWORD:-dbpassword9090}
       POSTGRES_DB: litellm
       POSTGRES_HOST_AUTH_METHOD: scram-sha-256
       POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256"

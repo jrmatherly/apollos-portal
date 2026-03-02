@@ -8,8 +8,9 @@ import pytest
 from app.config import get_settings
 from app.core.auth import CurrentUser, get_current_user, require_admin
 from app.core.database import get_session
+from app.core.teams import TeamsConfig
 from app.main import app
-from app.services.litellm_client import get_litellm_client
+from app.services.litellm_client import get_litellm_client, get_teams_config
 from httpx import ASGITransport, AsyncClient
 
 
@@ -128,6 +129,7 @@ async def test_422_validation_error_on_keys_endpoint():
     app.dependency_overrides[get_current_user] = _mock_user
     app.dependency_overrides[get_session] = _sess
     app.dependency_overrides[get_litellm_client] = lambda: AsyncMock()
+    app.dependency_overrides[get_teams_config] = lambda: TeamsConfig()
 
     try:
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
