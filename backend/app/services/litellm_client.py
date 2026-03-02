@@ -158,17 +158,18 @@ class LiteLLMClient:
         team_id: str,
         models: list[str],
         key_alias: str,
+        duration: str | None = None,
     ) -> dict[str, Any]:
-        """POST /key/generate — create an API key (no duration, portal manages expiry)."""
-        resp = await self._client.post(
-            "/key/generate",
-            json={
-                "user_id": user_id,
-                "team_id": team_id,
-                "models": models,
-                "key_alias": key_alias,
-            },
-        )
+        """POST /key/generate — create an API key with optional native expiry."""
+        payload: dict[str, Any] = {
+            "user_id": user_id,
+            "team_id": team_id,
+            "models": models,
+            "key_alias": key_alias,
+        }
+        if duration is not None:
+            payload["duration"] = duration
+        resp = await self._client.post("/key/generate", json=payload)
         _raise_with_body(resp)
         return resp.json()
 
