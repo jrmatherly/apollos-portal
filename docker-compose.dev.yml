@@ -160,7 +160,7 @@ services:
       # DATABASE_URL: "postgresql://llmproxy:dbpassword9090@db:5432/litellm"
       STORE_MODEL_IN_DB: "True" # allows adding models to proxy via UI
     env_file:
-      - .env # Load local .env file
+      - ./backend/.env # Load local .env file
     depends_on:
       - litellm_db # Indicates that this service depends on the 'db' service, ensuring 'db' starts first
     healthcheck: # Defines the health check configuration for the container
@@ -183,6 +183,8 @@ services:
       POSTGRES_HOST_AUTH_METHOD: scram-sha-256
       POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256"
       PGDATA: /var/lib/postgresql/18/docker
+    env_file:
+      - ./backend/.env
     volumes:
       - litellm_postgres_data:/var/lib/postgresql/18/docker
     healthcheck:
