@@ -77,6 +77,7 @@ class TestAutoRotateKey:
         gen_kwargs = litellm.generate_key.call_args.kwargs
         assert gen_kwargs["team_id"] == "team-1"
         assert gen_kwargs["user_id"] == "litellm-user-1"
+        assert gen_kwargs["duration"] == "90d"
 
         session.commit.assert_called_once()
 
@@ -121,4 +122,6 @@ class TestAutoRotateKey:
 
         # New key still generated
         litellm.generate_key.assert_called_once()
+        gen_kwargs = litellm.generate_key.call_args.kwargs
+        assert gen_kwargs["duration"] == "90d"
         assert key.status == "rotated"
