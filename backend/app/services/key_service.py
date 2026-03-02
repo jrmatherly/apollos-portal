@@ -158,6 +158,7 @@ async def create_key(
         team_id=team_id,
         models=[],  # Inherit from team
         key_alias=key_alias,
+        duration=f"{db_user.default_key_duration_days}d",
     )
 
     raw_key = key_resp.get("key", "")
@@ -245,6 +246,7 @@ async def rotate_key(
         team_id=old_key.team_id,
         models=[],
         key_alias=new_key_alias,
+        duration=f"{db_user.default_key_duration_days}d",
     )
 
     raw_key = key_resp.get("key", "")

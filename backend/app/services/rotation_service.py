@@ -66,6 +66,7 @@ async def _auto_rotate_key(
         team_id=key.team_id,
         models=[],
         key_alias=new_alias,
+        duration=f"{user.default_key_duration_days}d",
     )
 
     new_key = ProvisionedKey(
